@@ -6,6 +6,7 @@ from types import SimpleNamespace
 
 from sports_card_news.config import load_settings
 from sports_card_news.generator import generate_daily_package
+from sports_card_news.models import DailyPackage
 from sports_card_news.pipeline import load_package
 
 
@@ -43,3 +44,9 @@ def test_generation_uses_openai_responses_web_search_and_schema() -> None:
     assert responses.kwargs["tool_choice"] == "required"
     assert responses.kwargs["text_format"] is generated.__class__
     assert responses.kwargs["store"] is False
+
+
+def test_daily_package_schema_does_not_emit_uri_format() -> None:
+    schema_text = str(DailyPackage.model_json_schema())
+    assert "'format': 'uri'" not in schema_text
+    assert '"format": "uri"' not in schema_text
