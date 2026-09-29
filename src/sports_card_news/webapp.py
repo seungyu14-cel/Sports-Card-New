@@ -68,7 +68,7 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
 
     app = FastAPI(
         title="Sports Card News Studio",
-        version="0.5.0",
+        version="0.6.0",
         docs_url=None,
         redoc_url=None,
         openapi_url=None,

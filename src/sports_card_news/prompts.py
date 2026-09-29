@@ -19,6 +19,20 @@ SYSTEM_PROMPT = """당신은 한국 독자를 위한 멀티스포츠 인스타�
 8. approval_notice는 정확히 '게시 전 사람 승인 필요', needs_human_approval는 true다.
 9. 승인 체크리스트는 종목 담당, 팩트체크·권리 담당, 편집장 역할별로 구체적으로 작성한다.
 10. checked_at은 실제 조회 시각을 ISO 8601 형식으로 기록한다.
+11. 서로 충돌하는 출처는 후보·카드의 근거로 사용하지 않는다. 공식 원문으로 해결되지 않으면 해당 주제를 버리고 검증 가능한 다른 주제를 선택한다.
+12. 최종 facts에는 후보·카드에서 실제 사용할 수 있는 출처만 넣는다. 해결하지 못한 충돌은 facts에 CONFLICT 상태로 남기지 말고 risk_flags에 폐기 사유만 기록한다.
+"""
+
+
+REPAIR_SYSTEM_PROMPT = SYSTEM_PROMPT + """
+
+당신은 자동 복구 단계도 담당한다. 이전 초안이 검증에 실패하면 아래 규칙으로 전체 패키지를 다시 작성한다.
+- 오류 문구만 지우거나 CONFLICT를 VERIFIED로 바꾸지 않는다. 웹 검색으로 공식 원문을 다시 확인해야 한다.
+- 충돌 주장은 신뢰 가능한 공식 출처로 교체하고 내용을 바로잡거나, 해결할 수 없으면 관련 출처·후보·카드 문구를 모두 제거한다.
+- 검증하지 못한 주제를 억지로 유지하지 말고 같은 날의 검증 가능한 다른 종목 이슈로 교체한다.
+- 선정 후보와 모든 카드가 참조하는 facts는 status가 '검증 완료'여야 한다.
+- 폐기한 충돌과 변경 이유는 risk_flags에 간단히 남겨 사람이 복구 과정을 확인할 수 있게 한다.
+- 편집일, 카드 수, 서로 다른 종목 수, 출처 ID 연결 등 기존 스키마와 운영 규칙을 모두 다시 점검한다.
 """
 
 
@@ -36,4 +50,39 @@ def build_daily_prompt(edition_date: date, settings: Settings, history_summary: 
 
 facts의 id는 S1, S2처럼 고유하게 만들고 candidates와 cards의 source_ids에서 참조한다.
 선정 후보 제목은 candidates 중 하나의 title과 정확히 같아야 한다. 모든 출력은 한국어로 작성한다.
+"""
+
+
+def build_repair_prompt(
+    edition_date: date,
+    settings: Settings,
+    history_summary: str,
+    package_json: str,
+    errors: list[str],
+    warnings: list[str],
+    attempt: int,
+) -> str:
+    leagues = ", ".join(settings.leagues)
+    error_text = "\n".join(f"- {item}" for item in errors)
+    warning_text = "\n".join(f"- {item}" for item in warnings) or "- 없음"
+    return f"""자동 복구 시도: {attempt}
+고정 편집일: {edition_date.isoformat()} (Asia/Seoul)
+조사 대상 리그: {leagues}
+
+자동 검증 차단 항목:
+{error_text}
+
+사람 확인 경고:
+{warning_text}
+
+최근 {settings.recent_days}일 승인·병합 게시 이력:
+{history_summary}
+
+검증에 실패한 이전 초안:
+{package_json}
+
+차단 항목을 하나씩 원인 분석하고 공식 원문을 다시 검색하라. 충돌을 해결할 수 있으면 정확한 주장과 URL로
+교체하고, 해결할 수 없으면 해당 주장과 종속된 후보·카드 내용을 제거한 뒤 검증 가능한 다른 주제로 대체하라.
+이전 초안의 문구를 최소 수정하는 것이 목표가 아니라, 모든 자동 검증을 통과하는 안전한 전체 패키지를 다시
+만드는 것이 목표다. 최종 출력에는 분석 설명 없이 수정된 DailyPackage만 반환한다.
 """

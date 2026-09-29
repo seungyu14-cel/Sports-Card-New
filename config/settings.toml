@@ -7,6 +7,7 @@ caption_min_chars = 500
 caption_max_chars = 2000
 output_width = 1080
 output_height = 1350
+auto_repair_attempts = 2
 
 [editorial]
 leagues = ["KBO", "NPB", "MLB", "EPL", "KBL", "NBA"]

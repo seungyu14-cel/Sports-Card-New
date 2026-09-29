@@ -7,8 +7,9 @@
 3. 최근 7일 동안 병합된 `output/*/package.json`을 읽어 종목·리그·주제 편중을 프롬프트에 제공합니다.
 4. 선정 주제의 팩트 카드, 카드 5~6장, 캡션, 해시태그, 대체 텍스트, 디자인 브리프를 구조화 데이터로 생성합니다.
 5. `validation.py`가 출처 연결, 경기 상태, 권리 상태, 카드 수, 승인 게이트를 검사합니다.
-6. `renderer.py`가 외부 소재 없이 1080×1350 PNG를 만듭니다.
-7. GitHub Actions가 결과를 Draft PR로 제출합니다. PR 병합은 사람 승인을 뜻하며 자동으로 수행하지 않습니다.
+6. 차단 항목이 있으면 `pipeline.py`가 오류와 기존 초안을 복구 프롬프트에 넣어 공식 출처 재조사와 전체 원고 재작성을 최대 설정 횟수만큼 수행합니다. 충돌을 해결할 수 없으면 관련 주제를 폐기하며, 검증 규칙 자체는 완화하지 않습니다.
+7. 복구된 패키지를 처음부터 다시 검증하고, 통과한 경우에만 `renderer.py`가 외부 소재 없이 1080×1350 PNG를 만듭니다. 복구 과정은 `recovery-log.md`에 기록합니다.
+8. GitHub Actions가 결과를 Draft PR로 제출합니다. PR 병합은 사람 승인을 뜻하며 자동으로 수행하지 않습니다.
 
 ## 역할별 산출물
 
@@ -17,7 +18,7 @@
 | 후보 수집·종목 데스크 | `generator.py`, `package.json`의 `candidates`·`facts` |
 | 편성 에이전트 | 가중 점수와 `selected_candidate_title`·`selection_reason` |
 | 원고 에이전트 | `cards`, `caption`, `hashtags`, `design_brief` |
-| 팩트체크·권리 | `validation.py`, `validation.md`, `rights_status` |
+| 팩트체크·권리 | `validation.py`, `validation.md`, `recovery-log.md`, `rights_status` |
 | 편집장 | `editorial-review.md` 체크리스트와 Draft PR 승인 |
 | 채널·성장 | 현재 범위 밖. 승인된 결과를 수동 게시하고 링크·성과를 별도 기록 |
 
@@ -27,6 +28,6 @@
 - Draft PR 자동 병합
 - 외부 사진·영상·로고 수집
 - 광고·협찬 표기 판단
-- 출처 충돌이나 미확인 부상·이적 정보의 자동 확정
+- 출처 충돌이나 미확인 부상·이적 정보를 근거 없이 자동 확정
 
 이 경계는 운영안의 “AI는 조사·정리·초안을 돕고 사람 편집자가 게시를 승인한다”는 원칙을 코드로 강제하기 위한 것입니다.

@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from datetime import date
 from pathlib import Path
 
+import pytest
+
 from sports_card_news.config import load_settings
 from sports_card_news.history import recent_publication_summary
-from sports_card_news.models import RightsStatus
+from sports_card_news.models import FactStatus, RightsStatus
 from sports_card_news.pipeline import load_package, run_daily
 from sports_card_news.validation import validate_package
 
@@ -57,6 +60,87 @@ def test_rights_needs_review_is_warning_not_blocking() -> None:
 
     assert report.ok, report.errors
     assert any("시각 소재 권리가 '확인 필요'" in warning for warning in report.warnings)
+
+
+def test_live_generation_repairs_conflicts_and_writes_recovery_log(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    settings = load_settings(ROOT / "config/settings.toml")
+    valid = load_package(ROOT / "fixtures/demo_package.json")
+    conflicted_fact = valid.facts[0].model_copy(update={"status": FactStatus.CONFLICT})
+    invalid = valid.model_copy(update={"facts": [conflicted_fact, *valid.facts[1:]]})
+    repair_calls: list[list[str]] = []
+
+    monkeypatch.setattr(
+        "sports_card_news.pipeline.generate_daily_package",
+        lambda *_args, **_kwargs: invalid,
+    )
+
+    def fake_repair(*_args: object, **kwargs: object):  # type: ignore[no-untyped-def]
+        repair_calls.append(list(kwargs["errors"]))  # type: ignore[arg-type]
+        return valid
+
+    monkeypatch.setattr("sports_card_news.pipeline.repair_daily_package", fake_repair)
+
+    destination, report = run_daily(
+        edition_date=date(2026, 9, 29),
+        output_root=tmp_path,
+        settings=settings,
+    )
+
+    assert report.ok
+    assert len(repair_calls) == 1
+    assert any("출처 충돌: S1" in error for error in repair_calls[0])
+    assert any("자동 복구 1회" in warning for warning in report.warnings)
+    recovery_log = (destination / "recovery-log.md").read_text(encoding="utf-8")
+    assert "1차 재조사 사유" in recovery_log
+    assert "모든 차단 항목이 해결" in recovery_log
+    assert len(list(destination.glob("card-*.png"))) == 6
+
+    # A clean rerun for the same edition must not leave a stale recovery record.
+    run_daily(
+        edition_date=date(2026, 9, 29),
+        output_root=tmp_path,
+        settings=settings,
+        fixture=ROOT / "fixtures/demo_package.json",
+    )
+    assert not (destination / "recovery-log.md").exists()
+
+
+def test_live_generation_stops_after_bounded_repair_attempts(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    settings = replace(
+        load_settings(ROOT / "config/settings.toml"),
+        auto_repair_attempts=2,
+    )
+    valid = load_package(ROOT / "fixtures/demo_package.json")
+    conflicted_fact = valid.facts[0].model_copy(update={"status": FactStatus.CONFLICT})
+    invalid = valid.model_copy(update={"facts": [conflicted_fact, *valid.facts[1:]]})
+    attempts: list[int] = []
+
+    monkeypatch.setattr(
+        "sports_card_news.pipeline.generate_daily_package",
+        lambda *_args, **_kwargs: invalid,
+    )
+
+    def failed_repair(*_args: object, **kwargs: object):  # type: ignore[no-untyped-def]
+        attempts.append(int(kwargs["attempt"]))
+        return invalid
+
+    monkeypatch.setattr("sports_card_news.pipeline.repair_daily_package", failed_repair)
+
+    with pytest.raises(ValueError, match="자동 복구 횟수 안에"):
+        run_daily(
+            edition_date=date(2026, 9, 29),
+            output_root=tmp_path,
+            settings=settings,
+        )
+
+    assert attempts == [1, 2]
+    assert not (tmp_path / "2026-09-29").exists()
 
 
 def test_recent_history_uses_only_prior_seven_days(tmp_path: Path) -> None:

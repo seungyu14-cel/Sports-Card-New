@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import json
+import sys
 from datetime import date
 from pathlib import Path
 
 from .config import Settings
-from .generator import generate_daily_package
+from .generator import generate_daily_package, repair_daily_package
 from .history import recent_publication_summary
 from .models import DailyPackage
 from .renderer import render_package
@@ -23,6 +24,8 @@ def run_daily(
     fixture: str | Path | None = None,
 ) -> tuple[Path, ValidationReport]:
     output_root = Path(output_root)
+    history = ""
+    recovery_attempts: list[tuple[int, list[str]]] = []
     if fixture:
         package = load_package(fixture)
         package = package.model_copy(
@@ -32,14 +35,46 @@ def run_daily(
         history = recent_publication_summary(output_root, edition_date, settings.recent_days)
         package = generate_daily_package(edition_date, settings, history)
 
-    if package.edition_date != edition_date.isoformat():
-        raise ValueError(
-            f"생성물 편집일({package.edition_date})이 요청한 편집일({edition_date.isoformat()})과 다릅니다."
-        )
+    report = _validate_for_edition(package, settings, edition_date)
+    if not fixture:
+        for attempt in range(1, settings.auto_repair_attempts + 1):
+            if report.ok:
+                break
+            errors = list(report.errors)
+            recovery_attempts.append((attempt, errors))
+            print(
+                f"[자동 복구 {attempt}/{settings.auto_repair_attempts}] "
+                f"차단 항목 {len(errors)}건을 발견했습니다.",
+                file=sys.stderr,
+                flush=True,
+            )
+            for error in errors:
+                print(f"  - {error}", file=sys.stderr, flush=True)
+            package = repair_daily_package(
+                edition_date=edition_date,
+                settings=settings,
+                history_summary=history,
+                invalid_package=package,
+                errors=errors,
+                warnings=list(report.warnings),
+                attempt=attempt,
+            )
+            report = _validate_for_edition(package, settings, edition_date)
 
-    report = validate_package(package, settings)
     if not report.ok:
-        raise ValueError(report.as_markdown())
+        recovery_detail = _recovery_markdown(recovery_attempts, resolved=False)
+        raise ValueError(report.as_markdown() + recovery_detail)
+
+    if recovery_attempts:
+        report.warnings.insert(
+            0,
+            f"자동 복구 {len(recovery_attempts)}회 후 차단 항목을 해결하고 전체 검증을 다시 통과했습니다.",
+        )
+        print(
+            f"[자동 복구 완료] {len(recovery_attempts)}회 재조사 후 자동 검증을 통과했습니다.",
+            file=sys.stderr,
+            flush=True,
+        )
 
     destination = output_root / edition_date.isoformat()
     destination.mkdir(parents=True, exist_ok=True)
@@ -47,8 +82,51 @@ def run_daily(
     _write_text(destination / "caption.md", _caption_markdown(package))
     _write_text(destination / "editorial-review.md", _editorial_markdown(package, settings))
     _write_text(destination / "validation.md", report.as_markdown())
+    recovery_path = destination / "recovery-log.md"
+    if recovery_attempts:
+        _write_text(
+            recovery_path,
+            _recovery_markdown(recovery_attempts, resolved=True),
+        )
+    elif recovery_path.exists():
+        recovery_path.unlink()
     render_package(package, destination, settings)
     return destination, report
+
+
+def _validate_for_edition(
+    package: DailyPackage,
+    settings: Settings,
+    edition_date: date,
+) -> ValidationReport:
+    report = validate_package(package, settings)
+    expected = edition_date.isoformat()
+    if package.edition_date != expected:
+        report.errors.insert(
+            0,
+            f"생성물 편집일({package.edition_date})이 요청한 편집일({expected})과 다릅니다.",
+        )
+    return report
+
+
+def _recovery_markdown(
+    attempts: list[tuple[int, list[str]]],
+    *,
+    resolved: bool,
+) -> str:
+    if not attempts:
+        return ""
+    blocks = ["# 자동 복구 기록"]
+    for attempt, errors in attempts:
+        items = "\n".join(f"- {item}" for item in errors)
+        blocks.append(f"## {attempt}차 재조사 사유\n\n{items}")
+    outcome = (
+        "공식 출처 재조사와 원고 재작성 후 모든 차단 항목이 해결되었습니다."
+        if resolved
+        else "설정된 자동 복구 횟수 안에 모든 차단 항목을 해결하지 못했습니다."
+    )
+    blocks.append(f"## 최종 결과\n\n{outcome}")
+    return "\n\n".join(blocks) + "\n"
 
 
 def validate_file(path: str | Path, settings: Settings) -> ValidationReport:

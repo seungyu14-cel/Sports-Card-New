@@ -18,6 +18,7 @@ class Settings:
     caption_max_chars: int
     output_width: int
     output_height: int
+    auto_repair_attempts: int
     leagues: tuple[str, ...]
     candidate_sports_min: int
     recent_days: int
@@ -42,6 +43,7 @@ def load_settings(path: str | Path = "config/settings.toml") -> Settings:
         caption_max_chars=raw["caption_max_chars"],
         output_width=raw["output_width"],
         output_height=raw["output_height"],
+        auto_repair_attempts=min(3, max(0, int(raw.get("auto_repair_attempts", 2)))),
         leagues=tuple(editorial["leagues"]),
         candidate_sports_min=editorial["candidate_sports_min"],
         recent_days=editorial["recent_days"],

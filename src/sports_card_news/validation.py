@@ -36,6 +36,7 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
     report = ValidationReport()
     all_source_ids = [source.id for source in package.facts]
     source_ids = set(all_source_ids)
+    facts_by_id = {source.id: source for source in package.facts}
 
     if len(source_ids) != len(all_source_ids):
         report.errors.append("출처 ID가 중복되었습니다.")
@@ -68,11 +69,29 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
         missing = sorted(set(candidate.source_ids) - source_ids)
         if missing:
             report.errors.append(f"후보 '{candidate.title}'의 출처 ID가 없습니다: {missing}")
+        unresolved = sorted(
+            source_id
+            for source_id in candidate.source_ids
+            if source_id in facts_by_id and facts_by_id[source_id].status != FactStatus.VERIFIED
+        )
+        if unresolved:
+            report.errors.append(
+                f"후보 '{candidate.title}'가 검증 완료되지 않은 출처를 참조합니다: {unresolved}"
+            )
 
     for card in package.cards:
         missing = sorted(set(card.source_ids) - source_ids)
         if missing:
             report.errors.append(f"카드 {card.slide}의 출처 ID가 없습니다: {missing}")
+        unresolved = sorted(
+            source_id
+            for source_id in card.source_ids
+            if source_id in facts_by_id and facts_by_id[source_id].status != FactStatus.VERIFIED
+        )
+        if unresolved:
+            report.errors.append(
+                f"카드 {card.slide}가 검증 완료되지 않은 출처를 참조합니다: {unresolved}"
+            )
         if card.slide < len(package.cards) and not card.source_ids:
             report.warnings.append(f"카드 {card.slide}에 직접 연결된 출처가 없습니다.")
 

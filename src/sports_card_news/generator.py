@@ -7,7 +7,7 @@ from openai import OpenAI
 
 from .config import Settings
 from .models import DailyPackage
-from .prompts import SYSTEM_PROMPT, build_daily_prompt
+from .prompts import REPAIR_SYSTEM_PROMPT, SYSTEM_PROMPT, build_daily_prompt, build_repair_prompt
 
 
 class GenerationError(RuntimeError):
@@ -19,6 +19,51 @@ def generate_daily_package(
     settings: Settings,
     history_summary: str,
     client: OpenAI | None = None,
+) -> DailyPackage:
+    return _request_package(
+        settings=settings,
+        instructions=SYSTEM_PROMPT,
+        prompt=build_daily_prompt(edition_date, settings, history_summary),
+        phase="생성",
+        client=client,
+    )
+
+
+def repair_daily_package(
+    edition_date: date,
+    settings: Settings,
+    history_summary: str,
+    invalid_package: DailyPackage,
+    errors: list[str],
+    warnings: list[str],
+    attempt: int,
+    client: OpenAI | None = None,
+) -> DailyPackage:
+    """Re-research and rebuild an invalid package without weakening validation."""
+    prompt = build_repair_prompt(
+        edition_date=edition_date,
+        settings=settings,
+        history_summary=history_summary,
+        package_json=invalid_package.model_dump_json(indent=2),
+        errors=errors,
+        warnings=warnings,
+        attempt=attempt,
+    )
+    return _request_package(
+        settings=settings,
+        instructions=REPAIR_SYSTEM_PROMPT,
+        prompt=prompt,
+        phase=f"자동 복구 {attempt}차",
+        client=client,
+    )
+
+
+def _request_package(
+    settings: Settings,
+    instructions: str,
+    prompt: str,
+    phase: str,
+    client: OpenAI | None,
 ) -> DailyPackage:
     if not os.getenv("OPENAI_API_KEY") and client is None:
         raise GenerationError(
@@ -33,20 +78,20 @@ def generate_daily_package(
             tools=[{"type": "web_search", "external_web_access": True}],
             tool_choice="required",
             include=["web_search_call.action.sources"],
-            instructions=SYSTEM_PROMPT,
-            input=build_daily_prompt(edition_date, settings, history_summary),
+            instructions=instructions,
+            input=prompt,
             text_format=DailyPackage,
             max_output_tokens=16000,
             store=False,
         )
     except Exception as error:
-        raise GenerationError(f"OpenAI 생성 요청에 실패했습니다: {error}") from error
+        raise GenerationError(f"OpenAI {phase} 요청에 실패했습니다: {error}") from error
 
     package = response.output_parsed
     if package is None:
         refusal = _extract_refusal(response)
         detail = f" 모델 응답: {refusal}" if refusal else ""
-        raise GenerationError(f"구조화된 카드뉴스 초안을 받지 못했습니다.{detail}")
+        raise GenerationError(f"{phase} 단계에서 구조화된 카드뉴스 초안을 받지 못했습니다.{detail}")
     return package
 
 

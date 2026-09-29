@@ -5,8 +5,8 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from sports_card_news.config import load_settings
-from sports_card_news.generator import generate_daily_package
-from sports_card_news.models import DailyPackage
+from sports_card_news.generator import generate_daily_package, repair_daily_package
+from sports_card_news.models import DailyPackage, FactStatus
 from sports_card_news.pipeline import load_package
 
 
@@ -50,3 +50,29 @@ def test_daily_package_schema_does_not_emit_uri_format() -> None:
     schema_text = str(DailyPackage.model_json_schema())
     assert "'format': 'uri'" not in schema_text
     assert '"format": "uri"' not in schema_text
+
+
+def test_repair_generation_includes_validation_errors_and_invalid_package() -> None:
+    package = load_package(ROOT / "fixtures/demo_package.json")
+    conflicted_fact = package.facts[0].model_copy(update={"status": FactStatus.CONFLICT})
+    invalid = package.model_copy(update={"facts": [conflicted_fact, *package.facts[1:]]})
+    responses = FakeResponses(package)
+    client = SimpleNamespace(responses=responses)
+    settings = load_settings(ROOT / "config/settings.toml")
+
+    repaired = repair_daily_package(
+        edition_date=date(2026, 9, 29),
+        settings=settings,
+        history_summary="최근 게시 이력 없음",
+        invalid_package=invalid,
+        errors=["출처 충돌: S1 점수가 일치하지 않습니다."],
+        warnings=["게시 전 재확인 필요"],
+        attempt=1,
+        client=client,  # type: ignore[arg-type]
+    )
+
+    assert repaired is package
+    assert "출처 충돌: S1" in str(responses.kwargs["input"])
+    assert "검증에 실패한 이전 초안" in str(responses.kwargs["input"])
+    assert '"status": "출처 충돌"' in str(responses.kwargs["input"])
+    assert "자동 복구 단계" in str(responses.kwargs["instructions"])
