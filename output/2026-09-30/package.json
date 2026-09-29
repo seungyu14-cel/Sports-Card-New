@@ -1,0 +1,330 @@
+{
+  "approval_notice": "게시 전 사람 승인 필요",
+  "needs_human_approval": true,
+  "edition_date": "2026-09-30",
+  "generated_at": "2026-09-30T03:00:26+09:00",
+  "candidates": [
+    {
+      "sport": "야구",
+      "league": "MLB",
+      "title": "MLB 와일드카드 1차전, 한국시간으로 보는 오늘의 관전표",
+      "summary": "한국시간 오늘 새벽부터 오전까지 편성된 네 경기를 정리하는 일정형 콘텐츠. 첫 경기의 실제 개시 여부는 추가 확인 대상이다.",
+      "game_status": "확인 중",
+      "importance": 5,
+      "korean_relevance": 4,
+      "source_reliability": 5,
+      "explainability": 5,
+      "source_ids": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ],
+      "caution": "공식 발표 일정과 실시간 경기 상태를 구분한다. 한국 선수 출전이나 국내 중계 편성은 확인하지 않았으므로 넣지 않는다."
+    },
+    {
+      "sport": "야구",
+      "league": "KBO",
+      "title": "KBO 오늘 5경기, 모두 오후 6시 30분 예정",
+      "summary": "공식 일정에는 NC-두산, 한화-삼성, 키움-롯데, LG-SSG, KT-KIA가 한국시간 9월 30일 18시 30분에 편성돼 있다. ([eng.koreabaseball.com](https://eng.koreabaseball.com/Schedule/DailySchedule.aspx))",
+      "game_status": "예정",
+      "importance": 4,
+      "korean_relevance": 5,
+      "source_reliability": 5,
+      "explainability": 3,
+      "source_ids": [
+        "S6"
+      ],
+      "caution": "취소·연기 및 선발 변경을 게시 직전 재확인한다. 순위 확정이나 경우의 수는 별도 검증 없이 연결하지 않는다."
+    },
+    {
+      "sport": "축구",
+      "league": "EPL",
+      "title": "EPL 다음 일정은 10월 10일, 재개 시각 미리 보기",
+      "summary": "조회한 공식 전체 일정의 다음 경기일은 영국시간 10월 10일이다. 첫 편성인 아스널-리즈는 한국시간 같은 날 20시 30분이다. ([premierleague.com](https://www.premierleague.com/en/news/4675097/all-380-fixtures-for-202627-premier-league-season))",
+      "game_status": "예정",
+      "importance": 3,
+      "korean_relevance": 4,
+      "source_reliability": 5,
+      "explainability": 3,
+      "source_ids": [
+        "S7"
+      ],
+      "caution": "오늘 발표된 새 소식이 아니라 오늘 재조회한 일정이다. 일정 공백의 이유는 이 출처만으로 단정하지 않는다."
+    },
+    {
+      "sport": "농구",
+      "league": "NBA",
+      "title": "NBA 훈련캠프 개시 일정 점검",
+      "summary": "공식 일정상 현지 9월 29일 캠프 개시. ([nba.com](https://www.nba.com/news/key-dates))",
+      "game_status": "확인 중",
+      "importance": 3,
+      "korean_relevance": 3,
+      "source_reliability": 5,
+      "explainability": 4,
+      "source_ids": [
+        "S8"
+      ],
+      "caution": "경기 결과 후보가 아니다. 구단별 실제 개시 시각과 선수 참가 여부는 별도 확인 대상이다."
+    },
+    {
+      "sport": "야구",
+      "league": "NPB",
+      "title": "NPB 오늘 저녁 한신-야쿠르트·라쿠텐-롯데 예정",
+      "summary": "최신 조회본에는 두 경기가 일본·한국시간 9월 30일 18시에 편성돼 있다. ([npb.jp](https://npb.jp/games/2026/schedule_09_detail.html))",
+      "game_status": "예정",
+      "importance": 3,
+      "korean_relevance": 2,
+      "source_reliability": 5,
+      "explainability": 3,
+      "source_ids": [
+        "S9"
+      ],
+      "caution": "예비일을 확정 경기로 세지 않는다. 전날 결과가 비어 있는 조회본이므로 전날 경기의 승패는 다루지 않는다."
+    },
+    {
+      "sport": "농구",
+      "league": "KBL",
+      "title": "KBL 최신 공식 일정·발표 확인 보류",
+      "summary": "공식 홈페이지와 공지사항을 조회했으나 본문을 확보하지 못했다. 비교표에는 취재 보류 항목으로 남기고 게시 후보에서는 제외한다.",
+      "game_status": "확인 중",
+      "importance": 1,
+      "korean_relevance": 5,
+      "source_reliability": 1,
+      "explainability": 1,
+      "source_ids": [
+        "S10"
+      ],
+      "caution": "중요도 1점은 실제 KBL 소식의 중요도가 아니라 확인된 게시 소재가 없다는 뜻이다. 공식 기관 자체의 신뢰도를 낮게 평가한 것이 아니다."
+    }
+  ],
+  "selected_candidate_title": "MLB 와일드카드 1차전, 한국시간으로 보는 오늘의 관전표",
+  "selection_reason": "점수는 편집 판단이며 단순 합산으로 선정하지 않았다. MLB 후보는 포스트시즌 첫 관문이라는 중요도와 당일 한국시간 안내의 실용성이 가장 높다. KBO는 한국 독자 관련성이 더 높지만 이번에 검증한 소재는 일반 경기 일정이어서 설명 가치에서 차이가 났다. 축구·농구 후보도 비교했으나 종목 균형을 위한 교체는 하지 않았다. 최근 승인·병합 이력이 없어 반복 감점은 없다. MLB의 일부 일정 조회본에 미정 표기가 남아 있었지만, 상세 공식 발표와 스포츠 일정 도구가 일치하는 편성만 채택했다. 단, 첫 경기 개시 시각을 지난 만큼 결과물이 아니라 일정 안내 초안으로 승인받아야 한다.",
+  "facts": [
+    {
+      "id": "S1",
+      "claim": "와일드카드 시리즈는 3전 2선승제다. ([mlb.com](https://www.mlb.com/news/mlb-2026-wild-card-series-airing-on-nbc-and-peacock))",
+      "title": "MLB 공식 와일드카드 시청 안내",
+      "url": "https://www.mlb.com/news/mlb-2026-wild-card-series-airing-on-nbc-and-peacock",
+      "source_type": "공식",
+      "checked_at": "2026-09-30T03:00:01+09:00",
+      "published_at": "본문에 15:43 UTC 표기, 게시 날짜는 확인 불가",
+      "local_time": "시리즈 방식에 관한 정보로 특정 시각 해당 없음",
+      "korea_time": "특정 시각 해당 없음",
+      "status": "검증 완료",
+      "rights_note": "규칙 사실만 자체 문장으로 요약. 기사·사진·방송 화면은 사용하지 않는다."
+    },
+    {
+      "id": "S2",
+      "claim": "필라델피아 원정·애틀랜타 홈 1차전 편성은 한국시간 9월 30일 03:00. 공식 발표와 스포츠 일정 도구를 대조했다. 실제 개시 여부는 미확인.",
+      "title": "MLB 공식 포스트시즌 일정 — 필라델피아·애틀랜타",
+      "url": "https://www.mlb.com/news/2026-mlb-playoff-and-world-series-schedule",
+      "source_type": "공식",
+      "checked_at": "2026-09-30T03:00:01+09:00",
+      "published_at": "2026-09-27, 게시 시각·시간대 미표기",
+      "local_time": "2026-09-29T14:00:00-04:00",
+      "korea_time": "2026-09-30T03:00:00+09:00",
+      "status": "검증 완료",
+      "rights_note": "대진·시각 데이터만 자체 그래픽으로 제작. 구단 로고와 경기 영상은 제외한다."
+    },
+    {
+      "id": "S3",
+      "claim": "시카고 화이트삭스 원정·휴스턴 홈 1차전은 한국시간 9월 30일 06:00 예정. 공식 편성과 스포츠 일정 도구가 일치한다.",
+      "title": "MLB 공식 포스트시즌 일정 — 화이트삭스·휴스턴",
+      "url": "https://www.mlb.com/postseason",
+      "source_type": "공식",
+      "checked_at": "2026-09-30T03:00:26+09:00",
+      "published_at": "상시 갱신 페이지, 갱신 시각 미표기",
+      "local_time": "2026-09-29T16:00:00-05:00",
+      "korea_time": "2026-09-30T06:00:00+09:00",
+      "status": "검증 완료",
+      "rights_note": "사실 데이터만 재구성. 원본 대진표 디자인은 복제하지 않는다."
+    },
+    {
+      "id": "S4",
+      "claim": "보스턴 원정·뉴욕 양키스 홈 1차전은 한국시간 9월 30일 09:00 예정. 공식 편성과 스포츠 일정 도구가 일치한다.",
+      "title": "MLB 공식 포스트시즌 일정 — 보스턴·양키스",
+      "url": "https://www.mlb.com/postseason",
+      "source_type": "공식",
+      "checked_at": "2026-09-30T03:00:26+09:00",
+      "published_at": "상시 갱신 페이지, 갱신 시각 미표기",
+      "local_time": "2026-09-29T20:00:00-04:00",
+      "korea_time": "2026-09-30T09:00:00+09:00",
+      "status": "검증 완료",
+      "rights_note": "구단명은 일반 텍스트로만 표기. 로고·선수 사진은 제외한다."
+    },
+    {
+      "id": "S5",
+      "claim": "시카고 컵스 원정·샌디에이고 홈 1차전은 한국시간 9월 30일 11:00 예정. 공식 편성과 스포츠 일정 도구가 일치한다.",
+      "title": "MLB 공식 포스트시즌 일정 — 컵스·샌디에이고",
+      "url": "https://www.mlb.com/postseason",
+      "source_type": "공식",
+      "checked_at": "2026-09-30T03:00:26+09:00",
+      "published_at": "상시 갱신 페이지, 갱신 시각 미표기",
+      "local_time": "2026-09-29T19:00:00-07:00",
+      "korea_time": "2026-09-30T11:00:00+09:00",
+      "status": "검증 완료",
+      "rights_note": "대진·시각만 자체 제작. 방송사 화면과 사진은 사용하지 않는다."
+    },
+    {
+      "id": "S6",
+      "claim": "KBO 9월 30일 공식 일정에 18시 30분 시작 경기 5개가 올라 있다. ([eng.koreabaseball.com](https://eng.koreabaseball.com/Schedule/DailySchedule.aspx))",
+      "title": "KBO 공식 일별 경기 일정",
+      "url": "https://eng.koreabaseball.com/Schedule/DailySchedule.aspx",
+      "source_type": "공식",
+      "checked_at": "2026-09-30T03:00:26+09:00",
+      "published_at": "상시 갱신 페이지, 갱신 시각 미표기",
+      "local_time": "2026-09-30T18:30:00+09:00",
+      "korea_time": "2026-09-30T18:30:00+09:00",
+      "status": "검증 완료",
+      "rights_note": "일정 사실만 요약. 공식 표·로고·사진의 사용권은 확보하지 않았다."
+    },
+    {
+      "id": "S7",
+      "claim": "EPL 공식 일정의 다음 경기일은 영국시간 10월 10일이며 아스널-리즈가 12시 30분에 편성돼 있다. ([premierleague.com](https://www.premierleague.com/en/news/4675097/all-380-fixtures-for-202627-premier-league-season))",
+      "title": "프리미어리그 공식 2026-27시즌 전체 일정",
+      "url": "https://www.premierleague.com/en/news/4675097/all-380-fixtures-for-202627-premier-league-season",
+      "source_type": "공식",
+      "checked_at": "2026-09-30T03:00:26+09:00",
+      "published_at": "2026-06-19, 게시 시각 미표기",
+      "local_time": "2026-10-10T12:30:00+01:00",
+      "korea_time": "2026-10-10T20:30:00+09:00",
+      "status": "검증 완료",
+      "rights_note": "일부 일정 사실만 자체 요약. 전체 일정표와 리그 그래픽은 복제하지 않는다."
+    },
+    {
+      "id": "S8",
+      "claim": "훈련캠프 개시일은 현지 9월 29일. ([nba.com](https://www.nba.com/news/key-dates))",
+      "title": "NBA 공식 주요 일정",
+      "url": "https://www.nba.com/news/key-dates",
+      "source_type": "공식",
+      "checked_at": "2026-09-30T03:00:26+09:00",
+      "published_at": "페이지 갱신 시각 추가 확인 필요",
+      "local_time": "2026-09-29, 구단별 시각 미표기",
+      "korea_time": "2026-09-29~30, 정확한 환산 불가",
+      "status": "검증 완료",
+      "rights_note": "날짜 사실만 사용. 미디어데이 사진과 구단 영상은 사용하지 않는다."
+    },
+    {
+      "id": "S9",
+      "claim": "NPB 9월 30일 일정에는 한신-야쿠르트, 라쿠텐-롯데가 각각 18시로 표기돼 있다. ([npb.jp](https://npb.jp/games/2026/schedule_09_detail.html))",
+      "title": "NPB 공식 2026년 9월 상세 일정·결과",
+      "url": "https://npb.jp/games/2026/schedule_09_detail.html",
+      "source_type": "공식",
+      "checked_at": "2026-09-30T03:00:26+09:00",
+      "published_at": "상시 갱신 페이지, 갱신 시각 미표기",
+      "local_time": "2026-09-30T18:00:00+09:00",
+      "korea_time": "2026-09-30T18:00:00+09:00",
+      "status": "검증 완료",
+      "rights_note": "일정만 요약. 공식 표·구단 로고·날씨 아이콘은 사용하지 않는다."
+    },
+    {
+      "id": "S10",
+      "claim": "공식 공지사항 URL 조회는 시도했으나 본문을 확보하지 못했다. 최신 일정이나 발표 내용은 검증하지 못했다.",
+      "title": "KBL 공식 공지사항 — 본문 확인 실패",
+      "url": "https://www.kbl.or.kr/board/notice",
+      "source_type": "공식",
+      "checked_at": "2026-09-30T03:00:26+09:00",
+      "published_at": "확인 불가",
+      "local_time": "확인 불가",
+      "korea_time": "확인 불가",
+      "status": "검증 필요",
+      "rights_note": "자료를 확보하지 못했으므로 시각물과 기사 내용 모두 사용하지 않는다."
+    }
+  ],
+  "cards": [
+    {
+      "slide": 1,
+      "headline": "와일드카드, 먼저 2승",
+      "body": "3전 2선승제. ([mlb.com](https://www.mlb.com/news/mlb-2026-wild-card-series-airing-on-nbc-and-peacock))",
+      "source_ids": [
+        "S1"
+      ],
+      "visual_direction": "자체 제작 원 3개 중 2개를 강조한다. 상단에 '2026.09.30 편집 · 일정 안내' 표기.",
+      "alt_text": "세 개의 원 중 두 개를 강조한 시리즈 방식 설명."
+    },
+    {
+      "slide": 2,
+      "headline": "03:00 편성",
+      "body": "필라델피아 → 애틀랜타\n한국 9/30 03:00 · 현지 9/29 14:00\n실제 개시 여부 확인 중.",
+      "source_ids": [
+        "S2"
+      ],
+      "visual_direction": "시간을 크게 쓰고 원정에서 홈으로 향하는 화살표를 배치한다. '편성 시각'과 '상태 확인 중'을 분리 표기.",
+      "alt_text": "필라델피아와 애틀랜타의 1차전 편성 시각 및 상태 확인 안내."
+    },
+    {
+      "slide": 3,
+      "headline": "06:00 예정",
+      "body": "화이트삭스 → 휴스턴\n한국 9/30 06:00 · 현지 9/29 16:00",
+      "source_ids": [
+        "S3"
+      ],
+      "visual_direction": "동일한 시간표 틀을 사용하고 '예정' 라벨을 명확하게 표시한다.",
+      "alt_text": "화이트삭스와 휴스턴의 1차전 한국·현지 시작 예정 시각."
+    },
+    {
+      "slide": 4,
+      "headline": "09:00 예정",
+      "body": "보스턴 → 뉴욕 양키스\n한국 9/30 09:00 · 현지 9/29 20:00",
+      "source_ids": [
+        "S4"
+      ],
+      "visual_direction": "구단명은 일반 글꼴로 표기한다. 로고나 유니폼을 연상시키는 도안은 넣지 않는다.",
+      "alt_text": "보스턴과 뉴욕 양키스의 1차전 한국·현지 시작 예정 시각."
+    },
+    {
+      "slide": 5,
+      "headline": "11:00 예정",
+      "body": "시카고 컵스 → 샌디에이고\n한국 9/30 11:00 · 현지 9/29 19:00",
+      "source_ids": [
+        "S5"
+      ],
+      "visual_direction": "앞선 카드와 동일한 자체 제작 타임라인을 사용한다. 하단에 '게시 직전 경기 상태 재확인' 안내.",
+      "alt_text": "시카고 컵스와 샌디에이고의 1차전 한국·현지 시작 예정 시각."
+    }
+  ],
+  "caption": "미국 날짜가 아니라 한국 날짜로 정리한 오늘의 MLB 관전표입니다. 이번 게시물은 경기 결과 속보가 아닌, 와일드카드 1차전 편성 안내입니다.\n\n한국시간 9월 30일 기준으로 필라델피아-애틀랜타는 03:00, 화이트삭스-휴스턴은 06:00, 보스턴-뉴욕 양키스는 09:00, 시카고 컵스-샌디에이고는 11:00에 편성돼 있습니다. 카드의 화살표는 원정팀에서 홈팀으로 향합니다.\n\n자료 확인 기준은 9월 30일 03:00, 서울 시간입니다. 첫 경기의 편성 시각에 도달했지만 실제 첫 투구 여부는 확인하지 못했습니다. 따라서 ‘시작했다’, ‘승리했다’ 같은 표현이나 스코어는 넣지 않았습니다. 나머지 경기 역시 확정 결과가 아니라 시작 예정 시각으로 읽어 주세요.\n\n편집 포인트는 날짜와 상태를 혼동하지 않는 것입니다. 현지 날짜만 보고 하루 뒤 경기로 오해하지 않도록 각 카드에 한국시간을 앞세웠습니다. 출근 전후에 확인할 경기를 골라 두되, 이 시간표를 실시간 문자중계 대신 사용하지는 마세요.\n\n한국 선수 출전 여부, 선발 라인업, 국내 시청 서비스는 이번 초안의 확인 범위에 포함하지 않았습니다. 게시 직전 변경 사항과 경기 상태를 다시 확인한 뒤 안내를 갱신하겠습니다. 여러분은 어느 대진을 먼저 확인하시겠어요?",
+  "hashtags": [
+    "#오늘의스포츠",
+    "#메이저리그",
+    "#MLB포스트시즌",
+    "#와일드카드",
+    "#야구일정",
+    "#한국시간"
+  ],
+  "design_brief": "1080×1350 세로형 5장. 짙은 남색 배경, 흰색 본문, 노란색 시간 강조를 사용한다. 도형·일반 텍스트·자체 제작 시간표만 활용한다. 각 카드에는 편집일, 서울 기준 확인 시각, 출처 ID를 작은 글씨로 넣는다. 현지 시각은 해당 홈구장 소재지 기준이며 한국시간을 더 크게 표시한다. 사진·선수 초상·방송 캡처·리그 및 구단 로고·공식 대진표 디자인은 사용하지 않는다. 글꼴은 상업적 이용 범위를 확인한 뒤 적용한다. 외부 게시나 예약 발행은 수행하지 않는다.",
+  "rights_status": "자체 제작",
+  "risk_flags": [
+    "이 초안은 2026-09-30 03:00:26 Asia/Seoul까지 조회한 정보다. 편집일 하루 전체의 최종 결과를 의미하지 않는다.",
+    "필라델피아-애틀랜타는 편성 시각에 도달했다. 실제 경기 상태 미확인으로 후보를 '확인 중' 처리했으며 게시 전에 반드시 갱신해야 한다.",
+    "MLB 기본 일정 조회본에는 미정 대진·시각이 남아 있었다. 상세 공식 발표와 스포츠 일정 도구가 일치하는 편성을 사용했지만 조회본 간 갱신 차이는 재확인 대상이다. ([mlb.com](https://www.mlb.com/schedule/2026-09-29?utm_source=openai))",
+    "KBL 공식 본문을 확보하지 못해 최신 소식 비교가 불완전하다. 담당자가 정상 브라우저에서 일정과 공지사항을 추가 확인해야 한다.",
+    "NPB 과거 검색 조회본의 예비일 표기는 최신 조회본과 달랐다. 예비일은 경기 수에 포함하지 않았다. ([npb.or.jp](https://www.npb.or.jp/games/2026/schedule_09_detail.html?utm_source=openai))",
+    "미확인 부상·징계·이적·선수 출전 주장은 채택하지 않았다. 향후 추가 시 별도의 공식 출처가 필요하다.",
+    "해외 방송 편성을 국내 중계권이나 한국 내 시청 가능 여부로 해석하지 않았다.",
+    "사진·영상·로고 사용권은 확인하지 않았으므로 전부 제외한다. '자체 제작'은 제안된 그래픽 방식에 한정하며 최종 글꼴 사용권과 제작물 검수가 남아 있다."
+  ],
+  "approval_checklist": {
+    "sport_editor": [
+      "MLB 네 경기의 실제 개시·진행·종료·연기 상태를 게시 직전에 확인하고 후보 상태와 카드 라벨을 함께 수정한다.",
+      "현지 시각이 애틀랜타·뉴욕은 동부, 휴스턴은 중부, 샌디에이고는 태평양 시간임을 확인하고 한국시간 환산을 검산한다.",
+      "KBO·NPB의 당일 변경 공지와 KBL의 미확보 공식 본문을 확인한다. 더 중요한 확정 이슈가 있으면 선정안을 다시 비교한다.",
+      "한국 선수의 출전이나 부상 소식을 추가하려면 당일 공식 명단·구단 발표를 확보한다."
+    ],
+    "fact_rights": [
+      "S1~S10 원문을 열어 주장과 URL의 대응 관계를 확인하고 재조회 시각을 ISO 8601로 기록한다.",
+      "MLB 미정 표기가 남은 조회본과 최신 상세 발표의 갱신 차이를 확인한다. 해소되지 않으면 영향받는 시각을 게시하지 않는다.",
+      "카드와 캡션의 '편성', '예정', '확인 중' 표현이 실제 상태와 일치하는지 확인한다.",
+      "사진·영상·로고·공식 그래픽이 들어 있지 않은지 검사하고 최종 글꼴의 상업적 사용 범위를 확인한다.",
+      "출처 ID, 링크, 캡션 500~2000자, 해시태그 5~8개, 대체 텍스트를 최종 검수한다."
+    ],
+    "editor_in_chief": [
+      "종목 다양성보다 MLB의 당일 중요도를 우선한 선정 근거와 KBL 조사 공백을 승인한다.",
+      "첫 경기 시작 이후에도 일정 안내로 게시할 가치가 있는지 판단하고, 필요하면 결과 확인 후 새 초안으로 전환한다.",
+      "광고·협찬 또는 국내 중계 안내로 오해할 요소가 없는지 확인한다.",
+      "종목 담당과 팩트체크·권리 담당의 승인 완료 후 최종 문안을 승인한다. 외부 계정 게시 자체는 권한 있는 사람이 별도로 수행한다."
+    ]
+  }
+}
