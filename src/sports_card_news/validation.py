@@ -77,7 +77,9 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
             report.warnings.append(f"카드 {card.slide}에 직접 연결된 출처가 없습니다.")
 
     if package.rights_status == RightsStatus.NEEDS_REVIEW:
-        report.errors.append("시각 소재 권리가 '확인 필요' 상태입니다.")
+        report.warnings.append(
+            "시각 소재 권리가 '확인 필요' 상태입니다. 게시 전 팩트체크·권리 담당자가 확인하세요."
+        )
 
     trusted_official = 0
     for source in package.facts:
