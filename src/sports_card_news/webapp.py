@@ -68,7 +68,7 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
 
     app = FastAPI(
         title="Sports Card News Studio",
-        version="0.4.0",
+        version="0.5.0",
         docs_url=None,
         redoc_url=None,
         openapi_url=None,
@@ -130,7 +130,6 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
         _save_local_env(
             env_path,
             {"OPENAI_API_KEY": api_key, "OPENAI_MODEL": model},
-            remove={"OPENROUTER_API_KEY", "OPENROUTER_MODEL"},
         )
         os.environ["OPENAI_API_KEY"] = api_key
         os.environ["OPENAI_MODEL"] = model

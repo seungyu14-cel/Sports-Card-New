@@ -1,5 +1,5 @@
 timezone = "Asia/Seoul"
-model = "gpt-5.5"
+model = "gpt-6-astra"
 reasoning_effort = "medium"
 cards_min = 5
 cards_max = 6

@@ -36,7 +36,7 @@ def test_generation_uses_openai_responses_web_search_and_schema() -> None:
     )
 
     assert generated.edition_date == "2026-09-29"
-    assert responses.kwargs["model"] == "gpt-5.5"
+    assert responses.kwargs["model"] == "gpt-6-astra"
     assert responses.kwargs["tools"] == [
         {"type": "web_search", "external_web_access": True}
     ]

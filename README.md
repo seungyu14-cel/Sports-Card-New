@@ -24,7 +24,7 @@ Windows에서 [`start.bat`](start.bat)을 더블클릭합니다. 최초 실행�
 
 1. [OpenAI API Keys](https://platform.openai.com/api-keys)에서 프로젝트 키를 발급합니다.
 2. `OpenAI API 연결`에 `sk-proj-...` 키를 입력하고 **저장하고 연결 확인**을 누릅니다.
-3. 기본 모델 `gpt-5.5`를 그대로 사용하거나 계정에서 사용할 수 있는 OpenAI 모델 ID로 바꿉니다.
+3. 기본 모델 `gpt-6-astra`를 그대로 사용하거나 계정에서 사용할 수 있는 OpenAI 모델 ID로 바꿉니다.
 4. 날짜를 선택하고 **라이브 제작**을 누릅니다.
 5. API 키 없이 확인하려면 **데모 실행**을 누릅니다.
 6. 생성된 카드, 캡션, 출처를 확인하고 사람 승인 후 게시합니다.
@@ -46,7 +46,7 @@ python -m venv .venv
 .venv\Scripts\Activate.ps1
 python -m pip install -e ".[dev]"
 $env:OPENAI_API_KEY="sk-proj-..."
-$env:OPENAI_MODEL="gpt-5.5"
+$env:OPENAI_MODEL="gpt-6-astra"
 sports-card-news daily --date 2026-09-29
 ```
 

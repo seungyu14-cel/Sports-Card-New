@@ -39,13 +39,12 @@ def test_settings_are_saved_locally_and_redacted(tmp_path: Path, monkeypatch) ->
     with TestClient(create_app(project)) as client:
         response = client.post(
             "/api/settings",
-            json={"api_key": secret, "model": "gpt-5.5"},
+            json={"api_key": secret, "model": "gpt-6-astra"},
         )
     assert response.status_code == 200
     assert secret not in response.text
     env_text = (project / ".env").read_text(encoding="utf-8")
     assert f"OPENAI_API_KEY={secret}" in env_text
-    assert "OPENROUTER_API_KEY" not in env_text
 
 
 def test_demo_job_generates_cards_and_api_detail(tmp_path: Path, monkeypatch) -> None:
