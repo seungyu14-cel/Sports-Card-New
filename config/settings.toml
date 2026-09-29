@@ -1,0 +1,29 @@
+timezone = "Asia/Seoul"
+model = "gpt-5.5"
+reasoning_effort = "medium"
+cards_min = 5
+cards_max = 6
+caption_min_chars = 150
+caption_max_chars = 300
+output_width = 1080
+output_height = 1350
+
+[editorial]
+leagues = ["KBO", "NPB", "MLB", "EPL", "KBL", "NBA"]
+candidate_sports_min = 3
+recent_days = 7
+weights = { importance = 1.0, korean_relevance = 1.0, source_reliability = 1.2, explainability = 0.8 }
+
+[sources]
+trusted_domains = [
+  "koreabaseball.com",
+  "npb.jp",
+  "mlb.com",
+  "premierleague.com",
+  "kbl.or.kr",
+  "nba.com",
+  "the-afc.com",
+  "fifa.com",
+  "olympics.com",
+]
+

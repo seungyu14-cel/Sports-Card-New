@@ -1,0 +1,110 @@
+name: Daily sports card news
+
+on:
+  schedule:
+    - cron: "0 23 * * *" # 매일 08:00 Asia/Seoul
+  workflow_dispatch:
+    inputs:
+      edition_date:
+        description: "편집일(YYYY-MM-DD). 비워두면 오늘(Asia/Seoul)"
+        required: false
+        type: string
+      use_demo:
+        description: "OpenAI API 대신 데모 데이터 사용"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: daily-card-news-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  create-draft:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      GH_TOKEN: ${{ github.token }}
+      TZ: Asia/Seoul
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install Korean font
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-cjk
+
+      - name: Install package
+        run: python -m pip install .
+
+      - name: Resolve edition date
+        id: edition
+        shell: bash
+        run: |
+          requested="${{ inputs.edition_date }}"
+          if [[ -n "$requested" ]]; then
+            edition_date="$requested"
+          else
+            edition_date="$(date +%F)"
+          fi
+          echo "date=$edition_date" >> "$GITHUB_OUTPUT"
+
+      - name: Generate cards
+        shell: bash
+        run: |
+          edition_date="${{ steps.edition.outputs.date }}"
+          if [[ "${{ inputs.use_demo }}" == "true" ]]; then
+            sports-card-news daily --date "$edition_date" --fixture fixtures/demo_package.json
+          else
+            if [[ -z "$OPENAI_API_KEY" ]]; then
+              echo "OPENAI_API_KEY repository secret is required." >&2
+              exit 1
+            fi
+            sports-card-news daily --date "$edition_date"
+          fi
+
+      - name: Commit generated draft
+        id: commit
+        shell: bash
+        run: |
+          edition_date="${{ steps.edition.outputs.date }}"
+          branch="automation/daily-${edition_date}-${GITHUB_RUN_ID}"
+          git config user.name "sports-card-news-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add -f "output/$edition_date"
+          if git diff --cached --quiet; then
+            echo "No generated changes."
+            echo "created=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git commit -m "content: add ${edition_date} sports card draft"
+          git push --set-upstream origin "$branch"
+          echo "created=true" >> "$GITHUB_OUTPUT"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+
+      - name: Open draft pull request
+        if: steps.commit.outputs.created == 'true'
+        shell: bash
+        run: |
+          edition_date="${{ steps.edition.outputs.date }}"
+          gh pr create \
+            --draft \
+            --base "${{ github.event.repository.default_branch }}" \
+            --head "${{ steps.commit.outputs.branch }}" \
+            --title "[검토 필요] ${edition_date} 스포츠 카드뉴스" \
+            --body-file "output/$edition_date/editorial-review.md"
+
