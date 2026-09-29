@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class StrictModel(BaseModel):
@@ -69,7 +69,10 @@ class FactSource(StrictModel):
     id: str = Field(pattern=r"^S\d+$")
     claim: str = Field(min_length=5, max_length=500)
     title: str = Field(min_length=2, max_length=200)
-    url: HttpUrl
+    # Keep the Structured Outputs schema simple: Pydantic HttpUrl emits
+    # JSON Schema format="uri", which the OpenAI response_format validator
+    # rejects. Validate http(s) URLs at the model layer instead.
+    url: str = Field(min_length=8, max_length=2048)
     source_type: SourceType
     checked_at: datetime
     published_at: str = Field(default="", max_length=100)
@@ -77,6 +80,13 @@ class FactSource(StrictModel):
     korea_time: str = Field(default="", max_length=100)
     status: FactStatus
     rights_note: str = Field(default="텍스트 사실 확인용. 이미지 재사용 안 함", max_length=300)
+
+    @field_validator("url")
+    @classmethod
+    def validate_url(cls, value: str) -> str:
+        if not value.startswith(("http://", "https://")):
+            raise ValueError("URL은 http:// 또는 https://로 시작해야 합니다")
+        return value
 
 
 class Card(StrictModel):
@@ -124,4 +134,3 @@ class DailyPackage(StrictModel):
         if any(not value.startswith("#") or " " in value for value in values):
             raise ValueError("해시태그는 공백 없이 #으로 시작해야 합니다")
         return values
-
