@@ -1,0 +1,185 @@
+{
+  "approval_notice": "게시 전 사람 승인 필요",
+  "needs_human_approval": true,
+  "edition_date": "2026-09-30",
+  "generated_at": "2026-09-29T08:00:00+09:00",
+  "candidates": [
+    {
+      "sport": "야구",
+      "league": "KBO",
+      "title": "데모: 경기 전 확인해야 할 세 가지",
+      "summary": "공식 일정과 선발 발표, 경기 상태를 확인해 카드뉴스를 만드는 흐름을 보여 주는 데모 후보입니다.",
+      "game_status": "예정",
+      "importance": 4,
+      "korean_relevance": 5,
+      "source_reliability": 5,
+      "explainability": 5,
+      "source_ids": [
+        "S1"
+      ],
+      "caution": "실제 발행 전 당일 경기 정보로 교체해야 합니다."
+    },
+    {
+      "sport": "축구",
+      "league": "EPL",
+      "title": "데모: 현지 시각과 한국 시각 구분법",
+      "summary": "공식 일정에 표시된 현지 시각을 한국 시각으로 변환하고 날짜 차이를 검토하는 데모 후보입니다.",
+      "game_status": "예정",
+      "importance": 3,
+      "korean_relevance": 4,
+      "source_reliability": 5,
+      "explainability": 4,
+      "source_ids": [
+        "S2"
+      ],
+      "caution": "서머타임 적용 여부를 사람이 확인해야 합니다."
+    },
+    {
+      "sport": "농구",
+      "league": "NBA",
+      "title": "데모: 진행 중 점수를 결과로 쓰지 않는 법",
+      "summary": "경기 상태와 최종 종료 여부를 구분하는 검증 규칙을 설명하기 위한 데모 후보입니다.",
+      "game_status": "진행 중",
+      "importance": 3,
+      "korean_relevance": 3,
+      "source_reliability": 5,
+      "explainability": 5,
+      "source_ids": [
+        "S3"
+      ],
+      "caution": "진행 중 수치는 최종 결과로 표현하면 안 됩니다."
+    }
+  ],
+  "selected_candidate_title": "데모: 경기 전 확인해야 할 세 가지",
+  "selection_reason": "이 데모는 공식 출처, 경기 상태, 사람 승인이라는 전체 자동화의 핵심 검증 단계를 가장 간단히 보여 줍니다.",
+  "facts": [
+    {
+      "id": "S1",
+      "claim": "KBO 경기 정보는 공식 일정 페이지에서 재확인해야 한다.",
+      "title": "KBO 공식 경기 일정",
+      "url": "https://www.koreabaseball.com/Schedule/GameCenter/Main.aspx",
+      "source_type": "공식",
+      "checked_at": "2026-09-29T08:00:00+09:00",
+      "published_at": "",
+      "local_time": "Asia/Seoul",
+      "korea_time": "Asia/Seoul",
+      "status": "검증 완료",
+      "rights_note": "링크와 텍스트 사실만 참조하며 이미지·로고는 재사용하지 않음"
+    },
+    {
+      "id": "S2",
+      "claim": "EPL 경기 일정은 공식 일정 페이지에서 현지 시각과 함께 확인한다.",
+      "title": "Premier League 공식 일정",
+      "url": "https://www.premierleague.com/en/matches",
+      "source_type": "공식",
+      "checked_at": "2026-09-29T08:00:00+09:00",
+      "published_at": "",
+      "local_time": "Europe/London",
+      "korea_time": "Asia/Seoul",
+      "status": "검증 완료",
+      "rights_note": "링크와 텍스트 사실만 참조하며 이미지·로고는 재사용하지 않음"
+    },
+    {
+      "id": "S3",
+      "claim": "NBA 경기 상태는 공식 경기 페이지에서 종료 여부를 확인해야 한다.",
+      "title": "NBA 공식 경기 일정",
+      "url": "https://www.nba.com/schedule",
+      "source_type": "공식",
+      "checked_at": "2026-09-29T08:00:00+09:00",
+      "published_at": "",
+      "local_time": "미국 현지 시간대",
+      "korea_time": "Asia/Seoul",
+      "status": "검증 완료",
+      "rights_note": "링크와 텍스트 사실만 참조하며 이미지·로고는 재사용하지 않음"
+    }
+  ],
+  "cards": [
+    {
+      "slide": 1,
+      "headline": "경기 전, 세 번 확인",
+      "body": "일정·발표·경기 상태를 따로 확인하면 성급한 속보와 잘못된 결과 표기를 줄일 수 있습니다.",
+      "source_ids": [
+        "S1"
+      ],
+      "visual_direction": "짙은 남색 배경에 세 개의 확인 표시를 자체 제작 도형으로 배치",
+      "alt_text": "짙은 남색 카드에 경기 전 세 번 확인이라는 제목과 일정, 발표, 상태 확인 안내가 적혀 있다."
+    },
+    {
+      "slide": 2,
+      "headline": "1. 공식 일정",
+      "body": "리그 공식 일정에서 경기 날짜와 시작 시각을 확인합니다. 캡처보다 원문 링크를 남깁니다.",
+      "source_ids": [
+        "S1"
+      ],
+      "visual_direction": "달력 모양을 단순 선과 숫자로 표현",
+      "alt_text": "공식 일정 원문 링크와 날짜, 시작 시각을 확인하라는 설명 카드다."
+    },
+    {
+      "slide": 3,
+      "headline": "2. 공식 발표",
+      "body": "선발, 부상, 등록 정보는 추측과 공식 발표를 구분합니다. 확정되지 않았다면 확인 중으로 표시합니다.",
+      "source_ids": [
+        "S1"
+      ],
+      "visual_direction": "확정과 확인 중을 대비하는 두 개의 텍스트 배지",
+      "alt_text": "공식 발표와 추측을 구분하고 미확정 정보는 확인 중으로 표시하라는 카드다."
+    },
+    {
+      "slide": 4,
+      "headline": "3. 경기 상태",
+      "body": "예정·진행 중·종료·연기·취소를 구분합니다. 진행 중 점수는 최종 결과로 쓰지 않습니다.",
+      "source_ids": [
+        "S1",
+        "S3"
+      ],
+      "visual_direction": "다섯 가지 상태를 원형 진행 표시로 표현",
+      "alt_text": "경기 상태 다섯 가지와 진행 중 점수를 최종 결과로 쓰지 말라는 안내 카드다."
+    },
+    {
+      "slide": 5,
+      "headline": "출처는 주장 옆에",
+      "body": "숫자·이름·소속·시간마다 출처 ID를 연결합니다. 출처가 충돌하면 자동 발행을 중단합니다.",
+      "source_ids": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "visual_direction": "주장과 출처를 선으로 연결한 자체 제작 다이어그램",
+      "alt_text": "각 주장과 출처 ID가 선으로 연결되고 출처 충돌 시 발행 중단이라고 적힌 카드다."
+    },
+    {
+      "slide": 6,
+      "headline": "마지막은 사람 승인",
+      "body": "종목 담당, 팩트체크·권리 담당, 편집장이 차례로 확인한 뒤에만 게시합니다.",
+      "source_ids": [],
+      "visual_direction": "세 역할의 체크박스를 순서대로 배치",
+      "alt_text": "종목 담당, 팩트체크와 권리 담당, 편집장의 세 단계 승인 체크박스가 있는 카드다."
+    }
+  ],
+  "caption": "스포츠 카드뉴스는 빠르기만 해서는 안 됩니다. 공식 일정, 공식 발표, 경기 상태를 각각 확인하고 모든 핵심 주장에 원문 링크를 연결하세요. 진행 중 경기는 최종 결과처럼 쓰지 않고, 출처가 충돌하면 제작을 멈춥니다. 이 샘플은 자동 생성 흐름을 보여 주는 데모이며 실제 발행 전에는 당일 정보로 교체하고 종목 담당·팩트체크 담당·편집장의 승인을 받아야 합니다.",
+  "hashtags": [
+    "#스포츠카드뉴스",
+    "#팩트체크",
+    "#KBO",
+    "#EPL",
+    "#NBA",
+    "#콘텐츠자동화"
+  ],
+  "design_brief": "외부 사진과 로고를 쓰지 않고 짙은 배경, 강조색, 큰 제목, 자체 제작 도형만 사용한다. 카드마다 주장 하나와 출처 ID를 표시한다.",
+  "rights_status": "자체 제작",
+  "risk_flags": [],
+  "approval_checklist": {
+    "sport_editor": [
+      "당일 공식 일정과 발표로 데모 문구를 교체했는가",
+      "경기 상태와 시즌 구분이 정확한가"
+    ],
+    "fact_rights": [
+      "모든 숫자와 고유명사가 원문과 일치하는가",
+      "외부 사진·영상·로고를 사용하지 않았는가"
+    ],
+    "editor_in_chief": [
+      "후보 비교와 선정 이유가 타당한가",
+      "게시 시점과 최종 문구를 승인했는가"
+    ]
+  }
+}
