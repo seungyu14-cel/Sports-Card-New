@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="description" content="사람 승인형 멀티스포츠 카드뉴스 제작 스튜디오" />
+    <title>Sports Card News Studio</title>
+    <link rel="stylesheet" href="/assets/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="#top" aria-label="스포츠 카드뉴스 스튜디오 홈">
+          <span class="brand-mark" aria-hidden="true">SC</span>
+          <span><strong>SPORTS CARD</strong><small>NEWS STUDIO</small></span>
+        </a>
+        <nav aria-label="주요 메뉴">
+          <a class="nav-link active" href="#create"><span>01</span>오늘의 제작</a>
+          <a class="nav-link" href="#settings"><span>02</span>API 설정</a>
+          <a class="nav-link" href="#archive"><span>03</span>생성 기록</a>
+        </nav>
+        <div class="sidebar-note">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          <p><strong>Human in the loop</strong>모든 결과는 게시 전 승인이 필요합니다.</p>
+        </div>
+      </aside>
+
+      <main id="top">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">MULTI-SPORT EDITORIAL SYSTEM</p>
+            <h1>오늘의 스포츠를<br /><em>한 장씩 정확하게.</em></h1>
+          </div>
+          <div class="system-status" id="system-status" aria-live="polite">
+            <span class="status-light"></span>
+            <span><small>SYSTEM</small><strong>확인 중</strong></span>
+          </div>
+        </header>
+
+        <section class="command-grid" id="create" aria-labelledby="create-title">
+          <article class="panel create-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="section-number">01 / DAILY EDITION</p>
+                <h2 id="create-title">카드뉴스 제작</h2>
+              </div>
+              <span class="approval-chip">게시 전 승인 필수</span>
+            </div>
+
+            <label class="date-field">
+              <span>편집일 · ASIA/SEOUL</span>
+              <input id="edition-date" type="date" required />
+            </label>
+
+            <div class="run-options">
+              <button class="run-card live" id="run-live" type="button">
+                <span class="run-index">A</span>
+                <span><strong>라이브 제작</strong><small>공식 출처 검색 · API 사용</small></span>
+                <span class="arrow" aria-hidden="true">→</span>
+              </button>
+              <button class="run-card demo" id="run-demo" type="button">
+                <span class="run-index">B</span>
+                <span><strong>데모 실행</strong><small>비용 없이 전체 흐름 확인</small></span>
+                <span class="arrow" aria-hidden="true">→</span>
+              </button>
+            </div>
+
+            <div class="job-box" id="job-box" hidden aria-live="polite">
+              <div class="job-head">
+                <span id="job-state">준비 중</span>
+                <strong id="job-percent">0%</strong>
+              </div>
+              <div class="progress-track"><span id="progress-bar"></span></div>
+              <p id="job-message">생성 작업을 준비하고 있습니다.</p>
+            </div>
+          </article>
+
+          <article class="panel workflow-panel">
+            <p class="section-number">WORKFLOW</p>
+            <h2>검증 게이트</h2>
+            <ol class="workflow-list">
+              <li><span>1</span><div><strong>후보 수집</strong><small>서로 다른 종목 3건 이상</small></div></li>
+              <li><span>2</span><div><strong>팩트 연결</strong><small>핵심 주장마다 원문 URL</small></div></li>
+              <li><span>3</span><div><strong>카드 제작</strong><small>5~6장 원고와 이미지</small></div></li>
+              <li><span>4</span><div><strong>사람 승인</strong><small>종목 · 권리 · 편집장 확인</small></div></li>
+            </ol>
+            <div class="league-row" aria-label="지원 리그">
+              <span>KBO</span><span>NPB</span><span>MLB</span><span>EPL</span><span>KBL</span><span>NBA</span>
+            </div>
+          </article>
+        </section>
+
+        <section class="settings-section" id="settings" aria-labelledby="settings-title">
+          <div class="section-intro">
+            <p class="section-number">02 / CONNECTION</p>
+            <h2 id="settings-title">OpenAI API 연결</h2>
+            <p>키는 이 컴퓨터의 <code>.env</code>에만 저장되며 화면과 GitHub에는 표시되지 않습니다.</p>
+          </div>
+          <form class="settings-form" id="settings-form">
+            <label>
+              <span>OPENAI API KEY</span>
+              <input id="api-key" type="password" minlength="20" placeholder="sk-••••••••••••••••" autocomplete="off" required />
+            </label>
+            <label>
+              <span>MODEL</span>
+              <input id="model-name" type="text" value="gpt-5.5" required />
+            </label>
+            <button class="primary-button" id="save-settings" type="submit">저장하고 연결 확인</button>
+          </form>
+          <p class="form-status" id="form-status" aria-live="polite"></p>
+        </section>
+
+        <section class="archive-section" id="archive" aria-labelledby="archive-title">
+          <div class="archive-heading">
+            <div>
+              <p class="section-number">03 / ARCHIVE</p>
+              <h2 id="archive-title">최근 생성 기록</h2>
+            </div>
+            <button class="text-button" id="refresh-editions" type="button">새로고침 ↻</button>
+          </div>
+          <div class="edition-grid" id="edition-grid">
+            <p class="empty-state">생성 기록을 불러오는 중입니다.</p>
+          </div>
+        </section>
+
+        <footer>
+          <p>SPORTS CARD NEWS STUDIO</p>
+          <p>AI 초안 · 공식 출처 · 사람 승인</p>
+        </footer>
+      </main>
+    </div>
+
+    <dialog id="edition-dialog">
+      <button class="dialog-close" id="dialog-close" aria-label="닫기" type="button">×</button>
+      <div id="dialog-content"></div>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+    <script src="/assets/app.js" defer></script>
+  </body>
+</html>

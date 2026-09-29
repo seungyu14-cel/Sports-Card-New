@@ -4,15 +4,17 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sports-card-news"
-version = "0.1.0"
+version = "0.2.0"
 description = "Human-approved multi-sport Instagram card-news automation"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 dependencies = [
+  "fastapi>=0.115,<1",
   "openai>=2.41.0,<3",
   "pillow>=11,<13",
   "pydantic>=2.10,<3",
+  "uvicorn>=0.34,<1",
 ]
 
 [project.optional-dependencies]
@@ -20,11 +22,17 @@ dev = ["pytest>=8,<10"]
 
 [project.scripts]
 sports-card-news = "sports_card_news.cli:main"
+sports-card-news-web = "sports_card_news.webapp:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/sports_card_news"]
 
+[tool.hatch.build]
+include = [
+  "src/sports_card_news/**/*.py",
+  "src/sports_card_news/web/**",
+]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
-
