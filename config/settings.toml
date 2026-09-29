@@ -3,8 +3,8 @@ model = "gpt-6-astra"
 reasoning_effort = "medium"
 cards_min = 5
 cards_max = 6
-caption_min_chars = 150
-caption_max_chars = 300
+caption_min_chars = 500
+caption_max_chars = 2000
 output_width = 1080
 output_height = 1350
 
