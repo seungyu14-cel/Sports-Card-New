@@ -22,9 +22,9 @@ Windows에서 [`start.bat`](start.bat)을 더블클릭합니다. 최초 실행�
 
 웹 화면에서 다음 순서로 사용합니다.
 
-1. [OpenRouter Keys](https://openrouter.ai/settings/keys)에서 키를 발급합니다.
-2. `OpenRouter API 연결`에 `sk-or-v1-...` 키를 입력하고 **저장하고 연결 확인**을 누릅니다.
-3. 기본 모델 `openai/gpt-5.2`를 그대로 사용하거나 원하는 OpenRouter 모델 ID로 바꿉니다.
+1. [OpenAI API Keys](https://platform.openai.com/api-keys)에서 프로젝트 키를 발급합니다.
+2. `OpenAI API 연결`에 `sk-proj-...` 키를 입력하고 **저장하고 연결 확인**을 누릅니다.
+3. 기본 모델 `gpt-5.5`를 그대로 사용하거나 계정에서 사용할 수 있는 OpenAI 모델 ID로 바꿉니다.
 4. 날짜를 선택하고 **라이브 제작**을 누릅니다.
 5. API 키 없이 확인하려면 **데모 실행**을 누릅니다.
 6. 생성된 카드, 캡션, 출처를 확인하고 사람 승인 후 게시합니다.
@@ -45,8 +45,8 @@ Python 3.11 이상이 필요합니다.
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 python -m pip install -e ".[dev]"
-$env:OPENROUTER_API_KEY="sk-or-v1-..."
-$env:OPENROUTER_MODEL="openai/gpt-5.2"
+$env:OPENAI_API_KEY="sk-proj-..."
+$env:OPENAI_MODEL="gpt-5.5"
 sports-card-news daily --date 2026-09-29
 ```
 
@@ -67,7 +67,7 @@ pytest
 ## GitHub 자동화 설정
 
 1. 이 프로젝트를 GitHub 저장소에 push합니다.
-2. 저장소의 `Settings → Secrets and variables → Actions`에서 `OPENROUTER_API_KEY` secret을 추가합니다.
+2. 저장소의 `Settings → Secrets and variables → Actions`에서 `OPENAI_API_KEY` secret을 추가합니다.
 3. `Actions` 탭에서 **Daily sports card news** 워크플로를 한 번 수동 실행해 권한과 결과를 확인합니다.
 4. 워크플로는 매일 오전 8시(Asia/Seoul, UTC 23:00)에 실행되어 새 Draft PR을 만듭니다.
 5. PR의 카드 이미지·출처·체크리스트를 사람이 검토하고 승인한 뒤 병합합니다.
@@ -89,11 +89,11 @@ pytest
 
 ## 구현 근거
 
-라이브 조사는 OpenRouter의 OpenAI 호환 Chat Completions API에 `openrouter:web_search` 서버 도구와 JSON Schema 구조화 출력을 적용합니다. 모델명은 환경 변수 `OPENROUTER_MODEL` 또는 웹 화면에서 교체할 수 있습니다.
+라이브 조사는 OpenAI Responses API에 `web_search` 도구와 Pydantic 구조화 출력을 적용합니다. 모델명은 환경 변수 `OPENAI_MODEL` 또는 웹 화면에서 교체할 수 있습니다.
 
-- [OpenRouter 빠른 시작](https://openrouter.ai/docs/quickstart)
-- [OpenRouter 웹 검색 서버 도구](https://openrouter.ai/docs/guides/features/server-tools/web-search)
-- [OpenRouter 구조화 출력](https://openrouter.ai/docs/guides/features/structured-outputs)
+- [OpenAI 웹 검색](https://developers.openai.com/api/docs/guides/tools-web-search)
+- [OpenAI 구조화 출력](https://developers.openai.com/api/docs/guides/structured-outputs)
+- [OpenAI 운영 환경 보안 지침](https://developers.openai.com/api/docs/guides/production-best-practices)
 - [운영안과 코드의 대응 관계](docs/architecture.md)
 
 ## 중요한 운영 원칙

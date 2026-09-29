@@ -94,17 +94,17 @@
         <section class="settings-section" id="settings" aria-labelledby="settings-title">
           <div class="section-intro">
             <p class="section-number">02 / CONNECTION</p>
-            <h2 id="settings-title">OpenRouter API 연결</h2>
+            <h2 id="settings-title">OpenAI API 연결</h2>
             <p>키는 이 컴퓨터의 <code>.env</code>에만 저장되며 화면과 GitHub에는 표시되지 않습니다.</p>
           </div>
           <form class="settings-form" id="settings-form">
             <label>
-              <span>OPENROUTER API KEY</span>
-              <input id="api-key" type="password" minlength="20" placeholder="sk-or-v1-••••••••••••" autocomplete="off" required />
+              <span>OPENAI API KEY</span>
+              <input id="api-key" type="password" minlength="20" placeholder="sk-proj-••••••••••••" autocomplete="off" required />
             </label>
             <label>
               <span>MODEL</span>
-              <input id="model-name" type="text" value="openai/gpt-5.2" placeholder="예: openai/gpt-5.2" required />
+              <input id="model-name" type="text" value="gpt-5.5" placeholder="예: gpt-5.5" required />
             </label>
             <button class="primary-button" id="save-settings" type="submit">저장하고 연결 확인</button>
           </form>

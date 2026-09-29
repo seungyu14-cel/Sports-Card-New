@@ -1,5 +1,5 @@
 timezone = "Asia/Seoul"
-model = "openai/gpt-5.2"
+model = "gpt-5.5"
 reasoning_effort = "medium"
 cards_min = 5
 cards_max = 6
