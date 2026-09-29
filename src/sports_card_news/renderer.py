@@ -9,23 +9,35 @@ from .config import Settings
 from .models import Card, DailyPackage
 
 
-PALETTES = {
-    "야구": ("#071E3D", "#21E6C1", "#278EA5"),
-    "축구": ("#102A13", "#A8FF3E", "#2F6B37"),
-    "농구": ("#2B1207", "#FF7A00", "#8A3210"),
-    "기타": ("#1C1538", "#C5A3FF", "#5A3D96"),
-}
+CANVAS = (1080, 1350)
+PAPER = "#F4F0E8"
+INK = "#111111"
+YELLOW = "#FFD63D"
+RED = "#E44236"
+MUTED = "#6B685F"
+HAIRLINE = "#C9C3B8"
+WHITE = "#FFFDF7"
 
 
 def render_package(package: DailyPackage, destination: str | Path, settings: Settings) -> list[Path]:
     output = Path(destination)
     output.mkdir(parents=True, exist_ok=True)
     selected = next(item for item in package.candidates if item.title == package.selected_candidate_title)
-    palette = PALETTES.get(selected.sport, PALETTES["기타"])
+    total_slides = len(package.cards)
     paths: list[Path] = []
+
     for card in package.cards:
         path = output / f"card-{card.slide:02d}.png"
-        _render_card(card, selected.sport, selected.league, palette, path, settings)
+        _render_card(
+            card=card,
+            sport=selected.sport,
+            league=selected.league,
+            game_status=str(selected.game_status),
+            edition_date=package.edition_date,
+            total_slides=total_slides,
+            path=path,
+            settings=settings,
+        )
         paths.append(path)
     return paths
 
@@ -34,62 +46,345 @@ def _render_card(
     card: Card,
     sport: str,
     league: str,
-    palette: tuple[str, str, str],
+    game_status: str,
+    edition_date: str,
+    total_slides: int,
     path: Path,
     settings: Settings,
 ) -> None:
-    width, height = settings.output_width, settings.output_height
-    background, accent, secondary = palette
-    image = Image.new("RGB", (width, height), background)
+    image = Image.new("RGB", CANVAS, PAPER)
     draw = ImageDraw.Draw(image)
-    _draw_gradient(draw, width, height, background, secondary)
+    fonts = _load_fonts()
 
-    font_path = _find_font()
-    small = ImageFont.truetype(font_path, 34)
-    label = ImageFont.truetype(font_path, 38)
-    headline_size, body_size = _fit_sizes(card)
-    headline = ImageFont.truetype(font_path, headline_size)
-    body = ImageFont.truetype(font_path, body_size)
-    marker = ImageFont.truetype(font_path, 150)
+    _draw_paper_texture(draw)
+    _draw_header(draw, fonts, edition_date, card.slide, total_slides)
 
-    draw.rounded_rectangle((70, 70, 390, 138), radius=34, fill=accent)
-    draw.text((100, 84), f"{sport}  ·  {league}", font=label, fill=background)
-    draw.text((850, 65), f"{card.slide:02d}", font=marker, fill=_with_alpha_color(accent, 0.35), anchor="ma")
+    if card.slide == 1:
+        _draw_cover(draw, fonts, card, sport, league, edition_date)
+    else:
+        _draw_story_card(draw, fonts, card, game_status)
 
-    headline_lines = _wrap_by_pixels(draw, card.headline, headline, width - 140)
-    headline_text = "\n".join(headline_lines)
-    draw.multiline_text((70, 300), headline_text, font=headline, fill="#FFFFFF", spacing=18)
-    headline_box = draw.multiline_textbbox((70, 300), headline_text, font=headline, spacing=18)
+    _draw_footer(draw, fonts, card)
 
-    rule_y = min(headline_box[3] + 55, 680)
-    draw.rounded_rectangle((70, rule_y, 330, rule_y + 12), radius=6, fill=accent)
-
-    body_lines = _wrap_by_pixels(draw, card.body, body, width - 140)
-    body_text = "\n".join(body_lines[:7])
-    draw.multiline_text((70, rule_y + 65), body_text, font=body, fill="#F2F5F8", spacing=20)
-
-    source_text = "출처  " + (" · ".join(card.source_ids) if card.source_ids else "검토 체크리스트 참조")
-    draw.text((70, height - 120), source_text, font=small, fill="#C7D1DB")
-    draw.text((width - 70, height - 120), "HUMAN REVIEW REQUIRED", font=small, fill=accent, anchor="ra")
-
+    if (settings.output_width, settings.output_height) != CANVAS:
+        image = image.resize((settings.output_width, settings.output_height), Image.Resampling.LANCZOS)
     image.save(path, format="PNG", optimize=True)
 
 
-def _draw_gradient(draw: ImageDraw.ImageDraw, width: int, height: int, top: str, bottom: str) -> None:
-    top_rgb = _hex_rgb(top)
-    bottom_rgb = _hex_rgb(bottom)
-    for y in range(height):
-        ratio = y / max(height - 1, 1)
-        rgb = tuple(round(a + (b - a) * ratio) for a, b in zip(top_rgb, bottom_rgb, strict=True))
-        draw.line((0, y, width, y), fill=rgb)
-    draw.ellipse((700, -220, 1240, 320), fill=_mix(_hex_rgb(top), _hex_rgb(bottom), 0.55))
-    draw.ellipse((-220, 1040, 300, 1560), fill=_mix(_hex_rgb(top), _hex_rgb(bottom), 0.7))
+def _load_fonts() -> dict[str, str]:
+    return {
+        "regular": _find_font("regular"),
+        "bold": _find_font("bold"),
+    }
 
 
-def _fit_sizes(card: Card) -> tuple[int, int]:
-    headline_size = 86 if len(card.headline) <= 22 else 72
-    body_size = 48 if len(card.body) <= 110 else 42
-    return headline_size, body_size
+def _font(fonts: dict[str, str], size: int, weight: str = "regular") -> ImageFont.FreeTypeFont:
+    return ImageFont.truetype(fonts[weight], size)
+
+
+def _draw_paper_texture(draw: ImageDraw.ImageDraw) -> None:
+    # Deterministic, very light paper grain keeps every automated render stable.
+    grain = (232, 227, 217)
+    light_grain = (248, 245, 238)
+    for index in range(1850):
+        x = (index * 73 + index * index * 17) % CANVAS[0]
+        y = (index * 151 + index * index * 11) % CANVAS[1]
+        draw.point((x, y), fill=grain if index % 3 else light_grain)
+
+
+def _draw_header(
+    draw: ImageDraw.ImageDraw,
+    fonts: dict[str, str],
+    edition_date: str,
+    slide: int,
+    total_slides: int,
+) -> None:
+    draw.line((70, 72, 1010, 72), fill=INK, width=3)
+    draw.text((70, 90), "SPORTS DESK", font=_font(fonts, 25, "bold"), fill=INK)
+    draw.text((285, 93), "/  DAILY EDITION", font=_font(fonts, 20), fill=MUTED)
+    draw.text(
+        (1010, 88),
+        f"{edition_date.replace('-', '.')}   |   {slide:02d} / {total_slides:02d}",
+        font=_font(fonts, 23),
+        fill=INK,
+        anchor="ra",
+    )
+    draw.line((70, 134, 1010, 134), fill=INK, width=2)
+
+
+def _draw_cover(
+    draw: ImageDraw.ImageDraw,
+    fonts: dict[str, str],
+    card: Card,
+    sport: str,
+    league: str,
+    edition_date: str,
+) -> None:
+    draw.text((70, 190), "DAILY SPORTS BRIEF", font=_font(fonts, 24, "bold"), fill=RED)
+    draw.rectangle((70, 229, 130, 237), fill=RED)
+
+    headline_font, headline_lines = _fit_text(
+        draw,
+        card.headline,
+        fonts["bold"],
+        max_width=655,
+        max_lines=3,
+        start_size=106,
+        minimum_size=72,
+    )
+    line_height = _line_height(headline_font, 18)
+    headline_y = 270
+    highlight_index = min(1, len(headline_lines) - 1)
+    highlight_top = headline_y + highlight_index * line_height + int(line_height * 0.56)
+    highlight_width = int(draw.textlength(headline_lines[highlight_index], font=headline_font)) + 24
+    draw.rectangle((58, highlight_top, 58 + highlight_width, highlight_top + 38), fill=YELLOW)
+    draw.multiline_text(
+        (70, headline_y),
+        "\n".join(headline_lines),
+        font=headline_font,
+        fill=INK,
+        spacing=18,
+    )
+
+    headline_bottom = headline_y + len(headline_lines) * line_height
+    body_font, body_lines = _fit_text(
+        draw,
+        card.body,
+        fonts["regular"],
+        max_width=650,
+        max_lines=4,
+        start_size=43,
+        minimum_size=35,
+    )
+    body_y = max(655, headline_bottom + 42)
+    draw.line((70, body_y - 24, 650, body_y - 24), fill=INK, width=3)
+    draw.multiline_text((70, body_y), "\n".join(body_lines), font=body_font, fill=INK, spacing=16)
+
+    _draw_field_notation(draw, fonts)
+    _draw_cover_facts(draw, fonts, sport, league, edition_date)
+
+
+def _draw_field_notation(draw: ImageDraw.ImageDraw, fonts: dict[str, str]) -> None:
+    left, top, right, bottom = 742, 275, 1010, 590
+    draw.rectangle((left, top, right, bottom), outline=INK, width=3)
+    middle_x = (left + right) // 2
+    middle_y = (top + bottom) // 2
+    draw.line((middle_x, top, middle_x, bottom), fill=INK, width=2)
+    draw.ellipse((middle_x - 43, middle_y - 43, middle_x + 43, middle_y + 43), outline=INK, width=2)
+    draw.arc((left - 48, middle_y - 82, left + 95, middle_y + 82), -90, 90, fill=INK, width=2)
+    draw.arc((right - 95, middle_y - 82, right + 48, middle_y + 82), 90, 270, fill=INK, width=2)
+
+    points = [(765, 550), (812, 500), (862, 429), (918, 375), (982, 335)]
+    for start, end in zip(points, points[1:], strict=False):
+        _draw_dashed_line(draw, start, end, INK, 3)
+    draw.ellipse((969, 322, 995, 348), fill=INK)
+    draw.text((1010, 610), "PLAY / DATA", font=_font(fonts, 18, "bold"), fill=MUTED, anchor="ra")
+    draw.rectangle((992, 643, 1010, 649), fill=RED)
+
+
+def _draw_cover_facts(
+    draw: ImageDraw.ImageDraw,
+    fonts: dict[str, str],
+    sport: str,
+    league: str,
+    edition_date: str,
+) -> None:
+    top, bottom = 1000, 1185
+    labels = (("SPORT", sport), ("LEAGUE", league), ("EDITION", edition_date[5:]), ("REVIEW", "REQUIRED"))
+    cell_width = 940 / len(labels)
+    draw.rectangle((70, top, 1010, bottom), outline=INK, width=3)
+    draw.rectangle((70, top, 1010, top + 52), fill=YELLOW)
+    for index, (label, value) in enumerate(labels):
+        left = round(70 + index * cell_width)
+        right = round(70 + (index + 1) * cell_width)
+        if index:
+            draw.line((left, top, left, bottom), fill=INK, width=2)
+        draw.text(((left + right) // 2, top + 13), label, font=_font(fonts, 20, "bold"), fill=INK, anchor="ma")
+        value_font, value_lines = _fit_text(
+            draw,
+            value,
+            fonts["bold"],
+            max_width=int(cell_width - 28),
+            max_lines=2,
+            start_size=35,
+            minimum_size=24,
+        )
+        draw.multiline_text(
+            ((left + right) // 2, top + 91),
+            "\n".join(value_lines),
+            font=value_font,
+            fill=INK,
+            spacing=4,
+            anchor="ma",
+            align="center",
+        )
+
+
+def _draw_story_card(
+    draw: ImageDraw.ImageDraw,
+    fonts: dict[str, str],
+    card: Card,
+    game_status: str,
+) -> None:
+    draw.text((70, 185), f"{card.slide - 1:02d}", font=_font(fonts, 108, "bold"), fill=INK)
+    draw.ellipse((202, 267, 220, 285), fill=RED)
+    draw.text((1010, 205), "ONE CARD / ONE CLAIM", font=_font(fonts, 19, "bold"), fill=MUTED, anchor="ra")
+
+    headline_font, headline_lines = _fit_text(
+        draw,
+        card.headline,
+        fonts["bold"],
+        max_width=940,
+        max_lines=2,
+        start_size=82,
+        minimum_size=58,
+    )
+    headline_y = 340
+    line_height = _line_height(headline_font, 14)
+    band_y = headline_y + min(1, len(headline_lines) - 1) * line_height + int(line_height * 0.58)
+    band_width = min(620, int(draw.textlength(headline_lines[-1], font=headline_font)) + 22)
+    draw.rectangle((58, band_y, 58 + band_width, band_y + 30), fill=YELLOW)
+    draw.multiline_text((70, headline_y), "\n".join(headline_lines), font=headline_font, fill=INK, spacing=14)
+
+    body_y = headline_y + len(headline_lines) * line_height + 55
+    body_font, body_lines = _fit_text(
+        draw,
+        card.body,
+        fonts["regular"],
+        max_width=900,
+        max_lines=4,
+        start_size=39,
+        minimum_size=31,
+    )
+    draw.multiline_text((70, body_y), "\n".join(body_lines), font=body_font, fill=INK, spacing=15)
+
+    panel_top = max(745, body_y + len(body_lines) * _line_height(body_font, 15) + 40)
+    panel_top = min(panel_top, 835)
+    if card.slide == 2:
+        _draw_schedule_module(draw, fonts, panel_top)
+    elif card.slide == 3:
+        _draw_official_module(draw, fonts, panel_top)
+    elif card.slide == 4:
+        _draw_status_module(draw, fonts, panel_top, game_status)
+    elif card.slide == 5:
+        _draw_sources_module(draw, fonts, panel_top, card.source_ids)
+    else:
+        _draw_approval_module(draw, fonts, panel_top)
+
+
+def _draw_schedule_module(draw: ImageDraw.ImageDraw, fonts: dict[str, str], top: int) -> None:
+    _panel(draw, top)
+    items = (("01", "공식 일정 확인"), ("02", "한국 시각 변환"), ("03", "원문 링크 저장"))
+    row_height = (1165 - top) // len(items)
+    for index, (number, label) in enumerate(items):
+        row_top = top + index * row_height
+        if index:
+            draw.line((70, row_top, 1010, row_top), fill=HAIRLINE, width=2)
+        draw.rectangle((70, row_top, 205, row_top + row_height), fill=YELLOW if index == 0 else WHITE)
+        draw.text((137, row_top + row_height // 2), number, font=_font(fonts, 37, "bold"), fill=INK, anchor="mm")
+        draw.text((250, row_top + row_height // 2), label, font=_font(fonts, 34, "bold"), fill=INK, anchor="lm")
+        draw.text((965, row_top + row_height // 2), "CHECK", font=_font(fonts, 18, "bold"), fill=RED, anchor="rm")
+
+
+def _draw_official_module(draw: ImageDraw.ImageDraw, fonts: dict[str, str], top: int) -> None:
+    _panel(draw, top)
+    middle = 540
+    draw.line((middle, top, middle, 1165), fill=INK, width=3)
+    draw.rectangle((70, top, middle, top + 70), fill=YELLOW)
+    draw.rectangle((middle, top, 1010, top + 70), fill=INK)
+    draw.text((305, top + 35), "공식 발표", font=_font(fonts, 30, "bold"), fill=INK, anchor="mm")
+    draw.text((775, top + 35), "확인 중", font=_font(fonts, 30, "bold"), fill=WHITE, anchor="mm")
+    checks = (("원문 링크", True), ("발표 시각", True), ("추측·보도", False))
+    for index, (label, verified) in enumerate(checks):
+        y = top + 125 + index * 83
+        draw.text((125, y), "●" if verified else "○", font=_font(fonts, 28, "bold"), fill=RED if verified else MUTED, anchor="lm")
+        draw.text((175, y), label, font=_font(fonts, 27), fill=INK, anchor="lm")
+        draw.text((610, y), "—", font=_font(fonts, 30, "bold"), fill=MUTED, anchor="lm")
+        draw.text((660, y), "확정 전 표기 금지", font=_font(fonts, 25), fill=INK, anchor="lm")
+
+
+def _draw_status_module(draw: ImageDraw.ImageDraw, fonts: dict[str, str], top: int, game_status: str) -> None:
+    statuses = ("예정", "진행 중", "종료", "연기", "취소")
+    card_width = 174
+    gap = 18
+    for index, status in enumerate(statuses):
+        left = 70 + index * (card_width + gap)
+        right = left + card_width
+        active = status == game_status
+        fill = YELLOW if active else WHITE
+        draw.rounded_rectangle((left, top, right, top + 265), radius=18, fill=fill, outline=INK, width=3)
+        draw.text((left + 18, top + 24), f"0{index + 1}", font=_font(fonts, 22, "bold"), fill=RED if active else MUTED)
+        draw.ellipse((left + 55, top + 79, left + 119, top + 143), outline=INK, width=5)
+        if active:
+            draw.ellipse((left + 76, top + 100, left + 98, top + 122), fill=INK)
+        draw.text((left + card_width // 2, top + 198), status, font=_font(fonts, 26, "bold"), fill=INK, anchor="ma")
+    draw.text((70, top + 305), "현재 상태를 확인한 뒤 최종 문구를 확정합니다.", font=_font(fonts, 24), fill=MUTED)
+
+
+def _draw_sources_module(
+    draw: ImageDraw.ImageDraw,
+    fonts: dict[str, str],
+    top: int,
+    source_ids: list[str],
+) -> None:
+    _panel(draw, top)
+    source_ids = source_ids or ["CHECK"]
+    center = (540, top + 188)
+    draw.rounded_rectangle((395, top + 128, 685, top + 248), radius=18, fill=INK)
+    draw.text(center, "핵심 주장", font=_font(fonts, 31, "bold"), fill=WHITE, anchor="mm")
+    count = len(source_ids)
+    for index, source_id in enumerate(source_ids):
+        x = round(175 + index * (730 / max(count - 1, 1))) if count > 1 else 540
+        y = top + 330
+        draw.line((center[0], center[1] + 60, x, y - 42), fill=RED, width=3)
+        draw.ellipse((x - 48, y - 48, x + 48, y + 48), fill=YELLOW, outline=INK, width=3)
+        draw.text((x, y), source_id, font=_font(fonts, 25, "bold"), fill=INK, anchor="mm")
+
+
+def _draw_approval_module(draw: ImageDraw.ImageDraw, fonts: dict[str, str], top: int) -> None:
+    _panel(draw, top)
+    roles = (("01", "종목 담당"), ("02", "팩트·권리"), ("03", "편집장"))
+    row_height = (1165 - top) // len(roles)
+    for index, (number, role) in enumerate(roles):
+        y = top + index * row_height
+        if index:
+            draw.line((70, y, 1010, y), fill=HAIRLINE, width=2)
+        draw.text((105, y + row_height // 2), number, font=_font(fonts, 27, "bold"), fill=RED, anchor="lm")
+        draw.text((210, y + row_height // 2), role, font=_font(fonts, 33, "bold"), fill=INK, anchor="lm")
+        box = (890, y + row_height // 2 - 26, 942, y + row_height // 2 + 26)
+        draw.rounded_rectangle(box, radius=7, outline=INK, width=3)
+        draw.text((865, y + row_height // 2), "승인", font=_font(fonts, 21, "bold"), fill=MUTED, anchor="rm")
+
+
+def _panel(draw: ImageDraw.ImageDraw, top: int) -> None:
+    draw.rounded_rectangle((70, top, 1010, 1165), radius=18, fill=WHITE, outline=INK, width=3)
+
+
+def _draw_footer(draw: ImageDraw.ImageDraw, fonts: dict[str, str], card: Card) -> None:
+    source_text = "SOURCE  " + (" · ".join(card.source_ids) if card.source_ids else "EDITORIAL CHECKLIST")
+    draw.line((70, 1232, 1010, 1232), fill=INK, width=2)
+    draw.text((70, 1267), source_text, font=_font(fonts, 21, "bold"), fill=MUTED)
+    draw.rectangle((793, 1259, 811, 1282), fill=RED)
+    draw.text((1010, 1267), "HUMAN REVIEW REQUIRED", font=_font(fonts, 20, "bold"), fill=INK, anchor="ra")
+
+
+def _fit_text(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    font_path: str,
+    max_width: int,
+    max_lines: int,
+    start_size: int,
+    minimum_size: int,
+) -> tuple[ImageFont.FreeTypeFont, list[str]]:
+    for size in range(start_size, minimum_size - 1, -2):
+        font = ImageFont.truetype(font_path, size)
+        lines = _wrap_by_pixels(draw, text, font, max_width)
+        if len(lines) <= max_lines:
+            return font, lines
+    font = ImageFont.truetype(font_path, minimum_size)
+    lines = _wrap_by_pixels(draw, text, font, max_width)
+    return font, lines[:max_lines]
 
 
 def _wrap_by_pixels(
@@ -101,47 +396,74 @@ def _wrap_by_pixels(
     lines: list[str] = []
     for paragraph in text.splitlines() or [text]:
         current = ""
-        tokens = paragraph.split(" ") if " " in paragraph else list(paragraph)
-        separator = " " if " " in paragraph else ""
-        for token in tokens:
-            candidate = token if not current else current + separator + token
-            if draw.textlength(candidate, font=font) <= max_width:
+        for character in paragraph:
+            candidate = current + character
+            if not current or draw.textlength(candidate, font=font) <= max_width:
                 current = candidate
-            else:
-                if current:
-                    lines.append(current)
-                current = token
+                continue
+            lines.append(current.rstrip())
+            current = character.lstrip()
         if current:
-            lines.append(current)
+            lines.append(current.rstrip())
     return lines or [""]
 
 
-def _find_font() -> str:
-    candidates = [
-        os.getenv("CARD_NEWS_FONT", ""),
+def _line_height(font: ImageFont.FreeTypeFont, spacing: int) -> int:
+    box = font.getbbox("가Ag")
+    return box[3] - box[1] + spacing
+
+
+def _draw_dashed_line(
+    draw: ImageDraw.ImageDraw,
+    start: tuple[int, int],
+    end: tuple[int, int],
+    fill: str,
+    width: int,
+) -> None:
+    x1, y1 = start
+    x2, y2 = end
+    segments = 10
+    for index in range(segments):
+        if index % 2:
+            continue
+        begin = index / segments
+        finish = (index + 1) / segments
+        draw.line(
+            (
+                round(x1 + (x2 - x1) * begin),
+                round(y1 + (y2 - y1) * begin),
+                round(x1 + (x2 - x1) * finish),
+                round(y1 + (y2 - y1) * finish),
+            ),
+            fill=fill,
+            width=width,
+        )
+
+
+def _find_font(weight: str = "regular") -> str:
+    custom = os.getenv("CARD_NEWS_FONT", "")
+    regular = [
+        custom,
         "C:/Windows/Fonts/malgun.ttf",
         "C:/Windows/Fonts/NotoSansKR-Regular.ttf",
         "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
         "/usr/share/fonts/truetype/noto/NotoSansKR-Regular.ttf",
+        "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttf",
         "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
     ]
-    for candidate in candidates:
+    bold = [
+        os.getenv("CARD_NEWS_BOLD_FONT", ""),
+        "C:/Windows/Fonts/malgunbd.ttf",
+        "C:/Windows/Fonts/NotoSansKR-Bold.ttf",
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
+        "/usr/share/fonts/truetype/noto/NotoSansKR-Bold.ttf",
+        "/usr/share/fonts/truetype/noto/NotoSansCJK-Bold.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+        *regular,
+    ]
+    for candidate in bold if weight == "bold" else regular:
         if candidate and Path(candidate).exists():
             return candidate
     raise FileNotFoundError(
         "한글 폰트를 찾지 못했습니다. CARD_NEWS_FONT 환경 변수에 TTF/TTC 경로를 지정하세요."
     )
-
-
-def _hex_rgb(value: str) -> tuple[int, int, int]:
-    value = value.lstrip("#")
-    return tuple(int(value[index : index + 2], 16) for index in (0, 2, 4))  # type: ignore[return-value]
-
-
-def _mix(left: tuple[int, int, int], right: tuple[int, int, int], ratio: float) -> tuple[int, int, int]:
-    return tuple(round(a * (1 - ratio) + b * ratio) for a, b in zip(left, right, strict=True))
-
-
-def _with_alpha_color(value: str, ratio: float) -> tuple[int, int, int]:
-    # RGB 캔버스에서는 투명도 대신 배경과 혼합한 색을 사용한다.
-    return _mix(_hex_rgb(value), (255, 255, 255), 1 - ratio)
