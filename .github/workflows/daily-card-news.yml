@@ -10,7 +10,7 @@ on:
         required: false
         type: string
       use_demo:
-        description: "OpenAI API 대신 데모 데이터 사용"
+        description: "OpenRouter API 대신 데모 데이터 사용"
         required: false
         default: false
         type: boolean
@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
       GH_TOKEN: ${{ github.token }}
       TZ: Asia/Seoul
 
@@ -69,8 +69,8 @@ jobs:
           if [[ "${{ inputs.use_demo }}" == "true" ]]; then
             sports-card-news daily --date "$edition_date" --fixture fixtures/demo_package.json
           else
-            if [[ -z "$OPENAI_API_KEY" ]]; then
-              echo "OPENAI_API_KEY repository secret is required." >&2
+            if [[ -z "$OPENROUTER_API_KEY" ]]; then
+              echo "OPENROUTER_API_KEY repository secret is required." >&2
               exit 1
             fi
             sports-card-news daily --date "$edition_date"
@@ -107,4 +107,3 @@ jobs:
             --head "${{ steps.commit.outputs.branch }}" \
             --title "[검토 필요] ${edition_date} 스포츠 카드뉴스" \
             --body-file "output/$edition_date/editorial-review.md"
-

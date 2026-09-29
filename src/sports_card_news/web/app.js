@@ -59,9 +59,9 @@ async function loadHealth() {
     if (health.api_key_configured) {
       elements.apiKey.placeholder = "저장된 키 사용 중 · 새 키 입력 시 교체";
       if (health.api_key_verified) {
-        setFormStatus("API 키가 로컬에 저장되었고 연결 확인을 통과했습니다.", "success");
+        setFormStatus("OpenRouter 키가 로컬에 저장되었고 연결 확인을 통과했습니다.", "success");
       } else {
-        setFormStatus("저장된 키의 연결 확인이 필요합니다. 새 키를 입력해 확인하세요.");
+        setFormStatus("저장된 OpenRouter 키의 연결 확인이 필요합니다. 새 키를 입력해 확인하세요.");
       }
     }
   } catch (error) {
@@ -84,7 +84,7 @@ async function saveSettings(event) {
     elements.apiKey.value = "";
     const result = await api("/api/settings/test", { method: "POST" });
     setFormStatus(result.message, "success");
-    showToast("API 연결이 완료되었습니다.");
+    showToast("OpenRouter 연결이 완료되었습니다.");
     await loadHealth();
   } catch (error) {
     const prefix = saved ? "키는 저장했지만 연결 확인에 실패했습니다" : "저장하지 못했습니다";

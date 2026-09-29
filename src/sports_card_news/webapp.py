@@ -14,13 +14,14 @@ from pathlib import Path
 from typing import Literal
 
 import uvicorn
+import httpx
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from openai import OpenAI
 from pydantic import BaseModel, Field, SecretStr
 
 from .config import Settings, load_settings
+from .openrouter import OPENROUTER_APP_TITLE, OPENROUTER_BASE_URL, OPENROUTER_SITE_URL
 from .pipeline import load_package, run_daily
 
 
@@ -68,7 +69,7 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
 
     app = FastAPI(
         title="Sports Card News Studio",
-        version="0.2.0",
+        version="0.3.0",
         docs_url=None,
         redoc_url=None,
         openapi_url=None,
@@ -113,7 +114,7 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
         current = _refresh_settings(app)
         return {
             "status": "ready",
-            "api_key_configured": bool(os.getenv("OPENAI_API_KEY")),
+            "api_key_configured": bool(os.getenv("OPENROUTER_API_KEY")),
             "api_key_verified": app.state.api_verified,
             "model": current.model,
             "timezone": current.timezone,
@@ -127,32 +128,36 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
         if len(api_key) < 20 or any(char.isspace() for char in api_key):
             raise HTTPException(status_code=422, detail="API 키 형식이 올바르지 않습니다.")
         model = payload.model.strip()
-        _save_local_env(env_path, {"OPENAI_API_KEY": api_key, "OPENAI_MODEL": model})
-        os.environ["OPENAI_API_KEY"] = api_key
-        os.environ["OPENAI_MODEL"] = model
+        _save_local_env(
+            env_path,
+            {"OPENROUTER_API_KEY": api_key, "OPENROUTER_MODEL": model},
+            remove={"OPENAI_API_KEY", "OPENAI_MODEL"},
+        )
+        os.environ["OPENROUTER_API_KEY"] = api_key
+        os.environ["OPENROUTER_MODEL"] = model
         current = _refresh_settings(app)
         app.state.api_verified = False
         return {"saved": True, "api_key_configured": True, "model": current.model}
 
     @app.post("/api/settings/test")
     async def test_settings() -> dict[str, object]:
-        key = os.getenv("OPENAI_API_KEY")
+        key = os.getenv("OPENROUTER_API_KEY")
         if not key:
             raise HTTPException(status_code=409, detail="먼저 API 키를 저장하세요.")
         try:
-            await asyncio.to_thread(_test_openai_connection, key)
+            await asyncio.to_thread(_test_openrouter_connection, key)
         except Exception as error:
             app.state.api_verified = False
             raise HTTPException(status_code=502, detail=_safe_error(error)) from error
         app.state.api_verified = True
-        return {"valid": True, "message": "OpenAI API 연결을 확인했습니다."}
+        return {"valid": True, "message": "OpenRouter API 연결을 확인했습니다."}
 
     @app.post("/api/jobs", status_code=202)
     async def create_job(payload: CreateJobRequest) -> dict[str, object]:
         if app.state.job_lock.locked():
             raise HTTPException(status_code=409, detail="이미 생성 작업이 진행 중입니다.")
-        if not payload.demo and not os.getenv("OPENAI_API_KEY"):
-            raise HTTPException(status_code=409, detail="라이브 생성 전에 OpenAI API 키를 저장하세요.")
+        if not payload.demo and not os.getenv("OPENROUTER_API_KEY"):
+            raise HTTPException(status_code=409, detail="라이브 생성 전에 OpenRouter API 키를 저장하세요.")
         if not payload.demo and not app.state.api_verified:
             raise HTTPException(status_code=409, detail="라이브 생성 전에 API 연결 확인을 완료하세요.")
         if payload.demo and not fixture_path.exists():
@@ -300,17 +305,24 @@ def _load_local_env(path: Path) -> None:
         if not line or line.startswith("#") or "=" not in line:
             continue
         key, value = line.split("=", 1)
-        if key.strip() in {"OPENAI_API_KEY", "OPENAI_MODEL", "CARD_NEWS_FONT"}:
+        if key.strip() in {"OPENROUTER_API_KEY", "OPENROUTER_MODEL", "CARD_NEWS_FONT"}:
             os.environ[key.strip()] = value.strip().strip('"').strip("'")
 
 
-def _save_local_env(path: Path, updates: dict[str, str]) -> None:
+def _save_local_env(
+    path: Path,
+    updates: dict[str, str],
+    *,
+    remove: set[str] | None = None,
+) -> None:
     values: dict[str, str] = {}
     if path.exists():
         for raw_line in path.read_text(encoding="utf-8").splitlines():
             if "=" in raw_line and not raw_line.lstrip().startswith("#"):
                 key, value = raw_line.split("=", 1)
                 values[key.strip()] = value.strip()
+    for key in remove or set():
+        values.pop(key, None)
     values.update(updates)
     content = "# 로컬 전용 비밀 설정. GitHub에 커밋하지 마세요.\n"
     content += "\n".join(f"{key}={value}" for key, value in values.items()) + "\n"
@@ -323,19 +335,31 @@ def _save_local_env(path: Path, updates: dict[str, str]) -> None:
         pass
 
 
-def _test_openai_connection(api_key: str) -> None:
-    client = OpenAI(api_key=api_key, timeout=20.0, max_retries=0)
-    client.models.list()
+def _test_openrouter_connection(api_key: str) -> None:
+    response = httpx.get(
+        f"{OPENROUTER_BASE_URL}/key",
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "HTTP-Referer": OPENROUTER_SITE_URL,
+            "X-OpenRouter-Title": OPENROUTER_APP_TITLE,
+        },
+        timeout=20.0,
+    )
+    response.raise_for_status()
+    payload = response.json()
+    if not isinstance(payload, dict) or not isinstance(payload.get("data"), dict):
+        raise RuntimeError("OpenRouter 키 확인 응답 형식이 올바르지 않습니다.")
 
 
 def _safe_error(error: Exception) -> str:
     message = str(error)
-    if "invalid_api_key" in message or "Incorrect API key" in message:
-        return "API 키가 유효하지 않습니다. OpenAI에서 발급한 새 키를 입력하세요."
-    configured_key = os.getenv("OPENAI_API_KEY")
+    lowered = message.lower()
+    if any(token in lowered for token in ("invalid_api_key", "incorrect api key", "user not found", "unauthorized")):
+        return "API 키가 유효하지 않습니다. OpenRouter에서 발급한 키를 입력하세요."
+    configured_key = os.getenv("OPENROUTER_API_KEY")
     if configured_key:
         message = message.replace(configured_key, "[REDACTED]")
-    message = re.sub(r"sk-[A-Za-z0-9_*\-\s]{8,}", "[REDACTED]", message)
+    message = re.sub(r"sk-(?:or-v1-)?[A-Za-z0-9_*\-\s]{8,}", "[REDACTED]", message)
     return message[:500] or error.__class__.__name__
 
 

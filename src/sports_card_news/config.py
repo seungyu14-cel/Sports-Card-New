@@ -34,7 +34,7 @@ def load_settings(path: str | Path = "config/settings.toml") -> Settings:
     sources = raw["sources"]
     return Settings(
         timezone=raw["timezone"],
-        model=os.getenv("OPENAI_MODEL", raw["model"]),
+        model=os.getenv("OPENROUTER_MODEL", raw["model"]),
         reasoning_effort=raw["reasoning_effort"],
         cards_min=raw["cards_min"],
         cards_max=raw["cards_max"],
