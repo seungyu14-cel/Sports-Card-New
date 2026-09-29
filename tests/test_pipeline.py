@@ -21,6 +21,7 @@ def test_demo_package_passes_validation() -> None:
     assert report.ok, report.errors
     assert len(package.cards) == 6
     assert len({candidate.sport for candidate in package.candidates}) == 3
+    assert 500 <= len(package.caption) <= 2000
 
 
 def test_daily_fixture_renders_png_and_review_files(tmp_path: Path) -> None:
