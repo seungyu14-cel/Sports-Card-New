@@ -114,7 +114,7 @@ class DailyPackage(StrictModel):
     selection_reason: str = Field(min_length=10, max_length=500)
     facts: list[FactSource] = Field(min_length=1)
     cards: list[Card] = Field(min_length=5, max_length=6)
-    caption: str = Field(min_length=150, max_length=300)
+    caption: str = Field(min_length=500, max_length=2000)
     hashtags: list[str] = Field(min_length=5, max_length=8)
     design_brief: str = Field(min_length=10, max_length=500)
     rights_status: RightsStatus
