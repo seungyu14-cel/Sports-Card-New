@@ -6,6 +6,7 @@ from pathlib import Path
 
 from sports_card_news.config import load_settings
 from sports_card_news.history import recent_publication_summary
+from sports_card_news.models import RightsStatus
 from sports_card_news.pipeline import load_package, run_daily
 from sports_card_news.validation import validate_package
 
@@ -46,6 +47,17 @@ def test_unknown_source_reference_is_blocked() -> None:
     assert any("S999" in error for error in report.errors)
 
 
+def test_rights_needs_review_is_warning_not_blocking() -> None:
+    settings = load_settings(ROOT / "config/settings.toml")
+    package = load_package(ROOT / "fixtures/demo_package.json")
+    needs_review = package.model_copy(update={"rights_status": RightsStatus.NEEDS_REVIEW})
+
+    report = validate_package(needs_review, settings)
+
+    assert report.ok, report.errors
+    assert any("시각 소재 권리가 '확인 필요'" in warning for warning in report.warnings)
+
+
 def test_recent_history_uses_only_prior_seven_days(tmp_path: Path) -> None:
     package = json.loads((ROOT / "fixtures/demo_package.json").read_text(encoding="utf-8"))
     for day in ("2026-09-20", "2026-09-27", "2026-09-29"):
@@ -57,4 +69,3 @@ def test_recent_history_uses_only_prior_seven_days(tmp_path: Path) -> None:
     assert "2026-09-27" in summary
     assert "2026-09-20" not in summary
     assert "2026-09-29" not in summary
-
