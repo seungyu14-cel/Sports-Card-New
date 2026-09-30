@@ -98,63 +98,6 @@
       "fan_interest": 3,
       "visual_potential": 3,
       "uniqueness": 3
-    },
-    {
-      "sport": "야구",
-      "league": "KBO",
-      "title": "데모: KBO 경기 결과 확인",
-      "summary": "KBO 공식 경기센터에서 종료된 경기의 최종 점수와 경기 상태를 함께 확인하는 두 번째 국내 야구 데모 이슈입니다.",
-      "game_status": "종료",
-      "importance": 4,
-      "korean_relevance": 5,
-      "source_reliability": 5,
-      "explainability": 5,
-      "freshness": 4,
-      "fan_interest": 4,
-      "visual_potential": 5,
-      "uniqueness": 4,
-      "source_ids": [
-        "S1"
-      ],
-      "caution": "실제 발행에서는 당일 종료 경기의 공식 결과로 교체합니다."
-    },
-    {
-      "sport": "축구",
-      "league": "EPL",
-      "title": "데모: EPL 공식 일정 변화",
-      "summary": "Premier League 공식 일정에서 경기 날짜와 시작 시각 변경 여부를 다시 확인하는 두 번째 EPL 데모 이슈입니다.",
-      "game_status": "예정",
-      "importance": 4,
-      "korean_relevance": 4,
-      "source_reliability": 5,
-      "explainability": 4,
-      "freshness": 4,
-      "fan_interest": 5,
-      "visual_potential": 4,
-      "uniqueness": 4,
-      "source_ids": [
-        "S2"
-      ],
-      "caution": "서머타임과 일정 변경 공지를 함께 확인해야 합니다."
-    },
-    {
-      "sport": "농구",
-      "league": "NBA",
-      "title": "데모: NBA 최종 결과 확인",
-      "summary": "NBA 공식 일정에서 종료 상태와 최종 점수를 구분해 확인하는 두 번째 NBA 데모 이슈입니다.",
-      "game_status": "종료",
-      "importance": 4,
-      "korean_relevance": 4,
-      "source_reliability": 5,
-      "explainability": 5,
-      "freshness": 4,
-      "fan_interest": 5,
-      "visual_potential": 5,
-      "uniqueness": 4,
-      "source_ids": [
-        "S3"
-      ],
-      "caution": "진행 중 점수와 종료 점수를 혼동하지 않습니다."
     }
   ],
   "selected_candidate_title": "데모: 경기 전 확인해야 할 세 가지",
@@ -246,8 +189,8 @@
       "slide": 1,
       "league": "COVER",
       "candidate_title": "",
-      "headline": "오늘의 스포츠\n8대 이슈",
-      "body": "KBO·KBL·NPB·EPL·NBA 다섯 카테고리에서 오늘 확인할 핵심 이슈 8개를 정리합니다.",
+      "headline": "오늘의 스포츠\n5대 이슈",
+      "body": "KBO·KBL·NPB·EPL·NBA 다섯 카테고리에서 오늘 확인할 핵심 이슈 5개를 정리합니다.",
       "source_ids": [
         "S1",
         "S2",
@@ -258,37 +201,37 @@
       "content_type": "auto",
       "kicker": "",
       "visual_template": "cover",
-      "visual_title": "5개 카테고리 · 8개 이슈",
+      "visual_title": "5개 카테고리 · 5개 이슈",
       "visual_items": [
         {
           "label": "KBO",
-          "value": "2개 이슈",
-          "note": "국내 야구"
+          "value": "메인 이슈",
+          "note": "2페이지"
         },
         {
           "label": "KBL",
-          "value": "1개 이슈",
-          "note": "국내 농구"
+          "value": "메인 이슈",
+          "note": "3페이지"
         },
         {
           "label": "NPB",
-          "value": "1개 이슈",
-          "note": "일본 야구"
+          "value": "메인 이슈",
+          "note": "4페이지"
         },
         {
           "label": "EPL",
-          "value": "2개 이슈",
-          "note": "유럽 축구"
+          "value": "메인 이슈",
+          "note": "5페이지"
         },
         {
           "label": "NBA",
-          "value": "2개 이슈",
-          "note": "미국 농구"
+          "value": "메인 이슈",
+          "note": "6페이지"
         }
       ],
-      "visual_direction": "다섯 카테고리와 여덟 이슈를 하나의 데일리 에디션으로 보여 주는 표지",
+      "visual_direction": "다섯 스포츠 카테고리의 대표 이슈를 하나의 데일리 에디션으로 보여 주는 표지",
       "asset_ids": [],
-      "alt_text": "KBO, KBL, NPB, EPL, NBA 다섯 카테고리에서 여덟 개 스포츠 이슈를 소개하는 표지다."
+      "alt_text": "KBO, KBL, NPB, EPL, NBA 다섯 카테고리에서 하나씩 고른 오늘의 다섯 스포츠 이슈를 소개하는 표지다."
     },
     {
       "slide": 2,
@@ -457,112 +400,10 @@
     },
     {
       "slide": 7,
-      "league": "KBO",
-      "candidate_title": "데모: KBO 경기 결과 확인",
-      "headline": "KBO 최종 결과",
-      "body": "종료된 KBO 경기는 공식 경기센터의 최종 점수와 종료 상태를 함께 확인해 결과형 카드로 전달합니다.",
-      "source_ids": [
-        "S1"
-      ],
-      "content_type": "match_result",
-      "kicker": "MAIN 06",
-      "visual_template": "match_result",
-      "visual_title": "최종 결과 확인",
-      "visual_items": [
-        {
-          "label": "HOME",
-          "value": "최종 점수",
-          "note": "공식 결과"
-        },
-        {
-          "label": "AWAY",
-          "value": "최종 점수",
-          "note": "공식 결과"
-        },
-        {
-          "label": "상태",
-          "value": "종료",
-          "note": "확정"
-        }
-      ],
-      "visual_direction": "두 팀 최종 결과와 종료 상태를 스코어보드 형태로 표현",
-      "asset_ids": [],
-      "alt_text": "KBO 종료 경기의 최종 점수와 종료 상태를 확인하는 결과형 카드다."
-    },
-    {
-      "slide": 8,
-      "league": "EPL",
-      "candidate_title": "데모: EPL 공식 일정 변화",
-      "headline": "EPL 일정 변경 체크",
-      "body": "Premier League 공식 일정에서 경기 날짜와 시작 시각의 변경 여부를 확인하고 한국 기준 날짜까지 다시 계산합니다.",
-      "source_ids": [
-        "S2"
-      ],
-      "content_type": "schedule",
-      "kicker": "MAIN 07",
-      "visual_template": "schedule",
-      "visual_title": "일정 변경 포인트",
-      "visual_items": [
-        {
-          "label": "날짜",
-          "value": "공식 일정",
-          "note": "변경 여부"
-        },
-        {
-          "label": "시각",
-          "value": "영국 현지",
-          "note": "공식 표기"
-        },
-        {
-          "label": "한국",
-          "value": "날짜 재계산",
-          "note": "시차 반영"
-        }
-      ],
-      "visual_direction": "변경된 일정 요소를 세 구역으로 나눠 보여 준다",
-      "asset_ids": [],
-      "alt_text": "EPL 경기 날짜와 시작 시각 변경 여부를 공식 일정에서 확인하는 카드다."
-    },
-    {
-      "slide": 9,
-      "league": "NBA",
-      "candidate_title": "데모: NBA 최종 결과 확인",
-      "headline": "NBA 종료 경기 확인",
-      "body": "NBA 공식 일정에서 종료 여부를 먼저 확인하고 종료된 경기만 최종 점수와 결과로 정리합니다.",
-      "source_ids": [
-        "S3"
-      ],
-      "content_type": "match_result",
-      "kicker": "MAIN 08",
-      "visual_template": "stat",
-      "visual_title": "NBA 결과 확정",
-      "visual_items": [
-        {
-          "label": "상태",
-          "value": "FINAL",
-          "note": "종료 확인"
-        },
-        {
-          "label": "점수",
-          "value": "최종 점수",
-          "note": "공식 페이지"
-        },
-        {
-          "label": "표현",
-          "value": "결과 확정",
-          "note": "진행 중 제외"
-        }
-      ],
-      "visual_direction": "종료 상태와 최종 점수를 큰 숫자 데이터로 표현",
-      "asset_ids": [],
-      "alt_text": "NBA 종료 경기만 최종 결과로 정리한다는 카드다."
-    },
-    {
-      "slide": 10,
       "league": "SUMMARY",
       "candidate_title": "",
       "headline": "오늘의 스포츠 한눈에",
-      "body": "다섯 카테고리에서 확인한 여덟 개 이슈를 한 장에 다시 모아 오늘의 핵심 흐름을 정리합니다.",
+      "body": "KBO·KBL·NPB·EPL·NBA에서 고른 오늘의 메인 이슈 5개를 한 장에 다시 모아 핵심 흐름을 정리합니다.",
       "source_ids": [
         "S1",
         "S2",
@@ -573,7 +414,7 @@
       "content_type": "summary",
       "kicker": "DAILY RECAP",
       "visual_template": "summary",
-      "visual_title": "8개 이슈 한눈 요약",
+      "visual_title": "5개 이슈 한눈 요약",
       "visual_items": [
         {
           "label": "KBO",
@@ -599,26 +440,11 @@
           "label": "NBA",
           "value": "진행 상태 구분",
           "note": "이슈 5"
-        },
-        {
-          "label": "KBO",
-          "value": "최종 결과 확인",
-          "note": "이슈 6"
-        },
-        {
-          "label": "EPL",
-          "value": "일정 변경 체크",
-          "note": "이슈 7"
-        },
-        {
-          "label": "NBA",
-          "value": "종료 경기 확정",
-          "note": "이슈 8"
         }
       ],
-      "visual_direction": "여덟 이슈를 2열 4행 요약 그리드로 정리",
+      "visual_direction": "다섯 카테고리의 메인 이슈를 한눈에 볼 수 있는 요약 그리드",
       "asset_ids": [],
-      "alt_text": "오늘 다섯 스포츠 카테고리의 여덟 개 주요 이슈를 한눈에 정리한 마무리 카드다."
+      "alt_text": "오늘 KBO, KBL, NPB, EPL, NBA에서 고른 다섯 개 주요 이슈를 한눈에 정리한 마무리 카드다."
     }
   ],
   "caption": "스포츠 카드뉴스는 빠르기만 해서는 안 됩니다. 공식 일정, 공식 발표, 경기 상태를 각각 확인하고 모든 핵심 주장에 원문 링크를 연결하세요. 진행 중 경기는 최종 결과처럼 쓰지 않고, 출처가 충돌하면 제작을 멈춥니다. 이 샘플은 자동 생성 흐름을 보여 주는 데모이며 실제 발행 전에는 당일 정보로 교체하고 종목 담당·팩트체크 담당·편집장의 승인을 받아야 합니다. 제작 과정에서는 경기 날짜와 시작 시각이 한국 표준시 기준인지 먼저 확인하고, 정규시즌·포스트시즌·친선경기처럼 대회의 성격도 분명하게 표시해야 합니다. 선수와 팀 이름은 공식 표기를 우선하며, 이적·부상·징계와 관련된 내용은 구단이나 리그의 공식 발표가 있는지 다시 확인합니다. 통계 수치는 집계 시점에 따라 달라질 수 있으므로 기준 경기와 조회 시각을 함께 기록하고, 서로 다른 매체의 숫자가 충돌하면 원문 데이터까지 추적합니다. 카드 한 장에는 핵심 주장 하나만 담아 독자가 사실과 해석을 쉽게 구분하도록 구성하며, 전망이나 분석은 확정된 결과처럼 표현하지 않습니다. 외부 사진과 로고를 사용할 때에는 라이선스와 사용 범위를 확인하고, 권리가 불분명하면 자체 제작한 도형과 텍스트 디자인으로 대체합니다. 완성된 카드와 캡션은 게시 전에 맞춤법, 숫자, 링크, 경기 상태, 인물 표기, 이미지 권리를 차례로 점검합니다. 마지막으로 담당자가 모든 체크리스트를 확인하고 승인한 뒤에만 게시하며, 게시 후 공식 발표가 바뀌거나 오류가 발견되면 수정 이력을 남기고 신속하게 정정합니다.",
@@ -631,7 +457,7 @@
     "#NBA",
     "#데일리이슈"
   ],
-  "design_brief": "따뜻한 아이보리 지면과 검정 타이포그래피, 옐로·레드 포인트를 유지한다. 2~9번은 다섯 카테고리의 서로 다른 8개 이슈를 스포츠 전용 템플릿으로 보여 주고 10번은 8개 이슈를 2열 요약 그리드로 정리한다. 라이브 생성에서는 검증된 원문 페이지의 대표 이미지를 자동 연결할 수 있다.",
+  "design_brief": "표지 1장, KBO·KBL·NPB·EPL·NBA 메인 이슈 각 1장, 마무리 요약 1장으로 총 7장을 구성한다. 뉴스 이미지는 검증된 원문 페이지에서 연결하고, 실패하면 데이터 그래픽으로 대체한다.",
   "rights_status": "자체 제작",
   "risk_flags": [],
   "approval_checklist": {

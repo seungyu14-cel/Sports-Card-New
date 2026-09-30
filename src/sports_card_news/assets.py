@@ -59,7 +59,7 @@ def attach_verified_news_images(
     updated_cards = list(package.cards)
 
     headers = {
-        "User-Agent": "Mozilla/5.0 (compatible; SportsCardNews/1.1; +https://github.com/)"
+        "User-Agent": "Mozilla/5.0 (compatible; SportsCardNews/1.2; +https://github.com/)"
     }
     try:
         client = httpx.Client(
@@ -72,7 +72,7 @@ def attach_verified_news_images(
 
     with client:
         for index, card in enumerate(updated_cards):
-            if not 2 <= card.slide <= 9 or card.asset_ids:
+            if not 2 <= card.slide <= 6 or card.asset_ids:
                 continue
 
             chosen_asset: VisualAsset | None = None

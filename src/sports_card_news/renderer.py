@@ -34,7 +34,7 @@ def render_package(package: DailyPackage, destination: str | Path, settings: Set
     candidates_by_title = {item.title: item for item in package.candidates}
     facts_by_id = {item.id: item for item in package.facts}
     assets_by_id = {item.id: item for item in package.assets}
-    issue_cards = package.cards[1:9]
+    issue_cards = package.cards[1:6]
     total_slides = len(package.cards)
     paths: list[Path] = []
 
@@ -509,7 +509,7 @@ def _draw_news_image_module(
     settings: Settings,
 ) -> bool:
     try:
-        headers = {"User-Agent": "Mozilla/5.0 (compatible; SportsCardNews/1.1)"}
+        headers = {"User-Agent": "Mozilla/5.0 (compatible; SportsCardNews/1.2)"}
         if source_page_url:
             headers["Referer"] = source_page_url
         response = httpx.get(

@@ -1,8 +1,8 @@
 timezone = "Asia/Seoul"
 model = "gpt-6-astra"
 reasoning_effort = "medium"
-cards_min = 10
-cards_max = 10
+cards_min = 7
+cards_max = 7
 caption_min_chars = 500
 caption_max_chars = 2000
 output_width = 1080
@@ -14,9 +14,9 @@ api_timeout_seconds = 120
 [editorial]
 leagues = ["KBO", "KBL", "NPB", "EPL", "NBA"]
 candidate_sports_min = 3
-candidate_pool_target = 16
+candidate_pool_target = 10
 min_distinct_story_leagues = 5
-max_cards_per_league = 2
+max_cards_per_league = 1
 visual_repeat_limit = 2
 recent_days = 7
 analytics_days = 30

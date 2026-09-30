@@ -195,7 +195,7 @@ def _request_model(
         "instructions": instructions,
         "input": prompt,
         "text_format": output_type,
-        "max_output_tokens": 24000,
+        "max_output_tokens": 16000,
         "store": False,
     }
     if require_web:
