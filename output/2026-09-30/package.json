@@ -1,0 +1,276 @@
+{
+  "approval_notice": "게시 전 사람 승인 필요",
+  "needs_human_approval": true,
+  "edition_date": "2026-09-30",
+  "generated_at": "2026-09-30T10:46:06+09:00",
+  "candidates": [
+    {
+      "sport": "야구",
+      "league": "KBO",
+      "title": "가을야구 극장 관람, 홈·원정 응원석 나눠 예매한다",
+      "summary": "포스트시즌 전 경기 극장 생중계와 응원석 구분 운영 계획을 확인했다. ([koreabaseball.com](https://www.koreabaseball.com/MediaNews/Notice/View.aspx?bdSe=12170))",
+      "game_status": "예정",
+      "importance": 3,
+      "korean_relevance": 5,
+      "source_reliability": 5,
+      "explainability": 5,
+      "source_ids": [
+        "S1",
+        "S2"
+      ],
+      "caution": "경기 결과가 아닌 관람 서비스 발표다. 예매 개시·가격·상영관별 운영은 별도 확인해야 한다."
+    },
+    {
+      "sport": "야구",
+      "league": "MLB",
+      "title": "애틀랜타, 와일드카드 첫판 승리",
+      "summary": "필라델피아에 5-3 승리. ([mlb.com](https://www.mlb.com/gameday/phillies-vs-braves/2026/09/29/849845/final/wrap))",
+      "game_status": "종료",
+      "importance": 5,
+      "korean_relevance": 3,
+      "source_reliability": 5,
+      "explainability": 3,
+      "source_ids": [
+        "S7"
+      ],
+      "caution": "이 경기만 종료로 분류한다. 다른 경기나 시리즈 전체의 종료를 뜻하지 않는다."
+    },
+    {
+      "sport": "농구",
+      "league": "NBA",
+      "title": "새 시즌 판정 강조점, 밀어내기와 이동의 자유",
+      "summary": "현지 9월 29일 공개된 공식 안내는 공격자의 반대팔 밀어내기, 스크린 상황과 외곽·포스트에서의 이동의 자유 등을 다룬다. ([official.nba.com](https://official.nba.com/2026-27-points-of-emphasis/))",
+      "game_status": "확인 중",
+      "importance": 3,
+      "korean_relevance": 3,
+      "source_reliability": 5,
+      "explainability": 5,
+      "source_ids": [
+        "S5"
+      ],
+      "caution": "경기가 아닌 판정 안내 발표이므로 경기 상태는 적용 대상이 아니다. 새 규칙 도입으로 단정하지 않으며, 세부 사례는 원본 영상 확인이 필요하다."
+    },
+    {
+      "sport": "축구",
+      "league": "EPL",
+      "title": "국가대표 휴식기 뒤 EPL, 한국시간 10월 10일 재개 예정",
+      "summary": "공식 일정의 다음 리그 경기는 아스널-리즈전으로, 영국 10월 10일 12시 30분·한국 20시 30분 예정이다. 리그는 9~10월에 걸친 확대된 국가대표 경기 기간을 설명했다. ([premierleague.com](https://www.premierleague.com/en/news/4675097/all-380-fixtures-for-202627-premier-league-season))",
+      "game_status": "예정",
+      "importance": 3,
+      "korean_relevance": 4,
+      "source_reliability": 5,
+      "explainability": 4,
+      "source_ids": [
+        "S3",
+        "S4"
+      ],
+      "caution": "새 발표가 아니라 오늘 재확인한 기존 공식 일정이다. 편성 변경 가능성이 있다."
+    },
+    {
+      "sport": "야구",
+      "league": "NPB",
+      "title": "오늘 저녁 NPB, 한신-야쿠르트·라쿠텐-롯데 예정",
+      "summary": "9월 30일 두 경기가 일본·한국시간 모두 18시에 편성돼 있다. ([npb.jp](https://npb.jp/games/2026/schedule_09_detail.html))",
+      "game_status": "예정",
+      "importance": 2,
+      "korean_relevance": 2,
+      "source_reliability": 5,
+      "explainability": 2,
+      "source_ids": [
+        "S6"
+      ],
+      "caution": "조회 시점에는 경기 전이다. 개최 여부를 다시 확인하고 순위 결정 효과는 별도 검증 없이 붙이지 않는다."
+    }
+  ],
+  "selected_candidate_title": "가을야구 극장 관람, 홈·원정 응원석 나눠 예매한다",
+  "selection_reason": "각 항목은 1점이 낮음, 5점이 높음인 편집 평가다. 단순 합계는 KBO 18점, EPL 16점, NBA 16점, MLB 16점, NPB 11점이다. MLB 첫판 결과의 경기적 중요도는 가장 높게 평가했지만, 이번 게시물은 국내 독자가 실제 관람 계획에 활용할 수 있는 설명 가치를 우선했다. KBO와 운영사 양쪽에서 핵심 내용을 확인할 수 있어 확정 발표와 미확인 예매 조건도 명확히 나눌 수 있다. 최근 승인 이력이 없으므로 반복 감점이나 종목 균형 가산점은 적용하지 않았다. 선정안은 당일 발생 속보가 아니라 9월 28일 발표를 9월 30일 재확인한 생활형 스포츠 정보다. ([koreabaseball.com](https://www.koreabaseball.com/MediaNews/Notice/View.aspx?bdSe=12170))",
+  "facts": [
+    {
+      "id": "S1",
+      "claim": "포스트시즌 전 경기 극장 생중계, 3면 스크린, 응원석 구분, 용산아이파크몰 포함 및 예매 안내 경로를 발표했다. ([koreabaseball.com](https://www.koreabaseball.com/MediaNews/Notice/View.aspx?bdSe=12170))",
+      "title": "KBO·CGV, 2026 포스트시즌 전 경기 극장 생중계 발표",
+      "url": "https://www.koreabaseball.com/MediaNews/Notice/View.aspx?bdSe=12170",
+      "source_type": "공식",
+      "checked_at": "2026-09-30T10:46:06+09:00",
+      "published_at": "2026-09-28, 게시 시각 미표기",
+      "local_time": "대한민국 발표, 세부 상영 시각 미표기",
+      "korea_time": "2026-09-28 발표(Asia/Seoul), 세부 상영 시각 미표기",
+      "status": "검증 완료",
+      "rights_note": "사실을 재서술한다. 첨부 홍보 이미지·로고·보도자료 화면은 사용하지 않는다."
+    },
+    {
+      "id": "S2",
+      "claim": "운영사도 전 경기 생중계와 좌우 홈·원정 응원석 운영, 3면 영상 및 앱 안내를 확인했다. ([cjnews.cj.net](https://cjnews.cj.net/cgv-2026-kbo-%ED%8F%AC%EC%8A%A4%ED%8A%B8%EC%8B%9C%EC%A6%8C-%EC%A0%84-%EA%B2%BD%EA%B8%B0-screenx-%EC%83%9D%EC%A4%91%EA%B3%84/))",
+      "title": "CGV, 2026 KBO 포스트시즌 전 경기 스크린엑스 생중계",
+      "url": "https://cjnews.cj.net/cgv-2026-kbo-%ED%8F%AC%EC%8A%A4%ED%8A%B8%EC%8B%9C%EC%A6%8C-%EC%A0%84-%EA%B2%BD%EA%B8%B0-screenx-%EC%83%9D%EC%A4%91%EA%B3%84/",
+      "source_type": "1차 자료",
+      "checked_at": "2026-09-30T10:46:06+09:00",
+      "published_at": "2026-09-28, 게시 시각 미표기",
+      "local_time": "대한민국 발표, 세부 상영 시각 미표기",
+      "korea_time": "2026-09-28 발표(Asia/Seoul), 세부 상영 시각 미표기",
+      "status": "검증 완료",
+      "rights_note": "운영사 발표는 서비스 확인용이다. 홍보 사진과 브랜드 디자인의 사용 허가를 의미하지 않는다."
+    },
+    {
+      "id": "S3",
+      "claim": "공식 일정에는 9월 20일 다음 리그 경기일이 10월 10일이며, 아스널-리즈전이 영국시간 12시 30분으로 기재돼 있다. ([premierleague.com](https://www.premierleague.com/en/news/4675097/all-380-fixtures-for-202627-premier-league-season))",
+      "title": "2026-27 프리미어리그 전체 경기 일정",
+      "url": "https://www.premierleague.com/en/news/4675097/all-380-fixtures-for-202627-premier-league-season",
+      "source_type": "공식",
+      "checked_at": "2026-09-30T10:46:06+09:00",
+      "published_at": "2026-06-19, 최근 수정 시각 미표기",
+      "local_time": "2026-10-10T12:30:00+01:00",
+      "korea_time": "2026-10-10T20:30:00+09:00",
+      "status": "검증 완료",
+      "rights_note": "필요한 일정만 재서술하며 공식 일정표 이미지와 구단 문장은 복제하지 않는다."
+    },
+    {
+      "id": "S4",
+      "claim": "리그는 첫 국가대표 휴식기에 네 경기가 배정돼 9월과 10월에 걸친 확대된 기간이 마련됐다고 설명했다. ([premierleague.com](https://www.premierleague.com/es/news/4324541))",
+      "title": "2026-27 프리미어리그 일정은 어떻게 편성되는가",
+      "url": "https://www.premierleague.com/es/news/4324541",
+      "source_type": "공식",
+      "checked_at": "2026-09-30T10:46:06+09:00",
+      "published_at": "2026-06-18, 게시 시각 미표기",
+      "local_time": "2026년 9~10월, 개별 경기 시각 미표기",
+      "korea_time": "2026년 9~10월 해당 기간, 개별 한국시간 환산 대상 없음",
+      "status": "검증 완료",
+      "rights_note": "일정 편성 원리만 요약하고 본문·사진을 전재하지 않는다."
+    },
+    {
+      "id": "S5",
+      "claim": "2026-27 판정 강조점 안내가 공격자의 반대팔 밀어내기와 스크린·외곽·포스트에서의 이동의 자유 등을 다룬다. ([official.nba.com](https://official.nba.com/2026-27-points-of-emphasis/))",
+      "title": "NBA 2026-27 시즌 판정 강조점",
+      "url": "https://official.nba.com/2026-27-points-of-emphasis/",
+      "source_type": "공식",
+      "checked_at": "2026-09-30T10:46:06+09:00",
+      "published_at": "2026-09-29, 게시 시각·시간대 미표기",
+      "local_time": "원문 게시일 2026-09-29, 정확한 시각 미표기",
+      "korea_time": "게시 순간 환산 불가; 2026-09-30 10:46:06(Asia/Seoul) 조회",
+      "status": "검증 완료",
+      "rights_note": "공개 페이지의 설명 범위만 요약한다. 판정 사례 영상·캡처는 사용하지 않는다."
+    },
+    {
+      "id": "S6",
+      "claim": "9월 30일 한신-야쿠르트와 라쿠텐-롯데가 각각 18시 경기로 기재돼 있다. ([npb.jp](https://npb.jp/games/2026/schedule_09_detail.html))",
+      "title": "NPB 2026년 9월 경기 일정·결과",
+      "url": "https://npb.jp/games/2026/schedule_09_detail.html",
+      "source_type": "공식",
+      "checked_at": "2026-09-30T10:46:06+09:00",
+      "published_at": "상시 갱신 페이지, 게시·수정 시각 미표기",
+      "local_time": "2026-09-30T18:00:00+09:00(일본)",
+      "korea_time": "2026-09-30T18:00:00+09:00(Asia/Seoul)",
+      "status": "검증 완료",
+      "rights_note": "일정 사실만 최소한으로 재서술한다. 표·사진·날씨 아이콘은 복제하지 않는다."
+    },
+    {
+      "id": "S7",
+      "claim": "애틀랜타 5-3 승리 확정. ([mlb.com](https://www.mlb.com/gameday/phillies-vs-braves/2026/09/29/849845/final/wrap))",
+      "title": "필라델피아-애틀랜타 최종 결과",
+      "url": "https://www.mlb.com/gameday/phillies-vs-braves/2026/09/29/849845/final/wrap",
+      "source_type": "공식",
+      "checked_at": "2026-09-30T10:46:06+09:00",
+      "published_at": "경기 결과 페이지, 게시 시각 미표기",
+      "local_time": "경기일 2026-09-29, 개시 시각은 본 자료에서 미확인",
+      "korea_time": "2026-09-30 10:46:06(Asia/Seoul) 종료 결과 확인",
+      "status": "검증 완료",
+      "rights_note": "점수 사실만 이용하며 경기 영상·사진·중계 그래픽은 사용하지 않는다."
+    }
+  ],
+  "cards": [
+    {
+      "slide": 1,
+      "headline": "가을야구, 극장에서도 전 경기",
+      "body": "KBO·CGV가 2026 포스트시즌 전 경기 극장 생중계를 발표했습니다. ([koreabaseball.com](https://www.koreabaseball.com/MediaNews/Notice/View.aspx?bdSe=12170))",
+      "source_ids": [
+        "S1"
+      ],
+      "visual_direction": "직접 그린 사각 스크린과 야구공 원형 도형. 하단에 ‘9월 28일 발표·9월 30일 확인’.",
+      "alt_text": "포스트시즌 전 경기 극장 생중계 발표를 알리는 텍스트 카드."
+    },
+    {
+      "slide": 2,
+      "headline": "화면은 정면에서 양옆까지",
+      "body": "스크린엑스 라이브는 정면과 좌우를 활용하는 3면 영상 방식입니다. ([cjnews.cj.net](https://cjnews.cj.net/cgv-2026-kbo-%ED%8F%AC%EC%8A%A4%ED%8A%B8%EC%8B%9C%EC%A6%8C-%EC%A0%84-%EA%B2%BD%EA%B8%B0-screenx-%EC%83%9D%EC%A4%91%EA%B3%84/))",
+      "source_ids": [
+        "S2"
+      ],
+      "visual_direction": "세 개의 사각형으로 화면 구성을 추상적으로 표현. 실제 상영관 사진이나 공식 디자인은 사용하지 않는다.",
+      "alt_text": "정면과 좌우 화면을 세 사각형으로 나타낸 개념도."
+    },
+    {
+      "slide": 3,
+      "headline": "응원석도 홈·원정 구분",
+      "body": "상영관 좌우 좌석을 홈팀·원정팀 응원석으로 나눠 예매하도록 운영할 예정입니다. ([cjnews.cj.net](https://cjnews.cj.net/cgv-2026-kbo-%ED%8F%AC%EC%8A%A4%ED%8A%B8%EC%8B%9C%EC%A6%8C-%EC%A0%84-%EA%B2%BD%EA%B8%B0-screenx-%EC%83%9D%EC%A4%91%EA%B3%84/))",
+      "source_ids": [
+        "S2"
+      ],
+      "visual_direction": "동일한 크기의 두 좌석 묶음에 ‘홈 응원’·‘원정 응원’ 표시. ‘개념도·실제 배치 아님’을 명시한다.",
+      "alt_text": "홈팀과 원정팀 응원석 구분 운영을 설명하는 좌석 개념도."
+    },
+    {
+      "slide": 4,
+      "headline": "상영 장소, 용산도 포함",
+      "body": "KBO는 용산아이파크몰을 포함한 국내 주요 CGV 극장에서 상영한다고 안내했습니다. ([koreabaseball.com](https://www.koreabaseball.com/MediaNews/Notice/View.aspx?bdSe=12170))",
+      "source_ids": [
+        "S1"
+      ],
+      "visual_direction": "자체 제작 위치 핀 도형과 극장명 텍스트만 배치. 전국 모든 지점이 참여하는 듯한 지도는 쓰지 않는다.",
+      "alt_text": "발표된 상영 장소 중 용산아이파크몰을 소개하는 카드."
+    },
+    {
+      "slide": 5,
+      "headline": "예매 일정은 공식 안내에서",
+      "body": "예매 일정 확인 경로는 CGV 홈페이지·앱 이벤트 페이지와 KBO 공식 소셜미디어입니다. ([koreabaseball.com](https://www.koreabaseball.com/MediaNews/Notice/View.aspx?bdSe=12170))",
+      "source_ids": [
+        "S1"
+      ],
+      "visual_direction": "직접 그린 휴대전화 윤곽에 확인 경로를 텍스트로 기재. 예약 버튼·가격·개시 시각을 임의로 넣지 않는다.",
+      "alt_text": "극장 생중계 예매 일정의 공식 확인 경로를 안내하는 카드."
+    }
+  ],
+  "caption": "가을야구를 어디서 함께 볼지 고민하고 있다면, 극장 관람 계획도 확인해 보세요. KBO와 CGV는 9월 28일, 2026 KBO 포스트시즌 전 경기를 극장에서 생중계한다고 발표했습니다. 오늘 새로 나온 속보가 아니라, 9월 30일 오전에 다시 확인한 공식 발표입니다. ([koreabaseball.com](https://www.koreabaseball.com/MediaNews/Notice/View.aspx?bdSe=12170))\n\n이번 안내에서 눈여겨볼 부분은 응원석입니다. 운영사는 상영관 좌우를 홈팀과 원정팀 응원석으로 구분해 예매하도록 운영할 계획이라고 밝혔습니다. 스크린엑스 라이브는 정면뿐 아니라 양옆까지 활용하는 3면 영상 방식입니다. ([cjnews.cj.net](https://cjnews.cj.net/cgv-2026-kbo-%ED%8F%AC%EC%8A%A4%ED%8A%B8%EC%8B%9C%EC%A6%8C-%EC%A0%84-%EA%B2%BD%EA%B8%B0-screenx-%EC%83%9D%EC%A4%91%EA%B3%84/))\n\n상영 장소에는 용산아이파크몰 등 국내 주요 CGV 극장이 포함됩니다. 예매 일정은 CGV 홈페이지·앱의 이벤트 페이지와 KBO 공식 소셜미디어에서 확인하도록 안내됐습니다. ‘전 경기 상영’과 ‘모든 지점에서 상영’은 같은 뜻이 아니므로, 방문할 지점의 실제 회차를 확인해 주세요. ([koreabaseball.com](https://www.koreabaseball.com/MediaNews/Notice/View.aspx?bdSe=12170))\n\n편집 메모: 이 게시물은 예매가 이미 열렸다는 안내가 아닙니다. 가격, 지점별 좌석 배치, 취소 조건과 시작 시각은 실제 예매 화면에서 다시 확인하는 것을 권합니다. 카드의 좌석 그림도 실제 배치도가 아닌 설명용 개념도입니다. 여러분은 집·야구장·극장 중 어디에서 응원하고 싶나요?",
+  "hashtags": [
+    "#프로야구",
+    "#가을야구",
+    "#포스트시즌",
+    "#야구관람",
+    "#극장생중계",
+    "#스포츠소식"
+  ],
+  "design_brief": "1080×1350 세로형 카드 5장. 짙은 남색 배경, 흰 본문, 노란 강조색으로 통일한다. 카드당 핵심 주장 하나만 배치하고 출처 번호와 ‘2026-09-30 확인·한국시간’ 표기를 유지한다. 사진·영상·리그 및 구단 로고·공식 포스터·예매 화면 캡처는 사용하지 않는다. 모든 시각물은 직접 만든 도형·텍스트·개념도로 제작하며, 좌석 개념도에는 실제 배치가 아니라는 표시를 넣는다. 상표명은 설명에 필요한 일반 텍스트로만 사용한다. 제작 시 사용할 글꼴의 상업적 이용 조건도 담당자가 확인한다.",
+  "rights_status": "자체 제작",
+  "risk_flags": [
+    "조사 범위 제한: 여섯 리그의 공식 채널을 우선 조회했으나, KBL 홈페이지와 공지 페이지에서 본문을 확보하지 못했다. 당일 일정·결과를 검증하지 못해 KBL 후보를 제외했다. 이는 해당 리그에 소식이 없다는 뜻이 아니다.",
+    "KBO의 9월 30일 문화유산 관련 발표는 목록 제목만 확인되고 상세 원문 조회가 실패해 후보·카드 근거에서 제외했다. 따라서 전체 최신 발표를 빠짐없이 검증했다고 주장하지 않는다.",
+    "KBO 공식 경기 일정 페이지에서 당일 대진·결과 본문을 확보하지 못해 미확인 점수와 순위 경쟁 서술을 넣지 않았다.",
+    "선정 주제는 9월 28일 발표의 재확인이다. ‘오늘 발표’ 또는 ‘방금 확정’이라는 표현을 사용하지 않는다.",
+    "CGV 발표의 포스트시즌 기간은 이번 초안의 경기 일정 근거로 사용하지 않았다. 리그의 별도 일정 공지 확인 없이 개막일·종료일을 확정적으로 추가하지 않는다.",
+    "예매 개시 여부·가격·전체 참여 지점·취소 조건은 검증하지 않았다. 구매를 유도하는 문구나 예약 가능 표시를 넣지 않는다.",
+    "MLB 종료 표시는 검증한 한 경기에만 적용한다. 다른 진행 경기의 점수를 최종 결과처럼 추가하지 않는다.",
+    "NBA 판정 강조점 공개를 규칙 개정으로 표현하지 않는다. 영상 사례의 구체적 판정은 추가 검증 대상이다.",
+    "사진·영상·로고·첨부 홍보물 사용권은 확보하지 않았다. 자체 제작 방식을 벗어나는 자산을 추가하면 권리 재승인이 필요하다.",
+    "게시 권한이 없는 편집 초안이다. 외부 계정에는 게시하지 않았으며 사람 승인 후에도 일정·예매 정보 재조회가 필요하다."
+  ],
+  "approval_checklist": {
+    "sport_editor": [
+      "KBO·CGV 원문을 다시 열어 전 경기 생중계와 홈·원정 응원석 운영 계획이 유지되는지 확인한다.",
+      "경기 결과 게시물이 아닌 관람 서비스 안내라는 점과 9월 28일 발표일을 확인한다.",
+      "MLB 결과 속보보다 국내 관람 정보의 활용도를 우선한 선정 판단을 승인한다.",
+      "게시 시점에 중대한 우승·진출 확정 등 우선순위가 더 높은 공식 발표가 생겼는지 여섯 리그를 재점검한다."
+    ],
+    "fact_rights": [
+      "S1~S7 원문 URL과 후보·카드의 source_ids가 정확히 대응하는지 확인한다.",
+      "카드에 임의의 예매 개시 시각·가격·전체 지점 수가 들어가지 않았는지 검사한다.",
+      "EPL 후보의 영국 여름시간과 한국시간 변환, NPB의 한일 동일 시각 표기를 확인한다.",
+      "포스터·로고·영상 캡처가 없고 좌석 그림이 자체 제작 개념도임을 확인한다.",
+      "글꼴 이용 조건을 확인하고 최종 이미지와 캡션의 권리 검토 기록을 남긴다."
+    ],
+    "editor_in_chief": [
+      "야구·축구·농구 세 종목 비교와 KBL 검증 한계가 명시됐는지 확인한다.",
+      "특정 사업자 홍보 문구를 답습하지 않고 미확인 구매 조건을 명확히 구분했는지 검토한다.",
+      "카드 5장, 캡션 500~2000자, 해시태그 5~8개와 대체텍스트를 최종 검사한다.",
+      "게시 직전 재조회 시각과 담당자 승인을 기록한 뒤 별도의 권한 보유자가 게시하도록 승인한다."
+    ]
+  }
+}
