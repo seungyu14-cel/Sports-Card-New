@@ -33,6 +33,12 @@ class SourceType(StrEnum):
     SECONDARY = "보조 자료"
 
 
+class VerificationMethod(StrEnum):
+    DIRECT = "원문 직접 확인"
+    SEARCH_SNIPPET = "검색 결과 요약"
+    SECONDARY_ONLY = "보조 자료만 확인"
+
+
 class RightsStatus(StrEnum):
     ORIGINAL = "자체 제작"
     LICENSED = "사용 허가"
@@ -99,6 +105,9 @@ class FactSource(StrictModel):
     url: str = Field(min_length=8, max_length=2048)
     source_type: SourceType
     checked_at: datetime
+    expires_at: datetime | None
+    verification_method: VerificationMethod
+    evidence: str = Field(min_length=5, max_length=500)
     published_at: str = Field(default="", max_length=100)
     local_time: str = Field(default="", max_length=100)
     korea_time: str = Field(default="", max_length=100)
@@ -113,6 +122,12 @@ class FactSource(StrictModel):
         return value
 
 
+class VisualItem(StrictModel):
+    label: str = Field(min_length=1, max_length=24)
+    value: str = Field(min_length=1, max_length=60)
+    note: str = Field(default="", max_length=80)
+
+
 class Card(StrictModel):
     slide: int = Field(ge=1, le=6)
     league: CardLeague
@@ -120,6 +135,8 @@ class Card(StrictModel):
     body: str = Field(min_length=10, max_length=240)
     source_ids: list[str] = Field(default_factory=list)
     visual_template: VisualTemplate
+    visual_title: str = Field(min_length=2, max_length=60)
+    visual_items: list[VisualItem] = Field(min_length=1, max_length=5)
     visual_direction: str = Field(min_length=4, max_length=240)
     alt_text: str = Field(min_length=10, max_length=400)
 

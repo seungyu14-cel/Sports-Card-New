@@ -68,7 +68,7 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
 
     app = FastAPI(
         title="Sports Card News Studio",
-        version="0.8.0",
+        version="0.9.0",
         docs_url=None,
         redoc_url=None,
         openapi_url=None,
@@ -273,6 +273,8 @@ def _edition_detail(output_root: Path, edition_date: str) -> dict[str, object]:
                 "league": card.league.value,
                 "headline": card.headline,
                 "body": card.body,
+                "visual_title": card.visual_title,
+                "visual_items": [item.model_dump() for item in card.visual_items],
                 "alt_text": card.alt_text,
                 "image_url": f"/output/{edition_date}/card-{card.slide:02d}.png",
             }
@@ -285,6 +287,10 @@ def _edition_detail(output_root: Path, edition_date: str) -> dict[str, object]:
                 "title": fact.title,
                 "url": str(fact.url),
                 "status": fact.status.value,
+                "verification_method": fact.verification_method.value,
+                "checked_at": fact.checked_at.isoformat(),
+                "expires_at": fact.expires_at.isoformat() if fact.expires_at else None,
+                "evidence": fact.evidence,
             }
             for fact in package.facts
         ],

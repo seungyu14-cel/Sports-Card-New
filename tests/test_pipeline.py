@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import zipfile
 from dataclasses import replace
 from datetime import date
 from pathlib import Path
@@ -9,7 +10,13 @@ import pytest
 
 from sports_card_news.config import load_settings
 from sports_card_news.history import recent_publication_summary
-from sports_card_news.models import CardLeague, FactStatus, RightsStatus, VisualTemplate
+from sports_card_news.models import (
+    CardLeague,
+    FactStatus,
+    RightsStatus,
+    VerificationMethod,
+    VisualTemplate,
+)
 from sports_card_news.pipeline import load_package, run_daily
 from sports_card_news.validation import validate_package
 
@@ -38,15 +45,30 @@ def test_demo_package_passes_validation() -> None:
 def test_daily_fixture_renders_png_and_review_files(tmp_path: Path) -> None:
     settings = load_settings(ROOT / "config/settings.toml")
     destination, report = run_daily(
-        edition_date=date(2026, 9, 29),
+        edition_date=date(2026, 9, 30),
         output_root=tmp_path,
         settings=settings,
         fixture=ROOT / "fixtures/demo_package.json",
     )
     assert report.ok
+    assert destination.name == "2026-09-30"
     assert len(list(destination.glob("card-*.png"))) == 6
     assert (destination / "editorial-review.md").exists()
     assert (destination / "validation.md").exists()
+    assert (destination / "caption-instagram.md").exists()
+    assert (destination / "sources.md").exists()
+    assert (destination / "alt-text.json").exists()
+    manifest = json.loads((destination / "publish-manifest.json").read_text(encoding="utf-8"))
+    assert manifest["approval_status"] == "pending_human_review"
+    assert manifest["cards"] == [f"card-{index:02d}.png" for index in range(1, 7)]
+    with zipfile.ZipFile(destination / "instagram-carousel.zip") as archive:
+        assert set(archive.namelist()) == {
+            *(f"card-{index:02d}.png" for index in range(1, 7)),
+            "caption-instagram.md",
+            "alt-text.json",
+            "sources.md",
+            "publish-manifest.json",
+        }
 
 
 def test_unknown_source_reference_is_blocked() -> None:
@@ -78,6 +100,12 @@ def test_legacy_package_without_card_layout_fields_is_migrated(tmp_path: Path) -
     for card in payload["cards"]:
         card.pop("visual_template")
         card.pop("league")
+        card.pop("visual_title")
+        card.pop("visual_items")
+    for fact in payload["facts"]:
+        fact.pop("expires_at")
+        fact.pop("verification_method")
+        fact.pop("evidence")
     legacy_path = tmp_path / "legacy-package.json"
     legacy_path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
 
@@ -85,6 +113,12 @@ def test_legacy_package_without_card_layout_fields_is_migrated(tmp_path: Path) -
 
     assert package.cards[0].visual_template == VisualTemplate.COVER
     assert all(card.visual_template == VisualTemplate.AUTO for card in package.cards[1:])
+    assert all(card.visual_title for card in package.cards)
+    assert all(card.visual_items for card in package.cards)
+    assert all(
+        fact.verification_method == VerificationMethod.SECONDARY_ONLY
+        for fact in package.facts
+    )
     assert [card.league.value for card in package.cards] == [
         "COVER",
         "KBO",
@@ -116,6 +150,33 @@ def test_rights_needs_review_is_warning_not_blocking() -> None:
 
     assert report.ok, report.errors
     assert any("시각 소재 권리가 '확인 필요'" in warning for warning in report.warnings)
+
+
+def test_search_snippet_cannot_be_marked_verified() -> None:
+    settings = load_settings(ROOT / "config/settings.toml")
+    package = load_package(ROOT / "fixtures/demo_package.json")
+    snippet = package.facts[0].model_copy(
+        update={"verification_method": VerificationMethod.SEARCH_SNIPPET}
+    )
+    changed = package.model_copy(update={"facts": [snippet, *package.facts[1:]]})
+
+    report = validate_package(changed, settings)
+
+    assert not report.ok
+    assert any("원문을 직접 확인하지 않은 출처" in error for error in report.errors)
+    assert any("직접 확인한 리그 공식 출처" in error for error in report.errors)
+
+
+def test_scheduled_candidate_requires_source_expiry() -> None:
+    settings = load_settings(ROOT / "config/settings.toml")
+    package = load_package(ROOT / "fixtures/demo_package.json")
+    no_expiry = package.facts[0].model_copy(update={"expires_at": None})
+    changed = package.model_copy(update={"facts": [no_expiry, *package.facts[1:]]})
+
+    report = validate_package(changed, settings)
+
+    assert not report.ok
+    assert any("유효 기한(expires_at)" in error for error in report.errors)
 
 
 def test_live_generation_repairs_conflicts_and_writes_recovery_log(

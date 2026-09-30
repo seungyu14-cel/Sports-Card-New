@@ -39,6 +39,25 @@ def test_story_cards_render_distinct_data_modules(tmp_path: Path) -> None:
         assert schedule.tobytes() != status.tobytes()
 
 
+def test_structured_visual_items_change_the_rendered_card(tmp_path: Path) -> None:
+    settings = load_settings(ROOT / "config/settings.toml")
+    package = load_package(ROOT / "fixtures/demo_package.json")
+    original_paths = render_package(package, tmp_path / "original", settings)
+    first_item = package.cards[2].visual_items[0].model_copy(
+        update={"value": "직접 바꾼 경기 정보"}
+    )
+    changed_card = package.cards[2].model_copy(
+        update={"visual_items": [first_item, *package.cards[2].visual_items[1:]]}
+    )
+    changed_package = package.model_copy(
+        update={"cards": [*package.cards[:2], changed_card, *package.cards[3:]]}
+    )
+    changed_paths = render_package(changed_package, tmp_path / "changed", settings)
+
+    with Image.open(original_paths[2]) as original, Image.open(changed_paths[2]) as changed:
+        assert original.tobytes() != changed.tobytes()
+
+
 def test_renderer_removes_source_links_from_visible_copy() -> None:
     source = "CGV가 일정을 발표했습니다. ([cgv.co.kr](https://www.cgv.co.kr/news?id=3))"
 

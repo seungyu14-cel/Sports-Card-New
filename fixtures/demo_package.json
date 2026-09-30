@@ -80,6 +80,9 @@
       "url": "https://www.koreabaseball.com/Schedule/GameCenter/Main.aspx",
       "source_type": "공식",
       "checked_at": "2026-09-29T08:00:00+09:00",
+      "expires_at": "2026-09-29T23:59:00+09:00",
+      "verification_method": "원문 직접 확인",
+      "evidence": "KBO 공식 일정 페이지에서 경기 날짜와 상태를 직접 확인한다.",
       "published_at": "",
       "local_time": "Asia/Seoul",
       "korea_time": "Asia/Seoul",
@@ -93,6 +96,9 @@
       "url": "https://www.premierleague.com/en/matches",
       "source_type": "공식",
       "checked_at": "2026-09-29T08:00:00+09:00",
+      "expires_at": "2026-09-29T23:59:00+09:00",
+      "verification_method": "원문 직접 확인",
+      "evidence": "Premier League 공식 일정에서 현지 날짜와 시각을 직접 확인한다.",
       "published_at": "",
       "local_time": "Europe/London",
       "korea_time": "Asia/Seoul",
@@ -106,6 +112,9 @@
       "url": "https://www.nba.com/schedule",
       "source_type": "공식",
       "checked_at": "2026-09-29T08:00:00+09:00",
+      "expires_at": "2026-09-29T08:30:00+09:00",
+      "verification_method": "원문 직접 확인",
+      "evidence": "NBA 공식 경기 일정에서 예정·진행·종료 상태를 직접 확인한다.",
       "published_at": "",
       "local_time": "미국 현지 시간대",
       "korea_time": "Asia/Seoul",
@@ -119,6 +128,9 @@
       "url": "https://www.kbl.or.kr/game/schedule",
       "source_type": "공식",
       "checked_at": "2026-09-29T08:00:00+09:00",
+      "expires_at": "2026-09-29T23:59:00+09:00",
+      "verification_method": "원문 직접 확인",
+      "evidence": "KBL 공식 일정에서 국내 농구 경기 정보를 확인한다.",
       "published_at": "",
       "local_time": "Asia/Seoul",
       "korea_time": "Asia/Seoul",
@@ -132,6 +144,9 @@
       "url": "https://npb.jp/games/2026/schedule_09_detail.html",
       "source_type": "공식",
       "checked_at": "2026-09-29T08:00:00+09:00",
+      "expires_at": "2026-09-29T23:59:00+09:00",
+      "verification_method": "원문 직접 확인",
+      "evidence": "NPB 공식 일정에서 당일 경기와 시작 시각을 확인한다.",
       "published_at": "",
       "local_time": "Asia/Tokyo",
       "korea_time": "Asia/Seoul",
@@ -147,6 +162,14 @@
       "body": "KBO·KBL·NPB·EPL·NBA의 공식 정보를 한 장씩 순서대로 전합니다.",
       "source_ids": ["S1", "S2", "S3", "S4", "S5"],
       "visual_template": "cover",
+      "visual_title": "오늘 다섯 리그",
+      "visual_items": [
+        {"label": "KBO", "value": "공식 일정", "note": "2페이지"},
+        {"label": "KBL", "value": "국내 농구", "note": "3페이지"},
+        {"label": "NPB", "value": "당일 경기", "note": "4페이지"},
+        {"label": "EPL", "value": "한국 시각", "note": "5페이지"},
+        {"label": "NBA", "value": "경기 상태", "note": "6페이지"}
+      ],
       "visual_direction": "다섯 리그를 하나의 흐름으로 연결한 자체 제작 스포츠 필드 도형",
       "alt_text": "오늘의 스포츠 다섯 이슈를 KBO, KBL, NPB, EPL, NBA 순서로 전한다는 표지다."
     },
@@ -157,6 +180,12 @@
       "body": "KBO 공식 일정에서 경기 날짜, 시작 시각, 경기 상태를 확인합니다. 변경 공지도 게시 전에 다시 살핍니다.",
       "source_ids": ["S1"],
       "visual_template": "timeline",
+      "visual_title": "게시 전 세 가지 확인",
+      "visual_items": [
+        {"label": "날짜", "value": "공식 경기일", "note": "편집일과 대조"},
+        {"label": "시각", "value": "한국시간", "note": "시작 시각 확인"},
+        {"label": "상태", "value": "예정", "note": "변경 공지 재조회"}
+      ],
       "visual_direction": "달력 모양을 단순 선과 숫자로 표현",
       "alt_text": "KBO 공식 일정에서 날짜와 시작 시각, 경기 상태를 확인하라는 카드다."
     },
@@ -167,6 +196,12 @@
       "body": "KBL 공식 일정과 공지에서 국내 농구의 최신 경기 정보를 확인합니다. 확정되지 않은 내용은 단정하지 않습니다.",
       "source_ids": ["S4"],
       "visual_template": "key_fact",
+      "visual_title": "KBL 원문 확인 항목",
+      "visual_items": [
+        {"label": "일정", "value": "공식 경기 정보", "note": "리그 페이지"},
+        {"label": "공지", "value": "최신 발표", "note": "원문 직접 확인"},
+        {"label": "표현", "value": "확정 사실만", "note": "추측 제외"}
+      ],
       "visual_direction": "농구공과 핵심 정보 세 줄을 자체 제작 도형으로 표현",
       "alt_text": "KBL 공식 일정과 공지에서 최신 경기 정보를 확인하라는 카드다."
     },
@@ -177,6 +212,12 @@
       "body": "NPB 공식 일정에서 당일 대진과 시작 시각을 확인합니다. 예정·진행·종료 여부는 게시 직전에 다시 확인합니다.",
       "source_ids": ["S5"],
       "visual_template": "timeline",
+      "visual_title": "NPB 당일 일정",
+      "visual_items": [
+        {"label": "대진", "value": "공식 편성", "note": "팀명 확인"},
+        {"label": "시각", "value": "일본·한국 동일", "note": "시차 없음"},
+        {"label": "상태", "value": "게시 직전 재확인", "note": "우천 변경 주의"}
+      ],
       "visual_direction": "경기 시작 시각을 순서대로 보여 주는 자체 제작 타임라인",
       "alt_text": "NPB 당일 대진과 시작 시각, 경기 상태를 확인하라는 카드다."
     },
@@ -187,6 +228,11 @@
       "body": "EPL 공식 일정의 영국 현지 시각을 한국 시각으로 바꿔 확인합니다. 날짜가 다음 날로 넘어가는지도 함께 살핍니다.",
       "source_ids": ["S2"],
       "visual_template": "comparison",
+      "visual_title": "현지 시각과 한국 시각",
+      "visual_items": [
+        {"label": "영국", "value": "현지 날짜·시각", "note": "서머타임 확인"},
+        {"label": "한국", "value": "Asia/Seoul", "note": "날짜 변경 확인"}
+      ],
       "visual_direction": "영국 현지 시각과 한국 시각을 두 열로 비교",
       "alt_text": "EPL 영국 현지 시각과 한국 시각을 비교해 날짜 차이를 확인하는 카드다."
     },
@@ -197,6 +243,12 @@
       "body": "NBA 공식 경기 페이지에서 예정·진행·종료 상태를 구분합니다. 진행 중 점수는 최종 결과로 표현하지 않습니다.",
       "source_ids": ["S3"],
       "visual_template": "status",
+      "visual_title": "NBA 경기 상태",
+      "visual_items": [
+        {"label": "상태", "value": "진행 중", "note": "조회 시점 기준"},
+        {"label": "점수", "value": "최종 아님", "note": "종료 후 확정"},
+        {"label": "표현", "value": "현재 상황", "note": "결과 단정 금지"}
+      ],
       "visual_direction": "다섯 가지 경기 상태를 원형 진행 표시로 표현",
       "alt_text": "NBA 경기의 예정, 진행, 종료 상태를 구분하고 진행 중 점수를 최종 결과로 쓰지 말라는 카드다."
     }

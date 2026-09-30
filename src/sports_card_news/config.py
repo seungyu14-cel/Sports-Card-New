@@ -19,6 +19,8 @@ class Settings:
     output_width: int
     output_height: int
     auto_repair_attempts: int
+    api_retry_attempts: int
+    api_timeout_seconds: float
     leagues: tuple[str, ...]
     candidate_sports_min: int
     recent_days: int
@@ -44,6 +46,8 @@ def load_settings(path: str | Path = "config/settings.toml") -> Settings:
         output_width=raw["output_width"],
         output_height=raw["output_height"],
         auto_repair_attempts=min(3, max(0, int(raw.get("auto_repair_attempts", 2)))),
+        api_retry_attempts=min(5, max(1, int(raw.get("api_retry_attempts", 3)))),
+        api_timeout_seconds=max(10.0, float(raw.get("api_timeout_seconds", 120))),
         leagues=tuple(editorial["leagues"]),
         candidate_sports_min=editorial["candidate_sports_min"],
         recent_days=editorial["recent_days"],

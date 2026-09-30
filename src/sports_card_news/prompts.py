@@ -24,6 +24,10 @@ SYSTEM_PROMPT = """당신은 한국 독자를 위한 멀티스포츠 인스타�
 13. cards의 headline과 body에는 URL, 도메인, Markdown 링크, 괄호형 출처를 절대 넣지 않는다. 근거 연결은 cards.source_ids에 기록하고 실제 링크는 facts와 캡션에만 둔다. 이미지에는 URL과 출처 ID를 노출하지 않는다.
 14. 카드 내용에 맞는 visual_template을 고른다. 허용값은 cover, key_fact, three_screen, seat_split, location, steps, timeline, comparison, status, sources, approval이다. 1번 카드는 cover를 사용한다.
 15. cards.league는 순서대로 COVER, KBO, KBL, NPB, EPL, NBA를 정확히 사용한다. 2~6번 카드는 각 league와 같은 리그 후보의 검증 완료 출처를 하나 이상 참조해야 한다.
+16. facts.verification_method는 공식 원문 본문을 실제로 열어 근거를 확인했을 때만 '원문 직접 확인'으로 쓴다. 검색 결과 요약만 본 경우 '검색 결과 요약'이며 status를 '검증 완료'로 표시하지 않는다.
+17. facts.evidence에는 원문에서 확인한 핵심 근거를 짧게 요약한다. 경기·일정·진행 상태처럼 시간이 지나면 바뀌는 정보에는 Asia/Seoul 기준 expires_at을 반드시 지정한다.
+18. 각 리그 후보에는 해당 리그의 신뢰 가능한 공식 도메인에서 원문을 직접 확인한 출처가 하나 이상 있어야 한다. 직접 확인할 수 없으면 다른 검증 가능한 공식 이슈로 교체한다.
+19. 모든 카드는 visual_title과 visual_items를 작성한다. visual_items는 이미지 하단 그래픽에 실제로 표시할 1~5개의 구조화 정보이며, label·value·note가 기사 내용과 정확히 일치해야 한다.
 """
 
 
@@ -39,6 +43,8 @@ REPAIR_SYSTEM_PROMPT = SYSTEM_PROMPT + """
 - 카드 headline·body의 URL과 Markdown 출처를 제거하고, 해당 근거는 source_ids와 facts.url에만 남긴다.
 - visual_template이 카드 내용과 실제로 맞는지 다시 선택한다.
 - 6장 고정 순서 COVER → KBO → KBL → NPB → EPL → NBA를 바꾸지 않는다.
+- 검색 결과 요약만 확인한 자료를 VERIFIED로 바꾸지 않는다. 리그 공식 원문을 직접 확인하지 못하면 주제를 교체한다.
+- 시간 민감형 정보의 expires_at과 모든 카드의 visual_title·visual_items를 빠뜨리지 않는다.
 """
 
 
@@ -59,6 +65,8 @@ facts의 id는 S1, S2처럼 고유하게 만들고 candidates와 cards의 source
 선정 후보 제목은 candidates 중 하나의 title과 정확히 같아야 한다. 모든 출력은 한국어로 작성한다.
 카드 문장은 인스타그램 이미지에서 바로 읽을 수 있는 평문으로만 작성하고, 출처 이름·도메인·URL은 넣지 않는다.
 visual_direction과 visual_template은 같은 내용을 설명해야 하며 슬라이드 번호가 아니라 실제 정보 형태에 맞춰 선택한다.
+visual_items는 장식용 문구가 아니라 렌더러가 실제 도표·일정표·비교표에 사용할 데이터다. KBL 쿼터별 인원,
+NPB 대진과 시작 시각, EPL 휴식기와 재개일, NBA 판정 핵심처럼 독자가 바로 이해할 값으로 작성한다.
 cards는 정확히 6장이며 league와 순서는 COVER, KBO, KBL, NPB, EPL, NBA다. 표지는 다섯 리그를 아우르는 데일리 이슈 제목과 요약을 쓰고,
 2~6번은 해당 리그의 최신 검증 정보를 독립적으로 이해할 수 있는 제목과 본문으로 작성한다.
 """

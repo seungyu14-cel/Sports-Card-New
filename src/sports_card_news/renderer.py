@@ -7,7 +7,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 from .config import Settings
-from .models import Card, DailyPackage, VisualTemplate
+from .models import Card, DailyPackage, VisualItem, VisualTemplate
 
 
 CANVAS = (1080, 1350)
@@ -110,7 +110,7 @@ def _draw_header(
     edition_date: str,
 ) -> None:
     draw.line((70, 72, 1010, 72), fill=INK, width=3)
-    draw.text((70, 90), "DAILY ISSUE", font=_font(fonts, 25, "bold"), fill=INK)
+    draw.text((70, 90), "Daily Issue", font=_font(fonts, 25, "bold"), fill=INK)
     draw.text(
         (1010, 88),
         edition_date.replace("-", "."),
@@ -281,7 +281,7 @@ def _draw_story_card(
     panel_top = min(panel_top, 835)
     template = _resolve_visual_template(card)
     if template == VisualTemplate.THREE_SCREEN:
-        _draw_three_screen_module(draw, fonts, panel_top)
+        _draw_three_screen_module(draw, fonts, panel_top, card)
     elif template == VisualTemplate.SEAT_SPLIT:
         _draw_seat_split_module(draw, fonts, panel_top)
     elif template == VisualTemplate.LOCATION:
@@ -289,17 +289,17 @@ def _draw_story_card(
     elif template == VisualTemplate.STEPS:
         _draw_steps_module(draw, fonts, panel_top)
     elif template == VisualTemplate.TIMELINE:
-        _draw_schedule_module(draw, fonts, panel_top)
+        _draw_schedule_module(draw, fonts, panel_top, card.visual_title, card.visual_items)
     elif template == VisualTemplate.COMPARISON:
-        _draw_official_module(draw, fonts, panel_top)
+        _draw_official_module(draw, fonts, panel_top, card.visual_title, card.visual_items)
     elif template == VisualTemplate.STATUS:
-        _draw_status_module(draw, fonts, panel_top, game_status)
+        _draw_status_module(draw, fonts, panel_top, game_status, card.visual_title, card.visual_items)
     elif template == VisualTemplate.SOURCES:
         _draw_sources_module(draw, fonts, panel_top, card.source_ids)
     elif template == VisualTemplate.APPROVAL:
         _draw_approval_module(draw, fonts, panel_top)
     else:
-        _draw_key_fact_module(draw, fonts, panel_top, card.source_ids)
+        _draw_key_fact_module(draw, fonts, panel_top, card.visual_title, card.visual_items)
 
 
 def _clean_card_text(text: str) -> str:
@@ -336,19 +336,50 @@ def _resolve_visual_template(card: Card) -> VisualTemplate:
     return VisualTemplate.KEY_FACT
 
 
-def _draw_three_screen_module(draw: ImageDraw.ImageDraw, fonts: dict[str, str], top: int) -> None:
+def _draw_three_screen_module(
+    draw: ImageDraw.ImageDraw,
+    fonts: dict[str, str],
+    top: int,
+    card: Card,
+) -> None:
     _panel(draw, top)
-    draw.text((100, top + 32), "3면 영상 구성", font=_font(fonts, 25, "bold"), fill=MUTED)
-    panels = ((115, "좌측"), (385, "정면"), (730, "우측"))
+    draw.text((100, top + 32), card.visual_title, font=_font(fonts, 25, "bold"), fill=MUTED)
+    defaults = (
+        VisualItem(label="범위", value="공식 발표 확인"),
+        VisualItem(label="핵심", value="3면 영상"),
+        VisualItem(label="상태", value="세부 일정 확인"),
+    )
+    items = tuple(card.visual_items[:3])
+    items = items + defaults[len(items):]
+    panels = ((115, items[0]), (385, items[1]), (730, items[2]))
     widths = (285, 310, 285)
-    for index, ((left, label), width) in enumerate(zip(panels, widths, strict=True)):
+    for index, ((left, item), width) in enumerate(zip(panels, widths, strict=True)):
         y = top + (125 if index == 1 else 155)
         height = 235 if index == 1 else 205
         fill = YELLOW if index == 1 else WHITE
         draw.rounded_rectangle((left, y, left + width, y + height), radius=14, fill=fill, outline=INK, width=3)
         draw.line((left + 28, y + height - 42, left + width - 28, y + height - 42), fill=INK, width=2)
-        draw.text((left + width // 2, y + height // 2 - 10), label, font=_font(fonts, 31, "bold"), fill=INK, anchor="mm")
-    draw.text((540, top + 365), "정면과 양옆 화면을 함께 활용하는 개념도", font=_font(fonts, 24), fill=MUTED, anchor="ma")
+        value_font, value_lines = _fit_text(
+            draw, item.value, fonts["bold"], width - 34, 2, 29, 21
+        )
+        draw.multiline_text(
+            (left + width // 2, y + height // 2 - 12),
+            "\n".join(value_lines),
+            font=value_font,
+            fill=INK,
+            spacing=5,
+            anchor="mm",
+            align="center",
+        )
+        draw.text(
+            (left + width // 2, y + height - 28),
+            item.label,
+            font=_font(fonts, 18, "bold"),
+            fill=MUTED,
+            anchor="mm",
+        )
+    note = next((item.note for item in items if item.note), "실제 정보는 공식 원문 기준")
+    draw.text((540, top + 382), note, font=_font(fonts, 22), fill=MUTED, anchor="ma")
 
 
 def _draw_seat_split_module(draw: ImageDraw.ImageDraw, fonts: dict[str, str], top: int) -> None:
@@ -404,67 +435,142 @@ def _draw_key_fact_module(
     draw: ImageDraw.ImageDraw,
     fonts: dict[str, str],
     top: int,
-    source_ids: list[str],
+    title: str,
+    items: list[VisualItem],
+) -> None:
+    _draw_visual_rows(draw, fonts, top, title, items)
+
+
+def _draw_schedule_module(
+    draw: ImageDraw.ImageDraw,
+    fonts: dict[str, str],
+    top: int,
+    title: str,
+    items: list[VisualItem],
+) -> None:
+    _draw_visual_rows(draw, fonts, top, title, items)
+
+
+def _draw_official_module(
+    draw: ImageDraw.ImageDraw,
+    fonts: dict[str, str],
+    top: int,
+    title: str,
+    items: list[VisualItem],
 ) -> None:
     _panel(draw, top)
-    evidence = "공식 자료 확인" if source_ids else "편집 검토"
-    labels = (("핵심", "한 카드에 한 가지 주장"), ("시점", "최신 발표 기준"), ("근거", evidence))
-    row_height = (1165 - top) // len(labels)
-    for index, (label, value) in enumerate(labels):
-        row_top = top + index * row_height
+    draw.rectangle((70, top, 1010, top + 70), fill=YELLOW)
+    draw.text((100, top + 35), title, font=_font(fonts, 27, "bold"), fill=INK, anchor="lm")
+    shown = items[:4]
+    cell_width = 940 / len(shown)
+    for index, item in enumerate(shown):
+        left = round(70 + index * cell_width)
+        right = round(70 + (index + 1) * cell_width)
         if index:
-            draw.line((70, row_top, 1010, row_top), fill=HAIRLINE, width=2)
-        draw.text((120, row_top + row_height // 2), label, font=_font(fonts, 24, "bold"), fill=RED, anchor="lm")
-        draw.text((265, row_top + row_height // 2), value, font=_font(fonts, 31, "bold"), fill=INK, anchor="lm")
+            draw.line((left, top + 70, left, 1165), fill=INK, width=2)
+        draw.text(
+            ((left + right) // 2, top + 112),
+            item.label,
+            font=_font(fonts, 21, "bold"),
+            fill=RED,
+            anchor="ma",
+        )
+        value_font, value_lines = _fit_text(
+            draw, item.value, fonts["bold"], int(cell_width - 28), 3, 38, 25
+        )
+        draw.multiline_text(
+            ((left + right) // 2, top + 205),
+            "\n".join(value_lines),
+            font=value_font,
+            fill=INK,
+            spacing=5,
+            anchor="ma",
+            align="center",
+        )
+        if item.note:
+            note_font, note_lines = _fit_text(
+                draw, item.note, fonts["regular"], int(cell_width - 28), 2, 21, 17
+            )
+            draw.multiline_text(
+                ((left + right) // 2, top + 350),
+                "\n".join(note_lines),
+                font=note_font,
+                fill=MUTED,
+                spacing=3,
+                anchor="ma",
+                align="center",
+            )
 
 
-def _draw_schedule_module(draw: ImageDraw.ImageDraw, fonts: dict[str, str], top: int) -> None:
+def _draw_status_module(
+    draw: ImageDraw.ImageDraw,
+    fonts: dict[str, str],
+    top: int,
+    game_status: str,
+    title: str,
+    items: list[VisualItem],
+) -> None:
+    status_items = list(items)
+    if not any(item.label == "상태" for item in status_items):
+        status_items.insert(
+            0,
+            VisualItem(label="상태", value=game_status, note="생성 시점 기준"),
+        )
+    _draw_visual_rows(draw, fonts, top, title, status_items[:4])
+
+
+def _draw_visual_rows(
+    draw: ImageDraw.ImageDraw,
+    fonts: dict[str, str],
+    top: int,
+    title: str,
+    items: list[VisualItem],
+) -> None:
     _panel(draw, top)
-    items = (("01", "공식 일정 확인"), ("02", "한국 시각 변환"), ("03", "출처 정보 보관"))
-    row_height = (1165 - top) // len(items)
-    for index, (number, label) in enumerate(items):
-        row_top = top + index * row_height
+    draw.rectangle((70, top, 1010, top + 70), fill=YELLOW)
+    draw.text((100, top + 35), title, font=_font(fonts, 27, "bold"), fill=INK, anchor="lm")
+    shown = items[:4]
+    content_top = top + 70
+    row_height = (1165 - content_top) // len(shown)
+    for index, item in enumerate(shown):
+        row_top = content_top + index * row_height
         if index:
-            draw.line((70, row_top, 1010, row_top), fill=HAIRLINE, width=2)
-        draw.rectangle((70, row_top, 205, row_top + row_height), fill=YELLOW if index == 0 else WHITE)
-        draw.text((137, row_top + row_height // 2), number, font=_font(fonts, 37, "bold"), fill=INK, anchor="mm")
-        draw.text((250, row_top + row_height // 2), label, font=_font(fonts, 34, "bold"), fill=INK, anchor="lm")
-        draw.text((965, row_top + row_height // 2), "CHECK", font=_font(fonts, 18, "bold"), fill=RED, anchor="rm")
-
-
-def _draw_official_module(draw: ImageDraw.ImageDraw, fonts: dict[str, str], top: int) -> None:
-    _panel(draw, top)
-    middle = 540
-    draw.line((middle, top, middle, 1165), fill=INK, width=3)
-    draw.rectangle((70, top, middle, top + 70), fill=YELLOW)
-    draw.rectangle((middle, top, 1010, top + 70), fill=INK)
-    draw.text((305, top + 35), "공식 발표", font=_font(fonts, 30, "bold"), fill=INK, anchor="mm")
-    draw.text((775, top + 35), "확인 중", font=_font(fonts, 30, "bold"), fill=WHITE, anchor="mm")
-    checks = (("공식 원문", True), ("발표 시각", True), ("추측·보도", False))
-    for index, (label, verified) in enumerate(checks):
-        y = top + 125 + index * 83
-        draw.text((125, y), "●" if verified else "○", font=_font(fonts, 28, "bold"), fill=RED if verified else MUTED, anchor="lm")
-        draw.text((175, y), label, font=_font(fonts, 27), fill=INK, anchor="lm")
-        draw.text((610, y), "—", font=_font(fonts, 30, "bold"), fill=MUTED, anchor="lm")
-        draw.text((660, y), "확정 전 표기 금지", font=_font(fonts, 25), fill=INK, anchor="lm")
-
-
-def _draw_status_module(draw: ImageDraw.ImageDraw, fonts: dict[str, str], top: int, game_status: str) -> None:
-    statuses = ("예정", "진행 중", "종료", "연기", "취소")
-    card_width = 174
-    gap = 18
-    for index, status in enumerate(statuses):
-        left = 70 + index * (card_width + gap)
-        right = left + card_width
-        active = status == game_status
-        fill = YELLOW if active else WHITE
-        draw.rounded_rectangle((left, top, right, top + 265), radius=18, fill=fill, outline=INK, width=3)
-        draw.text((left + 18, top + 24), f"0{index + 1}", font=_font(fonts, 22, "bold"), fill=RED if active else MUTED)
-        draw.ellipse((left + 55, top + 79, left + 119, top + 143), outline=INK, width=5)
-        if active:
-            draw.ellipse((left + 76, top + 100, left + 98, top + 122), fill=INK)
-        draw.text((left + card_width // 2, top + 198), status, font=_font(fonts, 26, "bold"), fill=INK, anchor="ma")
-    draw.text((70, top + 305), "현재 상태를 확인한 뒤 최종 문구를 확정합니다.", font=_font(fonts, 24), fill=MUTED)
+            draw.line((200, row_top, 1010, row_top), fill=HAIRLINE, width=2)
+        draw.rectangle(
+            (70, row_top, 200, row_top + row_height),
+            fill=INK if index else WHITE,
+        )
+        draw.text(
+            (135, row_top + row_height // 2),
+            item.label,
+            font=_font(fonts, 23, "bold"),
+            fill=WHITE if index else RED,
+            anchor="mm",
+        )
+        value_font, value_lines = _fit_text(
+            draw, item.value, fonts["bold"], 500, 2, 31, 23
+        )
+        draw.multiline_text(
+            (235, row_top + row_height // 2),
+            "\n".join(value_lines),
+            font=value_font,
+            fill=INK,
+            spacing=4,
+            anchor="lm",
+        )
+        if item.note:
+            note_font, note_lines = _fit_text(
+                draw, item.note, fonts["regular"], 245, 2, 21, 17
+            )
+            draw.multiline_text(
+                (970, row_top + row_height // 2),
+                "\n".join(note_lines),
+                font=note_font,
+                fill=MUTED,
+                spacing=3,
+                anchor="rm",
+                align="right",
+            )
 
 
 def _draw_sources_module(

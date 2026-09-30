@@ -2,10 +2,21 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+from datetime import date
 from urllib.parse import urlparse
+from zoneinfo import ZoneInfo
 
 from .config import Settings
-from .models import CardLeague, DailyPackage, FactStatus, GameStatus, RightsStatus, SourceType, VisualTemplate
+from .models import (
+    CardLeague,
+    DailyPackage,
+    FactStatus,
+    GameStatus,
+    RightsStatus,
+    SourceType,
+    VerificationMethod,
+    VisualTemplate,
+)
 
 
 CARD_LINK_PATTERN = re.compile(
@@ -50,9 +61,18 @@ class ValidationReport:
 
 def validate_package(package: DailyPackage, settings: Settings) -> ValidationReport:
     report = ValidationReport()
+    edition_date = date.fromisoformat(package.edition_date)
+    editorial_timezone = ZoneInfo(settings.timezone)
     all_source_ids = [source.id for source in package.facts]
     source_ids = set(all_source_ids)
     facts_by_id = {source.id: source for source in package.facts}
+
+    def is_trusted_official(source_id: str) -> bool:
+        source = facts_by_id.get(source_id)
+        if source is None or source.source_type != SourceType.OFFICIAL:
+            return False
+        domain = (urlparse(str(source.url)).hostname or "").lower()
+        return any(domain == item or domain.endswith(f".{item}") for item in settings.trusted_domains)
 
     if len(source_ids) != len(all_source_ids):
         report.errors.append("출처 ID가 중복되었습니다.")
@@ -66,6 +86,8 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
 
     if package.generated_at.tzinfo is None:
         report.errors.append("생성 시각에 시간대가 없습니다.")
+    elif package.generated_at.astimezone(editorial_timezone).date() != edition_date:
+        report.errors.append("생성 시각의 현지 날짜가 편집일과 다릅니다.")
 
     sports = {candidate.sport for candidate in package.candidates}
     if len(sports) < settings.candidate_sports_min:
@@ -112,6 +134,27 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
             report.errors.append(
                 f"후보 '{candidate.title}'가 검증 완료되지 않은 출처를 참조합니다: {unresolved}"
             )
+        direct_official = [
+            source_id
+            for source_id in candidate.source_ids
+            if is_trusted_official(source_id)
+            and facts_by_id[source_id].verification_method == VerificationMethod.DIRECT
+            and facts_by_id[source_id].status == FactStatus.VERIFIED
+        ]
+        if not direct_official:
+            report.errors.append(
+                f"{candidate.league} 후보에 직접 확인한 리그 공식 출처가 없습니다."
+            )
+        if candidate.game_status in {GameStatus.SCHEDULED, GameStatus.LIVE}:
+            expiring_sources = [
+                facts_by_id[source_id]
+                for source_id in candidate.source_ids
+                if source_id in facts_by_id and facts_by_id[source_id].expires_at is not None
+            ]
+            if not expiring_sources:
+                report.errors.append(
+                    f"시간 민감형 후보 '{candidate.title}'에 출처 유효 기한(expires_at)이 없습니다."
+                )
 
     for card in package.cards:
         missing = sorted(set(card.source_ids) - source_ids)
@@ -166,6 +209,21 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
             report.errors.append(f"HTTPS가 아닌 출처 URL입니다: {source.id}")
         if source.checked_at.tzinfo is None:
             report.errors.append(f"출처 조회 시각에 시간대가 없습니다: {source.id}")
+        elif source.checked_at.astimezone(editorial_timezone).date() != edition_date:
+            report.errors.append(f"출처를 편집일 당일에 다시 확인하지 않았습니다: {source.id}")
+        elif package.generated_at.tzinfo is not None and source.checked_at > package.generated_at:
+            report.errors.append(f"출처 조회 시각이 생성 시각보다 늦습니다: {source.id}")
+        if source.expires_at is not None:
+            if source.expires_at.tzinfo is None:
+                report.errors.append(f"출처 유효 기한에 시간대가 없습니다: {source.id}")
+            elif source.expires_at <= source.checked_at:
+                report.errors.append(f"출처 유효 기한이 조회 시각보다 빠릅니다: {source.id}")
+            elif source.expires_at <= package.generated_at:
+                report.errors.append(f"생성 시점에 이미 만료된 출처입니다: {source.id}")
+        if source.status == FactStatus.VERIFIED and source.verification_method != VerificationMethod.DIRECT:
+            report.errors.append(
+                f"원문을 직접 확인하지 않은 출처는 검증 완료로 표시할 수 없습니다: {source.id}"
+            )
         trusted = any(domain == item or domain.endswith(f".{item}") for item in settings.trusted_domains)
         if source.source_type == SourceType.OFFICIAL and trusted:
             trusted_official += 1

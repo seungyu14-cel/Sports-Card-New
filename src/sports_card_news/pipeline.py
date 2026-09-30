@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
-from datetime import date
+import zipfile
+from datetime import date, timedelta
 from pathlib import Path
+
+from PIL import Image
 
 from .config import Settings
 from .generator import generate_daily_package, repair_daily_package
@@ -24,6 +28,19 @@ def load_package(path: str | Path) -> DailyPackage:
         slide_index = int(card.get("slide", 1)) - 1
         if 0 <= slide_index < len(legacy_leagues):
             card.setdefault("league", legacy_leagues[slide_index])
+        headline = str(card.get("headline", "핵심 정보")).splitlines()[0]
+        body = str(card.get("body", "")).replace("\n", " ")
+        card.setdefault("visual_title", headline[:60])
+        card.setdefault(
+            "visual_items",
+            [{"label": "핵심", "value": headline[:60], "note": body[:80]}],
+        )
+    for fact in payload.get("facts", []):
+        fact.setdefault("expires_at", None)
+        # Legacy packages remain readable, but missing provenance must never be
+        # upgraded to a false direct-verification claim.
+        fact.setdefault("verification_method", "보조 자료만 확인")
+        fact.setdefault("evidence", str(fact.get("claim", "공식 원문 확인"))[:500])
     return DailyPackage.model_validate(payload)
 
 
@@ -38,8 +55,25 @@ def run_daily(
     recovery_attempts: list[tuple[int, list[str]]] = []
     if fixture:
         package = load_package(fixture)
+        fixture_day = package.generated_at.date()
+        date_shift = timedelta(days=(edition_date - fixture_day).days)
+        shifted_facts = [
+            fact.model_copy(
+                update={
+                    "checked_at": fact.checked_at + date_shift,
+                    "expires_at": (
+                        fact.expires_at + date_shift if fact.expires_at is not None else None
+                    ),
+                }
+            )
+            for fact in package.facts
+        ]
         package = package.model_copy(
-            update={"edition_date": edition_date.isoformat()}
+            update={
+                "edition_date": edition_date.isoformat(),
+                "generated_at": package.generated_at + date_shift,
+                "facts": shifted_facts,
+            }
         )
     else:
         history = recent_publication_summary(output_root, edition_date, settings.recent_days)
@@ -100,7 +134,9 @@ def run_daily(
         )
     elif recovery_path.exists():
         recovery_path.unlink()
-    render_package(package, destination, settings)
+    rendered_paths = render_package(package, destination, settings)
+    _validate_rendered_output(rendered_paths, settings)
+    _write_publication_package(destination, package, rendered_paths)
     return destination, report
 
 
@@ -161,6 +197,94 @@ def _caption_markdown(package: DailyPackage) -> str:
         + "\n\n".join(f"{card.slide}. {card.alt_text}" for card in package.cards)
         + "\n"
     )
+
+
+def _instagram_caption(package: DailyPackage) -> str:
+    text = re.sub(
+        r"\s*\(\s*\[[^\]]+\]\(https?://[^)]*\)\s*\)",
+        "",
+        package.caption,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(r"\[([^\]]+)\]\(https?://[^)]*\)", r"\1", text, flags=re.IGNORECASE)
+    text = re.sub(r"https?://\S+|www\.\S+", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"[ \t]{2,}", " ", text)
+    return text.strip() + "\n\n" + " ".join(package.hashtags) + "\n"
+
+
+def _sources_markdown(package: DailyPackage) -> str:
+    blocks = [f"# 출처 목록: {package.edition_date}"]
+    for fact in package.facts:
+        expiry = fact.expires_at.isoformat() if fact.expires_at else "별도 만료 없음"
+        blocks.append(
+            f"## {fact.id} · {fact.title}\n\n"
+            f"- URL: {fact.url}\n"
+            f"- 확인 방식: {fact.verification_method.value}\n"
+            f"- 조회 시각: {fact.checked_at.isoformat()}\n"
+            f"- 유효 기한: {expiry}\n"
+            f"- 근거: {fact.evidence}"
+        )
+    return "\n\n".join(blocks) + "\n"
+
+
+def _validate_rendered_output(paths: list[Path], settings: Settings) -> None:
+    if len(paths) != 6:
+        raise ValueError(f"렌더링 결과는 정확히 6장이어야 합니다: {len(paths)}장")
+    expected_size = (settings.output_width, settings.output_height)
+    for path in paths:
+        if not path.exists() or path.stat().st_size == 0:
+            raise ValueError(f"렌더링 파일이 비어 있습니다: {path.name}")
+        with Image.open(path) as image:
+            if image.format != "PNG":
+                raise ValueError(f"인스타그램 카드가 PNG가 아닙니다: {path.name}")
+            if image.size != expected_size:
+                raise ValueError(
+                    f"카드 크기가 {expected_size}와 다릅니다: {path.name}={image.size}"
+                )
+            if image.mode != "RGB":
+                raise ValueError(f"카드 색상 모드는 RGB여야 합니다: {path.name}={image.mode}")
+
+
+def _write_publication_package(
+    destination: Path,
+    package: DailyPackage,
+    rendered_paths: list[Path],
+) -> None:
+    _write_text(destination / "caption-instagram.md", _instagram_caption(package))
+    _write_text(destination / "sources.md", _sources_markdown(package))
+    alt_text_payload = [
+        {"slide": card.slide, "league": card.league.value, "alt_text": card.alt_text}
+        for card in package.cards
+    ]
+    _write_text(
+        destination / "alt-text.json",
+        json.dumps(alt_text_payload, ensure_ascii=False, indent=2) + "\n",
+    )
+    manifest = {
+        "edition_date": package.edition_date,
+        "generated_at": package.generated_at.isoformat(),
+        "approval_status": "pending_human_review",
+        "requires_human_approval": package.needs_human_approval,
+        "cards": [path.name for path in rendered_paths],
+        "caption": "caption-instagram.md",
+        "alt_text": "alt-text.json",
+        "sources": "sources.md",
+    }
+    _write_text(
+        destination / "publish-manifest.json",
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+    )
+    archive_path = destination / "instagram-carousel.zip"
+    with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        for path in rendered_paths:
+            archive.write(path, arcname=path.name)
+        for name in (
+            "caption-instagram.md",
+            "alt-text.json",
+            "sources.md",
+            "publish-manifest.json",
+        ):
+            archive.write(destination / name, arcname=name)
 
 
 def _editorial_markdown(package: DailyPackage, settings: Settings) -> str:

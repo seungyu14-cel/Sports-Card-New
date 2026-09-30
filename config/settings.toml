@@ -8,6 +8,8 @@ caption_max_chars = 2000
 output_width = 1080
 output_height = 1350
 auto_repair_attempts = 2
+api_retry_attempts = 3
+api_timeout_seconds = 120
 
 [editorial]
 leagues = ["KBO", "KBL", "NPB", "EPL", "NBA"]

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import time
 from datetime import date
 
 from openai import OpenAI
@@ -70,22 +71,32 @@ def _request_package(
             "OPENAI_API_KEY가 없습니다. GitHub Actions secret 또는 로컬 환경 변수에 등록하세요."
         )
 
-    api = client or OpenAI()
-    try:
-        response = api.responses.parse(
-            model=settings.model,
-            reasoning={"effort": settings.reasoning_effort},
-            tools=[{"type": "web_search", "external_web_access": True}],
-            tool_choice="required",
-            include=["web_search_call.action.sources"],
-            instructions=instructions,
-            input=prompt,
-            text_format=DailyPackage,
-            max_output_tokens=16000,
-            store=False,
-        )
-    except Exception as error:
-        raise GenerationError(f"OpenAI {phase} 요청에 실패했습니다: {error}") from error
+    api = client or OpenAI(timeout=settings.api_timeout_seconds, max_retries=0)
+    response = None
+    last_error: Exception | None = None
+    for request_attempt in range(1, settings.api_retry_attempts + 1):
+        try:
+            response = api.responses.parse(
+                model=settings.model,
+                reasoning={"effort": settings.reasoning_effort},
+                tools=[{"type": "web_search", "external_web_access": True}],
+                tool_choice="required",
+                include=["web_search_call.action.sources"],
+                instructions=instructions,
+                input=prompt,
+                text_format=DailyPackage,
+                max_output_tokens=16000,
+                store=False,
+            )
+            break
+        except Exception as error:
+            last_error = error
+            if not _is_retryable(error) or request_attempt >= settings.api_retry_attempts:
+                raise GenerationError(f"OpenAI {phase} 요청에 실패했습니다: {error}") from error
+            time.sleep(min(8, 2 ** (request_attempt - 1)))
+
+    if response is None:
+        raise GenerationError(f"OpenAI {phase} 요청에 실패했습니다: {last_error}")
 
     package = response.output_parsed
     if package is None:
@@ -93,6 +104,18 @@ def _request_package(
         detail = f" 모델 응답: {refusal}" if refusal else ""
         raise GenerationError(f"{phase} 단계에서 구조화된 카드뉴스 초안을 받지 못했습니다.{detail}")
     return package
+
+
+def _is_retryable(error: Exception) -> bool:
+    status_code = getattr(error, "status_code", None)
+    if status_code == 429 or isinstance(status_code, int) and status_code >= 500:
+        return True
+    return error.__class__.__name__ in {
+        "APIConnectionError",
+        "APITimeoutError",
+        "InternalServerError",
+        "RateLimitError",
+    }
 
 
 def _extract_refusal(response: object) -> str:
