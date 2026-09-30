@@ -14,7 +14,13 @@ from .validation import ValidationReport, validate_package
 
 
 def load_package(path: str | Path) -> DailyPackage:
-    return DailyPackage.model_validate_json(Path(path).read_text(encoding="utf-8"))
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    # Packages generated before v0.7.0 did not contain visual_template.
+    # Keep publication history readable and let the renderer infer a safe template.
+    for card in payload.get("cards", []):
+        default_template = "cover" if card.get("slide") == 1 else "auto"
+        card.setdefault("visual_template", default_template)
+    return DailyPackage.model_validate(payload)
 
 
 def run_daily(

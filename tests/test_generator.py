@@ -47,9 +47,11 @@ def test_generation_uses_openai_responses_web_search_and_schema() -> None:
 
 
 def test_daily_package_schema_does_not_emit_uri_format() -> None:
-    schema_text = str(DailyPackage.model_json_schema())
+    schema = DailyPackage.model_json_schema()
+    schema_text = str(schema)
     assert "'format': 'uri'" not in schema_text
     assert '"format": "uri"' not in schema_text
+    assert "visual_template" in schema["$defs"]["Card"]["required"]
 
 
 def test_repair_generation_includes_validation_errors_and_invalid_package() -> None:

@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
 from .config import Settings
-from .models import Card, DailyPackage
+from .models import Card, DailyPackage, VisualTemplate
 
 
 CANVAS = (1080, 1350)
@@ -17,6 +18,11 @@ RED = "#E44236"
 MUTED = "#6B685F"
 HAIRLINE = "#C9C3B8"
 WHITE = "#FFFDF7"
+
+MARKDOWN_CITATION = re.compile(r"\s*\(\s*\[[^\]]+\]\(https?://[^)]*\)\s*\)", re.IGNORECASE)
+MARKDOWN_LINK = re.compile(r"\[([^\]]+)\]\(https?://[^)]*\)", re.IGNORECASE)
+RAW_URL = re.compile(r"https?://\S+|www\.\S+", re.IGNORECASE)
+BARE_DOMAIN = re.compile(r"\b(?:[a-z0-9-]+\.)+(?:com|net|org|kr|co\.kr)(?:/\S*)?", re.IGNORECASE)
 
 
 def render_package(package: DailyPackage, destination: str | Path, settings: Settings) -> list[Path]:
@@ -122,10 +128,12 @@ def _draw_cover(
 ) -> None:
     draw.text((70, 190), "DAILY SPORTS BRIEF", font=_font(fonts, 24, "bold"), fill=RED)
     draw.rectangle((70, 229, 130, 237), fill=RED)
+    headline_text = _clean_card_text(card.headline)
+    body_text = _clean_card_text(card.body)
 
     headline_font, headline_lines = _fit_text(
         draw,
-        card.headline,
+        headline_text,
         fonts["bold"],
         max_width=655,
         max_lines=3,
@@ -149,12 +157,12 @@ def _draw_cover(
     headline_bottom = headline_y + len(headline_lines) * line_height
     body_font, body_lines = _fit_text(
         draw,
-        card.body,
+        body_text,
         fonts["regular"],
         max_width=650,
-        max_lines=4,
+        max_lines=5,
         start_size=43,
-        minimum_size=35,
+        minimum_size=31,
     )
     body_y = max(655, headline_bottom + 42)
     draw.line((70, body_y - 24, 650, body_y - 24), fill=INK, width=3)
@@ -229,10 +237,12 @@ def _draw_story_card(
     draw.text((70, 185), f"{card.slide - 1:02d}", font=_font(fonts, 108, "bold"), fill=INK)
     draw.ellipse((202, 267, 220, 285), fill=RED)
     draw.text((1010, 205), "ONE CARD / ONE CLAIM", font=_font(fonts, 19, "bold"), fill=MUTED, anchor="ra")
+    headline_text = _clean_card_text(card.headline)
+    body_text = _clean_card_text(card.body)
 
     headline_font, headline_lines = _fit_text(
         draw,
-        card.headline,
+        headline_text,
         fonts["bold"],
         max_width=940,
         max_lines=2,
@@ -249,32 +259,158 @@ def _draw_story_card(
     body_y = headline_y + len(headline_lines) * line_height + 55
     body_font, body_lines = _fit_text(
         draw,
-        card.body,
+        body_text,
         fonts["regular"],
         max_width=900,
-        max_lines=4,
+        max_lines=5,
         start_size=39,
-        minimum_size=31,
+        minimum_size=28,
     )
     draw.multiline_text((70, body_y), "\n".join(body_lines), font=body_font, fill=INK, spacing=15)
 
     panel_top = max(745, body_y + len(body_lines) * _line_height(body_font, 15) + 40)
     panel_top = min(panel_top, 835)
-    if card.slide == 2:
+    template = _resolve_visual_template(card)
+    if template == VisualTemplate.THREE_SCREEN:
+        _draw_three_screen_module(draw, fonts, panel_top)
+    elif template == VisualTemplate.SEAT_SPLIT:
+        _draw_seat_split_module(draw, fonts, panel_top)
+    elif template == VisualTemplate.LOCATION:
+        _draw_location_module(draw, fonts, panel_top)
+    elif template == VisualTemplate.STEPS:
+        _draw_steps_module(draw, fonts, panel_top)
+    elif template == VisualTemplate.TIMELINE:
         _draw_schedule_module(draw, fonts, panel_top)
-    elif card.slide == 3:
+    elif template == VisualTemplate.COMPARISON:
         _draw_official_module(draw, fonts, panel_top)
-    elif card.slide == 4:
+    elif template == VisualTemplate.STATUS:
         _draw_status_module(draw, fonts, panel_top, game_status)
-    elif card.slide == 5:
+    elif template == VisualTemplate.SOURCES:
         _draw_sources_module(draw, fonts, panel_top, card.source_ids)
-    else:
+    elif template == VisualTemplate.APPROVAL:
         _draw_approval_module(draw, fonts, panel_top)
+    else:
+        _draw_key_fact_module(draw, fonts, panel_top, card.source_ids)
+
+
+def _clean_card_text(text: str) -> str:
+    """Keep only reader-facing copy; source locations belong in package metadata."""
+    cleaned = MARKDOWN_CITATION.sub("", text)
+    cleaned = MARKDOWN_LINK.sub(r"\1", cleaned)
+    cleaned = RAW_URL.sub("", cleaned)
+    cleaned = BARE_DOMAIN.sub("", cleaned)
+    cleaned = re.sub(r"\(\s*\)", "", cleaned)
+    cleaned = re.sub(r"\s+([,.!?。！？])", r"\1", cleaned)
+    cleaned = re.sub(r"\s{2,}", " ", cleaned)
+    return cleaned.strip(" -·,.") or "상세 내용은 출처 검토 후 확정합니다"
+
+
+def _resolve_visual_template(card: Card) -> VisualTemplate:
+    if card.visual_template != VisualTemplate.AUTO:
+        return card.visual_template
+
+    context = f"{card.headline} {card.body} {card.visual_direction}".lower()
+    keyword_templates = (
+        (("3면", "세 화면", "스크린", "screen"), VisualTemplate.THREE_SCREEN),
+        (("좌석", "응원석", "홈·원정", "홈 원정"), VisualTemplate.SEAT_SPLIT),
+        (("장소", "위치", "지점", "경기장", "상영관"), VisualTemplate.LOCATION),
+        (("방법", "단계", "순서", "예매", "신청"), VisualTemplate.STEPS),
+        (("일정", "시간", "시각", "날짜", "달력"), VisualTemplate.TIMELINE),
+        (("비교", "구분", "확정", "발표"), VisualTemplate.COMPARISON),
+        (("상태", "진행", "종료", "연기", "취소"), VisualTemplate.STATUS),
+        (("출처", "근거", "자료"), VisualTemplate.SOURCES),
+        (("승인", "검토", "체크"), VisualTemplate.APPROVAL),
+    )
+    for keywords, template in keyword_templates:
+        if any(keyword in context for keyword in keywords):
+            return template
+    return VisualTemplate.KEY_FACT
+
+
+def _draw_three_screen_module(draw: ImageDraw.ImageDraw, fonts: dict[str, str], top: int) -> None:
+    _panel(draw, top)
+    draw.text((100, top + 32), "3면 영상 구성", font=_font(fonts, 25, "bold"), fill=MUTED)
+    panels = ((115, "좌측"), (385, "정면"), (730, "우측"))
+    widths = (285, 310, 285)
+    for index, ((left, label), width) in enumerate(zip(panels, widths, strict=True)):
+        y = top + (125 if index == 1 else 155)
+        height = 235 if index == 1 else 205
+        fill = YELLOW if index == 1 else WHITE
+        draw.rounded_rectangle((left, y, left + width, y + height), radius=14, fill=fill, outline=INK, width=3)
+        draw.line((left + 28, y + height - 42, left + width - 28, y + height - 42), fill=INK, width=2)
+        draw.text((left + width // 2, y + height // 2 - 10), label, font=_font(fonts, 31, "bold"), fill=INK, anchor="mm")
+    draw.text((540, top + 365), "정면과 양옆 화면을 함께 활용하는 개념도", font=_font(fonts, 24), fill=MUTED, anchor="ma")
+
+
+def _draw_seat_split_module(draw: ImageDraw.ImageDraw, fonts: dict[str, str], top: int) -> None:
+    _panel(draw, top)
+    middle = 540
+    draw.line((middle, top + 76, middle, 1165), fill=INK, width=3)
+    draw.rectangle((70, top, middle, top + 76), fill=YELLOW)
+    draw.rectangle((middle, top, 1010, top + 76), fill=INK)
+    draw.text((305, top + 38), "홈 응원 구역", font=_font(fonts, 29, "bold"), fill=INK, anchor="mm")
+    draw.text((775, top + 38), "원정 응원 구역", font=_font(fonts, 29, "bold"), fill=WHITE, anchor="mm")
+    for column, base_x in enumerate((145, 615)):
+        for row in range(3):
+            y = top + 130 + row * 76
+            for seat in range(4):
+                x = base_x + seat * 76
+                fill = RED if column == 0 and row == 0 else (YELLOW if column == 1 and row == 0 else WHITE)
+                draw.rounded_rectangle((x, y, x + 50, y + 42), radius=7, fill=fill, outline=INK, width=2)
+    draw.rectangle((245, top + 330, 835, top + 377), fill=WHITE)
+    draw.text((540, top + 350), "예매 전 상영관별 실제 좌석 배치를 확인하세요", font=_font(fonts, 24), fill=MUTED, anchor="ma")
+
+
+def _draw_location_module(draw: ImageDraw.ImageDraw, fonts: dict[str, str], top: int) -> None:
+    _panel(draw, top)
+    pin_x, pin_y = 260, top + 205
+    draw.ellipse((pin_x - 75, pin_y - 105, pin_x + 75, pin_y + 45), fill=YELLOW, outline=INK, width=4)
+    draw.polygon(((pin_x - 48, pin_y + 5), (pin_x + 48, pin_y + 5), (pin_x, pin_y + 105)), fill=YELLOW, outline=INK)
+    draw.ellipse((pin_x - 22, pin_y - 52, pin_x + 22, pin_y - 8), fill=INK)
+    draw.text((430, top + 112), "상영 지점 확인", font=_font(fonts, 39, "bold"), fill=INK)
+    details = (("01", "지점"), ("02", "회차"), ("03", "시작 시각"))
+    for index, (number, label) in enumerate(details):
+        y = top + 180 + index * 65
+        draw.text((435, y), number, font=_font(fonts, 22, "bold"), fill=RED)
+        draw.text((515, y), label, font=_font(fonts, 29, "bold"), fill=INK)
+        draw.line((690, y + 22, 930, y + 22), fill=HAIRLINE, width=2)
+    draw.text((540, top + 380), "공식 안내에서 최종 장소를 확인하세요", font=_font(fonts, 23), fill=MUTED, anchor="ma")
+
+
+def _draw_steps_module(draw: ImageDraw.ImageDraw, fonts: dict[str, str], top: int) -> None:
+    _panel(draw, top)
+    steps = (("01", "공식 안내 확인"), ("02", "지점·회차 선택"), ("03", "최종 조건 확인"))
+    row_height = (1165 - top) // len(steps)
+    for index, (number, label) in enumerate(steps):
+        row_top = top + index * row_height
+        if index:
+            draw.line((200, row_top, 1010, row_top), fill=HAIRLINE, width=2)
+        draw.rectangle((70, row_top, 200, row_top + row_height), fill=YELLOW if index == 0 else INK)
+        draw.text((135, row_top + row_height // 2), number, font=_font(fonts, 34, "bold"), fill=INK if index == 0 else WHITE, anchor="mm")
+        draw.text((245, row_top + row_height // 2), label, font=_font(fonts, 33, "bold"), fill=INK, anchor="lm")
+        draw.text((955, row_top + row_height // 2), "→", font=_font(fonts, 34, "bold"), fill=RED, anchor="rm")
+
+
+def _draw_key_fact_module(
+    draw: ImageDraw.ImageDraw,
+    fonts: dict[str, str],
+    top: int,
+    source_ids: list[str],
+) -> None:
+    _panel(draw, top)
+    labels = (("핵심", "한 카드에 한 가지 주장"), ("시점", "최신 발표 기준"), ("근거", " · ".join(source_ids) or "편집 검토"))
+    row_height = (1165 - top) // len(labels)
+    for index, (label, value) in enumerate(labels):
+        row_top = top + index * row_height
+        if index:
+            draw.line((70, row_top, 1010, row_top), fill=HAIRLINE, width=2)
+        draw.text((120, row_top + row_height // 2), label, font=_font(fonts, 24, "bold"), fill=RED, anchor="lm")
+        draw.text((265, row_top + row_height // 2), value, font=_font(fonts, 31, "bold"), fill=INK, anchor="lm")
 
 
 def _draw_schedule_module(draw: ImageDraw.ImageDraw, fonts: dict[str, str], top: int) -> None:
     _panel(draw, top)
-    items = (("01", "공식 일정 확인"), ("02", "한국 시각 변환"), ("03", "원문 링크 저장"))
+    items = (("01", "공식 일정 확인"), ("02", "한국 시각 변환"), ("03", "출처 정보 보관"))
     row_height = (1165 - top) // len(items)
     for index, (number, label) in enumerate(items):
         row_top = top + index * row_height
@@ -294,7 +430,7 @@ def _draw_official_module(draw: ImageDraw.ImageDraw, fonts: dict[str, str], top:
     draw.rectangle((middle, top, 1010, top + 70), fill=INK)
     draw.text((305, top + 35), "공식 발표", font=_font(fonts, 30, "bold"), fill=INK, anchor="mm")
     draw.text((775, top + 35), "확인 중", font=_font(fonts, 30, "bold"), fill=WHITE, anchor="mm")
-    checks = (("원문 링크", True), ("발표 시각", True), ("추측·보도", False))
+    checks = (("공식 원문", True), ("발표 시각", True), ("추측·보도", False))
     for index, (label, verified) in enumerate(checks):
         y = top + 125 + index * 83
         draw.text((125, y), "●" if verified else "○", font=_font(fonts, 28, "bold"), fill=RED if verified else MUTED, anchor="lm")
@@ -384,7 +520,23 @@ def _fit_text(
             return font, lines
     font = ImageFont.truetype(font_path, minimum_size)
     lines = _wrap_by_pixels(draw, text, font, max_width)
-    return font, lines[:max_lines]
+    visible_lines = lines[:max_lines]
+    if len(lines) > max_lines and visible_lines:
+        visible_lines[-1] = _ellipsize(draw, visible_lines[-1], font, max_width)
+    return font, visible_lines
+
+
+def _ellipsize(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    font: ImageFont.FreeTypeFont,
+    max_width: int,
+) -> str:
+    candidate = text.rstrip() + "…"
+    while text and draw.textlength(candidate, font=font) > max_width:
+        text = text[:-1].rstrip()
+        candidate = text + "…"
+    return candidate
 
 
 def _wrap_by_pixels(

@@ -9,7 +9,7 @@ import pytest
 
 from sports_card_news.config import load_settings
 from sports_card_news.history import recent_publication_summary
-from sports_card_news.models import FactStatus, RightsStatus
+from sports_card_news.models import FactStatus, RightsStatus, VisualTemplate
 from sports_card_news.pipeline import load_package, run_daily
 from sports_card_news.validation import validate_package
 
@@ -49,6 +49,33 @@ def test_unknown_source_reference_is_blocked() -> None:
     report = validate_package(broken, settings)
     assert not report.ok
     assert any("S999" in error for error in report.errors)
+
+
+def test_card_copy_with_markdown_or_url_is_blocked() -> None:
+    settings = load_settings(ROOT / "config/settings.toml")
+    package = load_package(ROOT / "fixtures/demo_package.json")
+    linked_card = package.cards[1].model_copy(
+        update={"body": "공식 발표를 확인했습니다. ([example.com](https://example.com/news))"}
+    )
+    linked = package.model_copy(update={"cards": [package.cards[0], linked_card, *package.cards[2:]]})
+
+    report = validate_package(linked, settings)
+
+    assert not report.ok
+    assert any("URL·도메인·Markdown 링크" in error for error in report.errors)
+
+
+def test_legacy_package_without_visual_template_is_migrated(tmp_path: Path) -> None:
+    payload = json.loads((ROOT / "fixtures/demo_package.json").read_text(encoding="utf-8"))
+    for card in payload["cards"]:
+        card.pop("visual_template")
+    legacy_path = tmp_path / "legacy-package.json"
+    legacy_path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+
+    package = load_package(legacy_path)
+
+    assert package.cards[0].visual_template == VisualTemplate.COVER
+    assert all(card.visual_template == VisualTemplate.AUTO for card in package.cards[1:])
 
 
 def test_rights_needs_review_is_warning_not_blocking() -> None:

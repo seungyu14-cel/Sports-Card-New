@@ -1,10 +1,17 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from urllib.parse import urlparse
 
 from .config import Settings
-from .models import DailyPackage, FactStatus, GameStatus, RightsStatus, SourceType
+from .models import DailyPackage, FactStatus, GameStatus, RightsStatus, SourceType, VisualTemplate
+
+
+CARD_LINK_PATTERN = re.compile(
+    r"https?://|www\.|\[[^\]]+\]\([^)]*\)|\b[a-z0-9-]+(?:\.[a-z0-9-]+)+\b",
+    re.IGNORECASE,
+)
 
 
 @dataclass
@@ -92,6 +99,19 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
             report.errors.append(
                 f"카드 {card.slide}가 검증 완료되지 않은 출처를 참조합니다: {unresolved}"
             )
+        if CARD_LINK_PATTERN.search(card.headline) or CARD_LINK_PATTERN.search(card.body):
+            report.errors.append(
+                f"카드 {card.slide} 문구에 URL·도메인·Markdown 링크가 포함되어 있습니다. "
+                "출처는 source_ids와 facts.url로만 연결하세요."
+            )
+        if len(card.body) > 180:
+            report.errors.append(
+                f"카드 {card.slide} 본문이 180자를 초과했습니다: {len(card.body)}자"
+            )
+        if card.slide == 1 and card.visual_template != VisualTemplate.COVER:
+            report.errors.append("카드 1의 visual_template은 cover여야 합니다.")
+        if card.slide > 1 and card.visual_template == VisualTemplate.COVER:
+            report.errors.append(f"카드 {card.slide}에는 cover 템플릿을 사용할 수 없습니다.")
         if card.slide < len(package.cards) and not card.source_ids:
             report.warnings.append(f"카드 {card.slide}에 직접 연결된 출처가 없습니다.")
 

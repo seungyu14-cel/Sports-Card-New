@@ -6,7 +6,8 @@ from PIL import Image
 
 from sports_card_news.config import load_settings
 from sports_card_news.pipeline import load_package
-from sports_card_news.renderer import render_package
+from sports_card_news.models import VisualTemplate
+from sports_card_news.renderer import _clean_card_text, _resolve_visual_template, render_package
 
 
 ROOT = Path(__file__).parents[1]
@@ -36,3 +37,26 @@ def test_story_cards_render_distinct_data_modules(tmp_path: Path) -> None:
 
     with Image.open(paths[1]) as schedule, Image.open(paths[3]) as status:
         assert schedule.tobytes() != status.tobytes()
+
+
+def test_renderer_removes_source_links_from_visible_copy() -> None:
+    source = "CGV가 일정을 발표했습니다. ([cgv.co.kr](https://www.cgv.co.kr/news?id=3))"
+
+    cleaned = _clean_card_text(source)
+
+    assert cleaned == "CGV가 일정을 발표했습니다"
+    assert "http" not in cleaned
+    assert "cgv.co.kr" not in cleaned
+
+
+def test_auto_template_uses_card_content_instead_of_slide_number() -> None:
+    package = load_package(ROOT / "fixtures/demo_package.json")
+    card = package.cards[1].model_copy(
+        update={
+            "visual_template": VisualTemplate.AUTO,
+            "headline": "홈·원정 응원석 구분",
+            "visual_direction": "좌석 구역을 두 부분으로 나눈다",
+        }
+    )
+
+    assert _resolve_visual_template(card) == VisualTemplate.SEAT_SPLIT

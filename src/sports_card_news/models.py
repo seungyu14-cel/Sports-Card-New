@@ -39,6 +39,21 @@ class RightsStatus(StrEnum):
     NEEDS_REVIEW = "확인 필요"
 
 
+class VisualTemplate(StrEnum):
+    COVER = "cover"
+    KEY_FACT = "key_fact"
+    THREE_SCREEN = "three_screen"
+    SEAT_SPLIT = "seat_split"
+    LOCATION = "location"
+    STEPS = "steps"
+    TIMELINE = "timeline"
+    COMPARISON = "comparison"
+    STATUS = "status"
+    SOURCES = "sources"
+    APPROVAL = "approval"
+    AUTO = "auto"
+
+
 Score = Annotated[int, Field(ge=1, le=5)]
 
 
@@ -94,6 +109,7 @@ class Card(StrictModel):
     headline: str = Field(min_length=2, max_length=40)
     body: str = Field(min_length=10, max_length=240)
     source_ids: list[str] = Field(default_factory=list)
+    visual_template: VisualTemplate
     visual_direction: str = Field(min_length=4, max_length=240)
     alt_text: str = Field(min_length=10, max_length=400)
 
