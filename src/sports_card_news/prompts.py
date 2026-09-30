@@ -174,7 +174,7 @@ def build_repair_prompt(
 구조화 데이터:
 {structured_context}
 
-실패 초안:
+검증에 실패한 이전 초안:
 {package_json}
 
 공식 원문을 다시 확인해 오류를 해결한다.
