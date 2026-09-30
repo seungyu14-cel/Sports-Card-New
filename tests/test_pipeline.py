@@ -30,14 +30,8 @@ def test_demo_package_passes_validation() -> None:
     report = validate_package(package, settings)
     assert report.ok, report.errors
     assert len(package.cards) == 6
-    assert [card.league.value for card in package.cards] == [
-        "COVER",
-        "KBO",
-        "KBL",
-        "NPB",
-        "EPL",
-        "NBA",
-    ]
+    assert package.cards[0].league.value == "COVER"
+    assert len({card.league.value for card in package.cards[1:]}) >= 3
     assert len({candidate.sport for candidate in package.candidates}) == 3
     assert 500 <= len(package.caption) <= 2000
 
@@ -55,6 +49,7 @@ def test_daily_fixture_renders_png_and_review_files(tmp_path: Path) -> None:
     assert len(list(destination.glob("card-*.png"))) == 6
     assert (destination / "editorial-review.md").exists()
     assert (destination / "validation.md").exists()
+    assert (destination / "visual-qa.md").exists()
     assert (destination / "caption-instagram.md").exists()
     assert (destination / "sources.md").exists()
     assert (destination / "alt-text.json").exists()
@@ -67,6 +62,7 @@ def test_daily_fixture_renders_png_and_review_files(tmp_path: Path) -> None:
             "caption-instagram.md",
             "alt-text.json",
             "sources.md",
+            "visual-qa.md",
             "publish-manifest.json",
         }
 
@@ -119,17 +115,11 @@ def test_legacy_package_without_card_layout_fields_is_migrated(tmp_path: Path) -
         fact.verification_method == VerificationMethod.SECONDARY_ONLY
         for fact in package.facts
     )
-    assert [card.league.value for card in package.cards] == [
-        "COVER",
-        "KBO",
-        "KBL",
-        "NPB",
-        "EPL",
-        "NBA",
-    ]
+    assert package.cards[0].league.value == "COVER"
+    assert all(card.candidate_title for card in package.cards[1:])
 
 
-def test_wrong_league_page_order_is_blocked() -> None:
+def test_card_candidate_league_mismatch_is_blocked() -> None:
     settings = load_settings(ROOT / "config/settings.toml")
     package = load_package(ROOT / "fixtures/demo_package.json")
     wrong_card = package.cards[1].model_copy(update={"league": CardLeague.NBA})
@@ -138,7 +128,19 @@ def test_wrong_league_page_order_is_blocked() -> None:
     report = validate_package(wrong, settings)
 
     assert not report.ok
-    assert any("카드 리그 순서" in error for error in report.errors)
+    assert any("리그와 후보 리그가 다릅니다" in error for error in report.errors)
+
+
+def test_flexible_editorial_order_is_allowed() -> None:
+    settings = load_settings(ROOT / "config/settings.toml")
+    package = load_package(ROOT / "fixtures/demo_package.json")
+    cards = [package.cards[0], package.cards[5], package.cards[1], package.cards[4], package.cards[2], package.cards[3]]
+    cards = [card.model_copy(update={"slide": index}) for index, card in enumerate(cards, start=1)]
+    changed = package.model_copy(update={"cards": cards})
+
+    report = validate_package(changed, settings)
+
+    assert report.ok, report.errors
 
 
 def test_rights_needs_review_is_warning_not_blocking() -> None:

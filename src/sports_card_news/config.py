@@ -23,7 +23,13 @@ class Settings:
     api_timeout_seconds: float
     leagues: tuple[str, ...]
     candidate_sports_min: int
+    candidate_pool_target: int
+    min_distinct_story_leagues: int
+    max_cards_per_league: int
+    visual_repeat_limit: int
     recent_days: int
+    analytics_days: int
+    structured_data_dir: str
     weights: dict[str, float]
     trusted_domains: tuple[str, ...]
 
@@ -49,8 +55,18 @@ def load_settings(path: str | Path = "config/settings.toml") -> Settings:
         api_retry_attempts=min(5, max(1, int(raw.get("api_retry_attempts", 3)))),
         api_timeout_seconds=max(10.0, float(raw.get("api_timeout_seconds", 120))),
         leagues=tuple(editorial["leagues"]),
-        candidate_sports_min=editorial["candidate_sports_min"],
-        recent_days=editorial["recent_days"],
+        candidate_sports_min=int(editorial["candidate_sports_min"]),
+        candidate_pool_target=min(20, max(5, int(editorial.get("candidate_pool_target", 10)))),
+        min_distinct_story_leagues=min(
+            5, max(1, int(editorial.get("min_distinct_story_leagues", 3)))
+        ),
+        max_cards_per_league=min(
+            5, max(1, int(editorial.get("max_cards_per_league", 2)))
+        ),
+        visual_repeat_limit=min(5, max(1, int(editorial.get("visual_repeat_limit", 2)))),
+        recent_days=max(1, int(editorial["recent_days"])),
+        analytics_days=max(1, int(editorial.get("analytics_days", 30))),
+        structured_data_dir=str(editorial.get("structured_data_dir", "data/structured")),
         weights=dict(editorial["weights"]),
         trusted_domains=tuple(sources["trusted_domains"]),
     )

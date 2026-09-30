@@ -88,6 +88,7 @@ jobs:
           sports-card-news validate "output/$edition_date/package.json"
           test -s "output/$edition_date/caption-instagram.md"
           test -s "output/$edition_date/sources.md"
+          test -s "output/$edition_date/visual-qa.md"
           test -s "output/$edition_date/alt-text.json"
           test -s "output/$edition_date/publish-manifest.json"
           unzip -t "output/$edition_date/instagram-carousel.zip"

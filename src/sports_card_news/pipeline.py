@@ -4,30 +4,49 @@ import json
 import re
 import sys
 import zipfile
+from collections import Counter
 from datetime import date, timedelta
 from pathlib import Path
 
-from PIL import Image
-
+from .analytics import recent_performance_summary
 from .config import Settings
 from .generator import generate_daily_package, repair_daily_package
 from .history import recent_publication_summary
 from .models import DailyPackage
 from .renderer import render_package
+from .structured_data import load_structured_context
 from .validation import ValidationReport, validate_package
+from .visual_qa import run_visual_qa
 
 
 def load_package(path: str | Path) -> DailyPackage:
     payload = json.loads(Path(path).read_text(encoding="utf-8"))
-    # Keep packages from earlier releases readable. The fixed league sequence is
-    # also used as a safe migration default for publication history.
     legacy_leagues = ("COVER", "KBO", "KBL", "NPB", "EPL", "NBA")
+    candidates = payload.get("candidates", [])
+    candidate_by_league = {}
+    for candidate in candidates:
+        league = str(candidate.get("league", "")).upper()
+        candidate_by_league.setdefault(league, candidate)
+        candidate.setdefault("freshness", 3)
+        candidate.setdefault("fan_interest", 3)
+        candidate.setdefault("visual_potential", 3)
+        candidate.setdefault("uniqueness", 3)
+
     for card in payload.get("cards", []):
-        default_template = "cover" if card.get("slide") == 1 else "auto"
-        card.setdefault("visual_template", default_template)
         slide_index = int(card.get("slide", 1)) - 1
         if 0 <= slide_index < len(legacy_leagues):
             card.setdefault("league", legacy_leagues[slide_index])
+        default_template = "cover" if card.get("slide") == 1 else "auto"
+        card.setdefault("visual_template", default_template)
+        card.setdefault("content_type", "auto")
+        card.setdefault("kicker", "")
+        card.setdefault("asset_ids", [])
+        if int(card.get("slide", 1)) == 1:
+            card.setdefault("candidate_title", "")
+        else:
+            league = str(card.get("league", "")).upper()
+            candidate = candidate_by_league.get(league)
+            card.setdefault("candidate_title", str(candidate.get("title", "")) if candidate else "")
         headline = str(card.get("headline", "핵심 정보")).splitlines()[0]
         body = str(card.get("body", "")).replace("\n", " ")
         card.setdefault("visual_title", headline[:60])
@@ -35,12 +54,13 @@ def load_package(path: str | Path) -> DailyPackage:
             "visual_items",
             [{"label": "핵심", "value": headline[:60], "note": body[:80]}],
         )
+
     for fact in payload.get("facts", []):
         fact.setdefault("expires_at", None)
-        # Legacy packages remain readable, but missing provenance must never be
-        # upgraded to a false direct-verification claim.
         fact.setdefault("verification_method", "보조 자료만 확인")
         fact.setdefault("evidence", str(fact.get("claim", "공식 원문 확인"))[:500])
+
+    payload.setdefault("assets", [])
     return DailyPackage.model_validate(payload)
 
 
@@ -52,7 +72,10 @@ def run_daily(
 ) -> tuple[Path, ValidationReport]:
     output_root = Path(output_root)
     history = ""
+    performance = "성과 데이터 없음"
+    structured_context = "사전 구조화 데이터 없음"
     recovery_attempts: list[tuple[int, list[str]]] = []
+
     if fixture:
         package = load_package(fixture)
         fixture_day = package.generated_at.date()
@@ -77,7 +100,22 @@ def run_daily(
         )
     else:
         history = recent_publication_summary(output_root, edition_date, settings.recent_days)
-        package = generate_daily_package(edition_date, settings, history)
+        performance = recent_performance_summary(
+            output_root,
+            edition_date,
+            settings.analytics_days,
+        )
+        structured_context = load_structured_context(
+            settings.structured_data_dir,
+            edition_date,
+        )
+        package = generate_daily_package(
+            edition_date,
+            settings,
+            history,
+            performance_summary=performance,
+            structured_context=structured_context,
+        )
 
     report = _validate_for_edition(package, settings, edition_date)
     if not fixture:
@@ -98,6 +136,8 @@ def run_daily(
                 edition_date=edition_date,
                 settings=settings,
                 history_summary=history,
+                performance_summary=performance,
+                structured_context=structured_context,
                 invalid_package=package,
                 errors=errors,
                 warnings=list(report.warnings),
@@ -126,16 +166,19 @@ def run_daily(
     _write_text(destination / "caption.md", _caption_markdown(package))
     _write_text(destination / "editorial-review.md", _editorial_markdown(package, settings))
     _write_text(destination / "validation.md", report.as_markdown())
+
     recovery_path = destination / "recovery-log.md"
     if recovery_attempts:
-        _write_text(
-            recovery_path,
-            _recovery_markdown(recovery_attempts, resolved=True),
-        )
+        _write_text(recovery_path, _recovery_markdown(recovery_attempts, resolved=True))
     elif recovery_path.exists():
         recovery_path.unlink()
+
     rendered_paths = render_package(package, destination, settings)
-    _validate_rendered_output(rendered_paths, settings)
+    visual_report = run_visual_qa(package, rendered_paths, settings)
+    _write_text(destination / "visual-qa.md", visual_report.as_markdown())
+    if not visual_report.ok:
+        raise ValueError(visual_report.as_markdown())
+
     _write_publication_package(destination, package, rendered_paths)
     return destination, report
 
@@ -184,7 +227,11 @@ def render_file(path: str | Path, destination: str | Path, settings: Settings) -
     report = validate_package(package, settings)
     if not report.ok:
         raise ValueError(report.as_markdown())
-    return render_package(package, destination, settings)
+    paths = render_package(package, destination, settings)
+    visual_report = run_visual_qa(package, paths, settings)
+    if not visual_report.ok:
+        raise ValueError(visual_report.as_markdown())
+    return paths
 
 
 def _caption_markdown(package: DailyPackage) -> str:
@@ -224,25 +271,19 @@ def _sources_markdown(package: DailyPackage) -> str:
             f"- 유효 기한: {expiry}\n"
             f"- 근거: {fact.evidence}"
         )
+    if package.assets:
+        blocks.append("# 시각 자산 권리")
+        for asset in package.assets:
+            blocks.append(
+                f"## {asset.id} · {asset.title}\n\n"
+                f"- 종류: {asset.asset_type.value}\n"
+                f"- 권리 상태: {asset.rights_status.value}\n"
+                f"- 게시 승인: {'예' if asset.approved_for_publish else '아니오'}\n"
+                f"- 출처: {asset.source_url or '외부 URL 없음'}\n"
+                f"- 크레딧: {asset.credit or '없음'}\n"
+                f"- 권리 메모: {asset.rights_note}"
+            )
     return "\n\n".join(blocks) + "\n"
-
-
-def _validate_rendered_output(paths: list[Path], settings: Settings) -> None:
-    if len(paths) != 6:
-        raise ValueError(f"렌더링 결과는 정확히 6장이어야 합니다: {len(paths)}장")
-    expected_size = (settings.output_width, settings.output_height)
-    for path in paths:
-        if not path.exists() or path.stat().st_size == 0:
-            raise ValueError(f"렌더링 파일이 비어 있습니다: {path.name}")
-        with Image.open(path) as image:
-            if image.format != "PNG":
-                raise ValueError(f"인스타그램 카드가 PNG가 아닙니다: {path.name}")
-            if image.size != expected_size:
-                raise ValueError(
-                    f"카드 크기가 {expected_size}와 다릅니다: {path.name}={image.size}"
-                )
-            if image.mode != "RGB":
-                raise ValueError(f"카드 색상 모드는 RGB여야 합니다: {path.name}={image.mode}")
 
 
 def _write_publication_package(
@@ -253,7 +294,12 @@ def _write_publication_package(
     _write_text(destination / "caption-instagram.md", _instagram_caption(package))
     _write_text(destination / "sources.md", _sources_markdown(package))
     alt_text_payload = [
-        {"slide": card.slide, "league": card.league.value, "alt_text": card.alt_text}
+        {
+            "slide": card.slide,
+            "league": card.league.value,
+            "content_type": card.content_type.value,
+            "alt_text": card.alt_text,
+        }
         for card in package.cards
     ]
     _write_text(
@@ -269,6 +315,8 @@ def _write_publication_package(
         "caption": "caption-instagram.md",
         "alt_text": "alt-text.json",
         "sources": "sources.md",
+        "visual_qa": "visual-qa.md",
+        "assets": [asset.model_dump(mode="json") for asset in package.assets],
     }
     _write_text(
         destination / "publish-manifest.json",
@@ -282,6 +330,7 @@ def _write_publication_package(
             "caption-instagram.md",
             "alt-text.json",
             "sources.md",
+            "visual-qa.md",
             "publish-manifest.json",
         ):
             archive.write(destination / name, arcname=name)
@@ -289,14 +338,21 @@ def _write_publication_package(
 
 def _editorial_markdown(package: DailyPackage, settings: Settings) -> str:
     candidate_rows = []
-    for candidate in package.candidates:
+    for candidate in sorted(
+        package.candidates,
+        key=lambda item: item.editorial_score(settings.weights),
+        reverse=True,
+    ):
         candidate_rows.append(
-            "| {sport} | {league} | {title} | {status} | {score:.1f} | {sources} |".format(
+            "| {sport} | {league} | {title} | {status} | {score:.2f} | {freshness} | {interest} | {visual} | {sources} |".format(
                 sport=candidate.sport,
                 league=candidate.league,
                 title=candidate.title.replace("|", "\\|"),
                 status=candidate.game_status.value,
                 score=candidate.editorial_score(settings.weights),
+                freshness=candidate.freshness,
+                interest=candidate.fan_interest,
+                visual=candidate.visual_potential,
                 sources=", ".join(candidate.source_ids),
             )
         )
@@ -304,6 +360,8 @@ def _editorial_markdown(package: DailyPackage, settings: Settings) -> str:
         f"| {fact.id} | {fact.claim.replace('|', '\\|')} | [{fact.title}]({fact.url}) | {fact.status.value} |"
         for fact in package.facts
     ]
+    story_mix = Counter(card.league.value for card in package.cards[1:])
+    template_mix = Counter(card.visual_template.value for card in package.cards[1:])
     checklist = package.approval_checklist
     return f"""# 편집 검토: {package.edition_date}
 
@@ -311,15 +369,20 @@ def _editorial_markdown(package: DailyPackage, settings: Settings) -> str:
 
 ## 후보 비교
 
-| 종목 | 리그 | 후보 | 경기 상태 | 가중 점수 | 출처 |
-|---|---|---|---|---:|---|
+| 종목 | 리그 | 후보 | 경기 상태 | 편집 점수 | 최신성 | 팬 관심 | 시각화 | 출처 |
+|---|---|---|---|---:|---:|---:|---:|---|
 {chr(10).join(candidate_rows)}
 
-## 오늘의 추천
+## 오늘의 대표 이슈
 
 **{package.selected_candidate_title}**
 
 {package.selection_reason}
+
+## 오늘의 편성
+- 리그 구성: {dict(story_mix)}
+- 템플릿 구성: {dict(template_mix)}
+- 고정 리그 순서가 아니라 뉴스 가치와 다양성 규칙으로 편성
 
 ## 팩트 카드
 

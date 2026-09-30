@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sports-card-news"
-version = "0.9.0"
-description = "Human-approved multi-sport Instagram card-news automation"
+version = "1.0.0"
+description = "Human-approved multi-sport Instagram editorial quality automation"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
