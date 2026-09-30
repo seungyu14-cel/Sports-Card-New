@@ -42,6 +42,7 @@ class VerificationMethod(StrEnum):
 class RightsStatus(StrEnum):
     ORIGINAL = "자체 제작"
     LICENSED = "사용 허가"
+    NEWS_APPROVED = "뉴스 이미지 사용 승인"
     NEEDS_REVIEW = "확인 필요"
 
 
@@ -52,6 +53,7 @@ class AssetType(StrEnum):
     STADIUM = "stadium"
     ILLUSTRATION = "illustration"
     DATA_GRAPHIC = "data_graphic"
+    NEWS_IMAGE = "news_image"
 
 
 class ContentType(StrEnum):
@@ -66,6 +68,7 @@ class ContentType(StrEnum):
     INJURY = "injury"
     SCHEDULE = "schedule"
     EXPLAINER = "explainer"
+    SUMMARY = "summary"
 
 
 class VisualTemplate(StrEnum):
@@ -77,6 +80,7 @@ class VisualTemplate(StrEnum):
     RANKING = "ranking"
     BREAKING = "breaking"
     SCHEDULE = "schedule"
+    SUMMARY = "summary"
     KEY_FACT = "key_fact"
     THREE_SCREEN = "three_screen"
     SEAT_SPLIT = "seat_split"
@@ -97,6 +101,7 @@ class CardLeague(StrEnum):
     NPB = "NPB"
     EPL = "EPL"
     NBA = "NBA"
+    SUMMARY = "SUMMARY"
 
 
 Score = Annotated[int, Field(ge=1, le=5)]
@@ -150,7 +155,7 @@ class FactSource(StrictModel):
     local_time: str = Field(default="", max_length=100)
     korea_time: str = Field(default="", max_length=100)
     status: FactStatus
-    rights_note: str = Field(default="텍스트 사실 확인용. 이미지 재사용 안 함", max_length=300)
+    rights_note: str = Field(default="텍스트 사실 확인용", max_length=300)
 
     @field_validator("url")
     @classmethod
@@ -165,9 +170,12 @@ class VisualAsset(StrictModel):
     asset_type: AssetType
     title: str = Field(min_length=2, max_length=120)
     source_url: str = Field(default="", max_length=2048)
+    source_fact_id: str = Field(default="", max_length=24)
     rights_status: RightsStatus
     rights_note: str = Field(min_length=2, max_length=300)
-    credit: str = Field(default="", max_length=120)
+    credit: str = Field(default="", max_length=160)
+    usage_scope: list[str] = Field(default_factory=list, max_length=8)
+    license_evidence: str = Field(default="", max_length=500)
     approved_for_publish: bool = False
 
 
@@ -178,7 +186,7 @@ class VisualItem(StrictModel):
 
 
 class Card(StrictModel):
-    slide: int = Field(ge=1, le=6)
+    slide: int = Field(ge=1, le=10)
     league: CardLeague
     candidate_title: str = Field(default="", max_length=100)
     headline: str = Field(min_length=2, max_length=40)
@@ -188,7 +196,7 @@ class Card(StrictModel):
     kicker: str = Field(default="", max_length=32)
     visual_template: VisualTemplate
     visual_title: str = Field(min_length=2, max_length=60)
-    visual_items: list[VisualItem] = Field(min_length=1, max_length=5)
+    visual_items: list[VisualItem] = Field(min_length=1, max_length=8)
     visual_direction: str = Field(min_length=4, max_length=240)
     asset_ids: list[str] = Field(default_factory=list, max_length=3)
     alt_text: str = Field(min_length=10, max_length=400)
@@ -203,13 +211,13 @@ class ApprovalChecklist(StrictModel):
 class ResearchBrief(StrictModel):
     edition_date: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
     generated_at: datetime
-    candidates: list[Candidate] = Field(min_length=5, max_length=20)
+    candidates: list[Candidate] = Field(min_length=8, max_length=20)
     facts: list[FactSource] = Field(min_length=1)
     risk_flags: list[str] = Field(default_factory=list)
 
 
 class EditorialCard(StrictModel):
-    slide: int = Field(ge=1, le=6)
+    slide: int = Field(ge=1, le=10)
     league: CardLeague
     candidate_title: str = Field(default="", max_length=100)
     headline: str = Field(min_length=2, max_length=40)
@@ -224,7 +232,7 @@ class EditorialPlan(StrictModel):
     edition_date: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
     selected_candidate_title: str
     selection_reason: str = Field(min_length=10, max_length=500)
-    cards: list[EditorialCard] = Field(min_length=6, max_length=6)
+    cards: list[EditorialCard] = Field(min_length=10, max_length=10)
     caption: str = Field(min_length=500, max_length=2000)
     hashtags: list[str] = Field(min_length=5, max_length=8)
     approval_checklist: ApprovalChecklist
@@ -238,10 +246,10 @@ class EditorialPlan(StrictModel):
 
 
 class DesignCard(StrictModel):
-    slide: int = Field(ge=1, le=6)
+    slide: int = Field(ge=1, le=10)
     visual_template: VisualTemplate
     visual_title: str = Field(min_length=2, max_length=60)
-    visual_items: list[VisualItem] = Field(min_length=1, max_length=5)
+    visual_items: list[VisualItem] = Field(min_length=1, max_length=8)
     visual_direction: str = Field(min_length=4, max_length=240)
     asset_ids: list[str] = Field(default_factory=list, max_length=3)
 
@@ -250,7 +258,7 @@ class DesignPlan(StrictModel):
     design_brief: str = Field(min_length=10, max_length=500)
     rights_status: RightsStatus
     assets: list[VisualAsset] = Field(default_factory=list, max_length=30)
-    cards: list[DesignCard] = Field(min_length=6, max_length=6)
+    cards: list[DesignCard] = Field(min_length=10, max_length=10)
 
 
 class DailyPackage(StrictModel):
@@ -258,11 +266,11 @@ class DailyPackage(StrictModel):
     needs_human_approval: bool
     edition_date: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
     generated_at: datetime
-    candidates: list[Candidate] = Field(min_length=5, max_length=20)
+    candidates: list[Candidate] = Field(min_length=8, max_length=20)
     selected_candidate_title: str
     selection_reason: str = Field(min_length=10, max_length=500)
     facts: list[FactSource] = Field(min_length=1)
-    cards: list[Card] = Field(min_length=6, max_length=6)
+    cards: list[Card] = Field(min_length=10, max_length=10)
     caption: str = Field(min_length=500, max_length=2000)
     hashtags: list[str] = Field(min_length=5, max_length=8)
     design_brief: str = Field(min_length=10, max_length=500)

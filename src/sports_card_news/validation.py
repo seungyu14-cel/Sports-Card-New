@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 
 from .config import Settings
 from .models import (
+    AssetType,
     CardLeague,
     ContentType,
     DailyPackage,
@@ -97,45 +98,80 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
     missing_candidate_leagues = sorted(configured_leagues - candidate_leagues)
     if missing_candidate_leagues:
         report.errors.append(
-            f"리서치 후보 풀에 필수 조사 리그가 없습니다: {missing_candidate_leagues}"
+            f"리서치 후보 풀에 필수 조사 카테고리가 없습니다: {missing_candidate_leagues}"
         )
 
-    if len(package.cards) != 6:
-        report.errors.append("카드는 표지 포함 정확히 6장이어야 합니다.")
+    if len(package.cards) != 10:
+        report.errors.append("카드는 표지 포함 정확히 10장이어야 합니다.")
+
     actual_slides = [card.slide for card in package.cards]
     if actual_slides != list(range(1, len(package.cards) + 1)):
         report.errors.append(f"카드 번호가 연속적이지 않습니다: {actual_slides}")
 
     if package.cards:
-        if package.cards[0].league != CardLeague.COVER:
+        first = package.cards[0]
+        last = package.cards[-1]
+        if first.league != CardLeague.COVER:
             report.errors.append("1번 카드는 COVER여야 합니다.")
-        if package.cards[0].visual_template != VisualTemplate.COVER:
+        if first.visual_template != VisualTemplate.COVER:
             report.errors.append("1번 카드의 visual_template은 cover여야 합니다.")
+        if last.league != CardLeague.SUMMARY:
+            report.errors.append("10번 카드는 SUMMARY여야 합니다.")
+        if last.content_type != ContentType.SUMMARY:
+            report.errors.append("10번 카드의 content_type은 summary여야 합니다.")
+        if last.visual_template != VisualTemplate.SUMMARY:
+            report.errors.append("10번 카드의 visual_template은 summary여야 합니다.")
+        if last.candidate_title:
+            report.errors.append("10번 SUMMARY 카드의 candidate_title은 비워야 합니다.")
 
-    story_cards = package.cards[1:]
-    story_leagues = [card.league.value for card in story_cards]
-    unknown_story_leagues = sorted(set(story_leagues) - configured_leagues)
+    issue_cards = package.cards[1:9]
+    if len(issue_cards) != 8:
+        report.errors.append("2~9번에는 정확히 8개의 메인 이슈가 있어야 합니다.")
+
+    issue_titles = [card.candidate_title for card in issue_cards]
+    if any(not title for title in issue_titles):
+        report.errors.append("2~9번 모든 이슈 카드에 candidate_title이 필요합니다.")
+    if len(set(issue_titles)) != 8:
+        report.errors.append("2~9번은 서로 다른 8개의 이슈를 사용해야 합니다.")
+
+    issue_leagues = [card.league.value for card in issue_cards]
+    unknown_story_leagues = sorted(set(issue_leagues) - configured_leagues)
     if unknown_story_leagues:
-        report.errors.append(f"지원하지 않는 카드 리그가 있습니다: {unknown_story_leagues}")
-    distinct_story_leagues = len(set(story_leagues))
+        report.errors.append(f"지원하지 않는 이슈 카테고리가 있습니다: {unknown_story_leagues}")
+
+    distinct_story_leagues = len(set(issue_leagues))
     if distinct_story_leagues < settings.min_distinct_story_leagues:
         report.errors.append(
-            f"스토리 카드의 리그 다양성이 부족합니다: {distinct_story_leagues}개 "
-            f"(최소 {settings.min_distinct_story_leagues}개)"
+            f"8개 이슈에 다섯 카테고리가 모두 포함되어야 합니다: {distinct_story_leagues}개 "
+            f"(필요 {settings.min_distinct_story_leagues}개)"
         )
-    league_counts = Counter(story_leagues)
-    crowded = {league: count for league, count in league_counts.items() if count > settings.max_cards_per_league}
+
+    league_counts = Counter(issue_leagues)
+    crowded = {
+        league: count
+        for league, count in league_counts.items()
+        if count > settings.max_cards_per_league
+    }
     if crowded:
         report.errors.append(
-            f"한 리그의 카드 수가 최대 {settings.max_cards_per_league}장을 넘었습니다: {crowded}"
+            f"한 카테고리의 이슈 수가 최대 {settings.max_cards_per_league}개를 넘었습니다: {crowded}"
         )
+
+    if len(issue_cards) == 8 and distinct_story_leagues == 5 and not crowded:
+        distribution = sorted(league_counts.values(), reverse=True)
+        if distribution != [2, 2, 2, 1, 1]:
+            report.errors.append(
+                f"8개 이슈의 카테고리 분포는 2·2·2·1·1이어야 합니다: {distribution}"
+            )
 
     previous_template: VisualTemplate | None = None
     repeat_count = 0
+
     for card in package.cards:
         missing = sorted(set(card.source_ids) - source_ids)
         if missing:
             report.errors.append(f"카드 {card.slide}의 출처 ID가 없습니다: {missing}")
+
         unresolved = sorted(
             source_id
             for source_id in card.source_ids
@@ -145,31 +181,32 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
             report.errors.append(
                 f"카드 {card.slide}가 검증 완료되지 않은 출처를 참조합니다: {unresolved}"
             )
+
         if CARD_LINK_PATTERN.search(card.headline) or CARD_LINK_PATTERN.search(card.body):
             report.errors.append(
                 f"카드 {card.slide} 문구에 URL·도메인·Markdown 링크가 포함되어 있습니다. "
                 "출처는 source_ids와 facts.url로만 연결하세요."
             )
+
         if len(card.body) > 180:
             report.errors.append(
                 f"카드 {card.slide} 본문이 180자를 초과했습니다: {len(card.body)}자"
             )
+
         if card.slide > 1 and card.visual_template == VisualTemplate.COVER:
             report.errors.append(f"카드 {card.slide}에는 cover 템플릿을 사용할 수 없습니다.")
 
-        if card.visual_template == previous_template and card.slide > 1:
-            repeat_count += 1
-        else:
-            repeat_count = 1
-            previous_template = card.visual_template
-        if card.slide > 1 and repeat_count > settings.visual_repeat_limit:
-            report.errors.append(
-                f"같은 시각 템플릿이 연속 {repeat_count}회 반복되었습니다: {card.visual_template.value}"
-            )
+        if 2 <= card.slide <= 9:
+            if card.visual_template == previous_template:
+                repeat_count += 1
+            else:
+                repeat_count = 1
+                previous_template = card.visual_template
+            if repeat_count > settings.visual_repeat_limit:
+                report.errors.append(
+                    f"같은 시각 템플릿이 연속 {repeat_count}회 반복되었습니다: {card.visual_template.value}"
+                )
 
-        if card.league != CardLeague.COVER:
-            if not card.candidate_title:
-                report.errors.append(f"카드 {card.slide}에 candidate_title이 없습니다.")
             candidate = candidates_by_title.get(card.candidate_title)
             if candidate is None:
                 report.errors.append(
@@ -178,7 +215,7 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
             else:
                 if candidate.league.upper() != card.league.value:
                     report.errors.append(
-                        f"카드 {card.slide}의 리그와 후보 리그가 다릅니다: "
+                        f"카드 {card.slide}의 카테고리와 후보 카테고리가 다릅니다: "
                         f"{card.league.value} != {candidate.league}"
                     )
                 if not set(card.source_ids).intersection(candidate.source_ids):
@@ -195,7 +232,35 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
                 continue
             if not asset.approved_for_publish:
                 report.errors.append(f"게시 승인되지 않은 시각 자산을 참조합니다: {asset_id}")
-            if asset.rights_status == RightsStatus.NEEDS_REVIEW:
+                continue
+
+            if asset.asset_type == AssetType.NEWS_IMAGE:
+                if not settings.allow_news_images:
+                    report.errors.append(f"뉴스 이미지 사용이 비활성화되어 있습니다: {asset_id}")
+                if asset.rights_status != RightsStatus.NEWS_APPROVED:
+                    report.errors.append(f"뉴스 이미지 승인 상태가 아닙니다: {asset_id}")
+                if not asset.source_fact_id or asset.source_fact_id not in facts_by_id:
+                    report.errors.append(f"뉴스 이미지의 원문 fact 연결이 없습니다: {asset_id}")
+                elif asset.source_fact_id not in card.source_ids:
+                    report.errors.append(
+                        f"뉴스 이미지가 해당 카드의 원문 출처와 연결되지 않습니다: {asset_id}"
+                    )
+                else:
+                    source_fact = facts_by_id[asset.source_fact_id]
+                    if (
+                        source_fact.status != FactStatus.VERIFIED
+                        or source_fact.verification_method != VerificationMethod.DIRECT
+                    ):
+                        report.errors.append(
+                            f"검증 완료 원문에서 발견된 이미지가 아닙니다: {asset_id}"
+                        )
+                if "instagram_post" not in asset.usage_scope:
+                    report.errors.append(
+                        f"인스타그램 게시 사용 범위가 없는 뉴스 이미지입니다: {asset_id}"
+                    )
+                if not asset.license_evidence.strip():
+                    report.errors.append(f"뉴스 이미지 사용 승인 근거가 없습니다: {asset_id}")
+            elif asset.rights_status == RightsStatus.NEEDS_REVIEW:
                 report.errors.append(f"권리 확인이 끝나지 않은 시각 자산을 참조합니다: {asset_id}")
 
         recommended = {
@@ -206,6 +271,7 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
             ContentType.RANKING: {VisualTemplate.RANKING, VisualTemplate.STAT},
             ContentType.BREAKING: {VisualTemplate.BREAKING, VisualTemplate.KEY_FACT},
             ContentType.SCHEDULE: {VisualTemplate.SCHEDULE, VisualTemplate.TIMELINE},
+            ContentType.SUMMARY: {VisualTemplate.SUMMARY},
         }
         if card.content_type in recommended and card.visual_template not in recommended[card.content_type]:
             report.warnings.append(
@@ -213,10 +279,17 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
                 f"시각 템플릿({card.visual_template.value}) 조합을 사람이 확인하세요."
             )
 
+    summary = package.cards[-1] if package.cards else None
+    if summary is not None:
+        issue_source_ids = {source_id for card in issue_cards for source_id in card.source_ids}
+        if summary.source_ids and not set(summary.source_ids).issubset(issue_source_ids):
+            report.errors.append("10번 요약 카드가 2~9번에서 사용하지 않은 출처를 참조합니다.")
+
     for candidate in package.candidates:
         missing = sorted(set(candidate.source_ids) - source_ids)
         if missing:
             report.errors.append(f"후보 '{candidate.title}'의 출처 ID가 없습니다: {missing}")
+
         unresolved = sorted(
             source_id
             for source_id in candidate.source_ids
@@ -226,6 +299,7 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
             report.errors.append(
                 f"후보 '{candidate.title}'가 검증 완료되지 않은 출처를 참조합니다: {unresolved}"
             )
+
         direct_official = [
             source_id
             for source_id in candidate.source_ids
@@ -237,6 +311,7 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
             report.errors.append(
                 f"{candidate.league} 후보에 직접 확인한 리그 공식 출처가 없습니다."
             )
+
         if candidate.game_status in {GameStatus.SCHEDULED, GameStatus.LIVE}:
             expiring_sources = [
                 facts_by_id[source_id]
@@ -257,14 +332,17 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
     for source in package.facts:
         parsed_url = urlparse(str(source.url))
         domain = (parsed_url.hostname or "").lower()
+
         if parsed_url.scheme != "https":
             report.errors.append(f"HTTPS가 아닌 출처 URL입니다: {source.id}")
+
         if source.checked_at.tzinfo is None:
             report.errors.append(f"출처 조회 시각에 시간대가 없습니다: {source.id}")
         elif source.checked_at.astimezone(editorial_timezone).date() != edition_date:
             report.errors.append(f"출처를 편집일 당일에 다시 확인하지 않았습니다: {source.id}")
         elif package.generated_at.tzinfo is not None and source.checked_at > package.generated_at:
             report.errors.append(f"출처 조회 시각이 생성 시각보다 늦습니다: {source.id}")
+
         if source.expires_at is not None:
             if source.expires_at.tzinfo is None:
                 report.errors.append(f"출처 유효 기한에 시간대가 없습니다: {source.id}")
@@ -272,17 +350,21 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
                 report.errors.append(f"출처 유효 기한이 조회 시각보다 빠릅니다: {source.id}")
             elif source.expires_at <= package.generated_at:
                 report.errors.append(f"생성 시점에 이미 만료된 출처입니다: {source.id}")
+
         if source.status == FactStatus.VERIFIED and source.verification_method != VerificationMethod.DIRECT:
             report.errors.append(
                 f"원문을 직접 확인하지 않은 출처는 검증 완료로 표시할 수 없습니다: {source.id}"
             )
+
         trusted = any(domain == item or domain.endswith(f".{item}") for item in settings.trusted_domains)
         if source.source_type == SourceType.OFFICIAL and trusted:
             trusted_official += 1
+
         if source.status == FactStatus.CONFLICT:
             report.errors.append(f"출처 충돌: {source.id} {source.claim}")
         elif source.status in {FactStatus.NEEDS_REVIEW, FactStatus.CHANGED}:
             report.warnings.append(f"{source.status.value}: {source.id} {source.claim}")
+
         if source.source_type == SourceType.OFFICIAL and not trusted:
             report.warnings.append(f"공식 출처로 표기됐지만 신뢰 도메인 목록에 없습니다: {domain}")
 
@@ -295,4 +377,5 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
 
     if package.risk_flags:
         report.warnings.extend(f"AI 위험 표시: {flag}" for flag in package.risk_flags)
+
     return report

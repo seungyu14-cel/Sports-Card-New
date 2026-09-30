@@ -58,7 +58,7 @@ def test_demo_job_generates_cards_and_api_detail(tmp_path: Path, monkeypatch) ->
         assert created.status_code == 202
         job_id = created.json()["id"]
         job = created.json()
-        for _ in range(50):
+        for _ in range(80):
             job = client.get(f"/api/jobs/{job_id}").json()
             if job["status"] in {"completed", "failed"}:
                 break
@@ -66,7 +66,7 @@ def test_demo_job_generates_cards_and_api_detail(tmp_path: Path, monkeypatch) ->
         assert job["status"] == "completed", job
         detail = client.get("/api/editions/2026-09-29")
         assert detail.status_code == 200
-        assert len(detail.json()["cards"]) == 6
+        assert len(detail.json()["cards"]) == 10
         image = client.get("/output/2026-09-29/card-01.png")
         assert image.status_code == 200
         assert image.headers["content-type"] == "image/png"
