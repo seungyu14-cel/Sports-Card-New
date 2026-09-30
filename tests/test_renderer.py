@@ -19,7 +19,7 @@ def test_sports_desk_renderer_uses_editorial_palette(tmp_path: Path) -> None:
 
     paths = render_package(package, tmp_path, settings)
 
-    assert len(paths) == 10
+    assert len(paths) == 7
     with Image.open(paths[0]) as image:
         assert image.size == (1080, 1350)
         colors = {color for _, color in image.getcolors(maxcolors=2_000_000) or []}
@@ -32,20 +32,18 @@ def test_sports_desk_renderer_uses_editorial_palette(tmp_path: Path) -> None:
 def test_story_cards_render_distinct_data_modules(tmp_path: Path) -> None:
     settings = load_settings(ROOT / "config/settings.toml")
     package = load_package(ROOT / "fixtures/demo_package.json")
-
     paths = render_package(package, tmp_path, settings)
 
-    with Image.open(paths[1]) as preview, Image.open(paths[8]) as result:
-        assert preview.tobytes() != result.tobytes()
+    with Image.open(paths[1]) as preview, Image.open(paths[5]) as status:
+        assert preview.tobytes() != status.tobytes()
 
 
 def test_summary_card_has_distinct_render(tmp_path: Path) -> None:
     settings = load_settings(ROOT / "config/settings.toml")
     package = load_package(ROOT / "fixtures/demo_package.json")
-
     paths = render_package(package, tmp_path, settings)
 
-    with Image.open(paths[8]) as issue, Image.open(paths[9]) as summary:
+    with Image.open(paths[5]) as issue, Image.open(paths[6]) as summary:
         assert issue.tobytes() != summary.tobytes()
 
 
@@ -69,13 +67,11 @@ def test_structured_visual_items_change_the_rendered_card(tmp_path: Path) -> Non
 
 
 def test_renderer_removes_source_links_from_visible_copy() -> None:
-    source = "CGV가 일정을 발표했습니다. ([cgv.co.kr](https://www.cgv.co.kr/news?id=3))"
-
+    source = "공식 일정이 발표됐습니다. ([example.com](https://example.com/news))"
     cleaned = _clean_card_text(source)
 
-    assert cleaned == "CGV가 일정을 발표했습니다"
+    assert cleaned == "공식 일정이 발표됐습니다"
     assert "http" not in cleaned
-    assert "cgv.co.kr" not in cleaned
 
 
 def test_auto_template_uses_card_content_instead_of_slide_number() -> None:

@@ -124,6 +124,9 @@ def test_generation_uses_three_stage_research_editorial_design_pipeline() -> Non
     assert research_call["store"] is False
     assert editorial_call["store"] is False
     assert design_call["store"] is False
+    assert research_call["max_output_tokens"] == 16000
+    assert editorial_call["max_output_tokens"] == 16000
+    assert design_call["max_output_tokens"] == 16000
 
 
 def test_schema_includes_quality_and_rights_fields() -> None:

@@ -29,9 +29,6 @@ def load_package(path: str | Path) -> DailyPackage:
         "NPB",
         "EPL",
         "NBA",
-        "KBO",
-        "EPL",
-        "NBA",
         "SUMMARY",
     )
     candidates = payload.get("candidates", [])
@@ -381,8 +378,8 @@ def _editorial_markdown(package: DailyPackage, settings: Settings) -> str:
         f"| {fact.id} | {fact.claim.replace('|', '\\|')} | [{fact.title}]({fact.url}) | {fact.status.value} |"
         for fact in package.facts
     ]
-    story_mix = Counter(card.league.value for card in package.cards[1:9])
-    template_mix = Counter(card.visual_template.value for card in package.cards[1:9])
+    story_mix = Counter(card.league.value for card in package.cards[1:6])
+    template_mix = Counter(card.visual_template.value for card in package.cards[1:6])
     checklist = package.approval_checklist
     return f"""# 편집 검토: {package.edition_date}
 
@@ -403,9 +400,9 @@ def _editorial_markdown(package: DailyPackage, settings: Settings) -> str:
 ## 오늘의 편성
 - 리그 구성: {dict(story_mix)}
 - 템플릿 구성: {dict(template_mix)}
-- 2~9번: 다섯 카테고리에서 서로 다른 8개 이슈
-- 카테고리 분포: 2·2·2·1·1
-- 10번: 마무리/한눈 요약
+- 2~6번: 다섯 카테고리에서 서로 다른 5개 이슈
+- 카테고리 분포: KBO/KBL/NPB/EPL/NBA 각 1개
+- 7번: 마무리/한눈 요약
 
 ## 팩트 카드
 

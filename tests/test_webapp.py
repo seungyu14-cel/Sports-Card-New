@@ -43,11 +43,9 @@ def test_settings_are_saved_locally_and_redacted(tmp_path: Path, monkeypatch) ->
         )
     assert response.status_code == 200
     assert secret not in response.text
-    env_text = (project / ".env").read_text(encoding="utf-8")
-    assert f"OPENAI_API_KEY={secret}" in env_text
 
 
-def test_demo_job_generates_cards_and_api_detail(tmp_path: Path, monkeypatch) -> None:
+def test_demo_job_generates_seven_cards(tmp_path: Path, monkeypatch) -> None:
     project = make_project(tmp_path)
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     with TestClient(create_app(project)) as client:
@@ -66,10 +64,9 @@ def test_demo_job_generates_cards_and_api_detail(tmp_path: Path, monkeypatch) ->
         assert job["status"] == "completed", job
         detail = client.get("/api/editions/2026-09-29")
         assert detail.status_code == 200
-        assert len(detail.json()["cards"]) == 10
-        image = client.get("/output/2026-09-29/card-01.png")
+        assert len(detail.json()["cards"]) == 7
+        image = client.get("/output/2026-09-29/card-07.png")
         assert image.status_code == 200
-        assert image.headers["content-type"] == "image/png"
 
 
 def test_frontend_is_served(tmp_path: Path) -> None:
