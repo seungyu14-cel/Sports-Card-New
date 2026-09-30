@@ -21,16 +21,15 @@ visual_repeat_limit = 2
 recent_days = 7
 analytics_days = 30
 structured_data_dir = "data/structured"
-weights = {
-  importance = 0.20,
-  korean_relevance = 0.15,
-  source_reliability = 0.15,
-  explainability = 0.10,
-  freshness = 0.15,
-  fan_interest = 0.10,
-  visual_potential = 0.10,
-  uniqueness = 0.05
-}
+[editorial.weights]
+importance = 0.20
+korean_relevance = 0.15
+source_reliability = 0.15
+explainability = 0.10
+freshness = 0.15
+fan_interest = 0.10
+visual_potential = 0.10
+uniqueness = 0.05
 
 [sources]
 trusted_domains = [
