@@ -38,16 +38,16 @@ def run_visual_qa(
 ) -> VisualQAReport:
     report = VisualQAReport()
     expected_size = (settings.output_width, settings.output_height)
-    if len(paths) != 6:
-        report.errors.append(f"카드 이미지는 정확히 6장이어야 합니다: {len(paths)}장")
+    if len(paths) != 10:
+        report.errors.append(f"카드 이미지는 정확히 10장이어야 합니다: {len(paths)}장")
 
     for card, path in zip(package.cards, paths, strict=False):
         if len(card.headline) > 36:
             report.warnings.append(f"{card.slide}번 제목이 모바일에서 길 수 있습니다: {len(card.headline)}자")
         if len(card.body) > 150:
             report.warnings.append(f"{card.slide}번 본문 정보 밀도가 높습니다: {len(card.body)}자")
-        if card.slide > 1 and len(card.visual_items) < 2:
-            report.warnings.append(f"{card.slide}번 카드의 데이터 포인트가 1개뿐입니다.")
+        if 2 <= card.slide <= 9 and len(card.visual_items) < 2:
+            report.warnings.append(f"{card.slide}번 이슈 카드의 데이터 포인트가 1개뿐입니다.")
         if not path.exists() or path.stat().st_size == 0:
             report.errors.append(f"렌더링 파일이 비어 있습니다: {path.name}")
             continue
@@ -59,14 +59,18 @@ def run_visual_qa(
             if image.mode != "RGB":
                 report.errors.append(f"RGB가 아닌 카드입니다: {path.name}={image.mode}")
 
-    templates = [card.visual_template.value for card in package.cards[1:]]
+    issue_cards = package.cards[1:9]
+    templates = [card.visual_template.value for card in issue_cards]
     counts = Counter(templates)
-    if counts and counts.most_common(1)[0][1] >= 4:
+    if counts and counts.most_common(1)[0][1] >= 5:
         name, count = counts.most_common(1)[0]
-        report.warnings.append(f"5개 스토리 중 {count}개가 같은 템플릿({name})입니다.")
+        report.warnings.append(f"8개 이슈 중 {count}개가 같은 템플릿({name})입니다.")
 
-    headlines = [card.headline.strip() for card in package.cards[1:]]
-    if len(set(headlines)) != len(headlines):
-        report.errors.append("스토리 카드 headline이 중복되었습니다.")
+    headlines = [card.headline.strip() for card in issue_cards]
+    if len(set(headlines)) != 8:
+        report.errors.append("2~9번 메인 이슈 headline은 8개 모두 서로 달라야 합니다.")
+
+    if package.cards and package.cards[-1].visual_template.value != "summary":
+        report.errors.append("10번 마무리 카드는 summary 템플릿이어야 합니다.")
 
     return report

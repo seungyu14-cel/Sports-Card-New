@@ -5,8 +5,8 @@ from pathlib import Path
 from PIL import Image
 
 from sports_card_news.config import load_settings
-from sports_card_news.pipeline import load_package
 from sports_card_news.models import VisualTemplate
+from sports_card_news.pipeline import load_package
 from sports_card_news.renderer import _clean_card_text, _resolve_visual_template, render_package
 
 
@@ -19,14 +19,14 @@ def test_sports_desk_renderer_uses_editorial_palette(tmp_path: Path) -> None:
 
     paths = render_package(package, tmp_path, settings)
 
-    assert len(paths) == 6
+    assert len(paths) == 10
     with Image.open(paths[0]) as image:
         assert image.size == (1080, 1350)
         colors = {color for _, color in image.getcolors(maxcolors=2_000_000) or []}
-        assert (244, 240, 232) in colors  # warm paper
-        assert (255, 214, 61) in colors  # score yellow
-        assert (17, 17, 17) in colors  # editorial ink
-        assert (228, 66, 54) in colors  # review red
+        assert (244, 240, 232) in colors
+        assert (255, 214, 61) in colors
+        assert (17, 17, 17) in colors
+        assert (228, 66, 54) in colors
 
 
 def test_story_cards_render_distinct_data_modules(tmp_path: Path) -> None:
@@ -35,8 +35,18 @@ def test_story_cards_render_distinct_data_modules(tmp_path: Path) -> None:
 
     paths = render_package(package, tmp_path, settings)
 
-    with Image.open(paths[1]) as schedule, Image.open(paths[5]) as status:
-        assert schedule.tobytes() != status.tobytes()
+    with Image.open(paths[1]) as preview, Image.open(paths[8]) as result:
+        assert preview.tobytes() != result.tobytes()
+
+
+def test_summary_card_has_distinct_render(tmp_path: Path) -> None:
+    settings = load_settings(ROOT / "config/settings.toml")
+    package = load_package(ROOT / "fixtures/demo_package.json")
+
+    paths = render_package(package, tmp_path, settings)
+
+    with Image.open(paths[8]) as issue, Image.open(paths[9]) as summary:
+        assert issue.tobytes() != summary.tobytes()
 
 
 def test_structured_visual_items_change_the_rendered_card(tmp_path: Path) -> None:

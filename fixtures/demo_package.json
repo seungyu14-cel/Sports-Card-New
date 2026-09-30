@@ -14,8 +14,14 @@
       "korean_relevance": 5,
       "source_reliability": 5,
       "explainability": 5,
-      "source_ids": ["S1"],
-      "caution": "실제 발행 전 당일 경기 정보로 교체해야 합니다."
+      "source_ids": [
+        "S1"
+      ],
+      "caution": "실제 발행 전 당일 경기 정보로 교체해야 합니다.",
+      "freshness": 3,
+      "fan_interest": 3,
+      "visual_potential": 3,
+      "uniqueness": 3
     },
     {
       "sport": "농구",
@@ -27,8 +33,14 @@
       "korean_relevance": 5,
       "source_reliability": 5,
       "explainability": 4,
-      "source_ids": ["S4"],
-      "caution": "실제 발행 전 최신 공식 공지로 교체해야 합니다."
+      "source_ids": [
+        "S4"
+      ],
+      "caution": "실제 발행 전 최신 공식 공지로 교체해야 합니다.",
+      "freshness": 3,
+      "fan_interest": 3,
+      "visual_potential": 3,
+      "uniqueness": 3
     },
     {
       "sport": "야구",
@@ -40,8 +52,14 @@
       "korean_relevance": 3,
       "source_reliability": 5,
       "explainability": 4,
-      "source_ids": ["S5"],
-      "caution": "우천 취소와 경기 상태 변경을 게시 전에 확인해야 합니다."
+      "source_ids": [
+        "S5"
+      ],
+      "caution": "우천 취소와 경기 상태 변경을 게시 전에 확인해야 합니다.",
+      "freshness": 3,
+      "fan_interest": 3,
+      "visual_potential": 3,
+      "uniqueness": 3
     },
     {
       "sport": "축구",
@@ -53,8 +71,14 @@
       "korean_relevance": 4,
       "source_reliability": 5,
       "explainability": 4,
-      "source_ids": ["S2"],
-      "caution": "서머타임 적용 여부를 사람이 확인해야 합니다."
+      "source_ids": [
+        "S2"
+      ],
+      "caution": "서머타임 적용 여부를 사람이 확인해야 합니다.",
+      "freshness": 3,
+      "fan_interest": 3,
+      "visual_potential": 3,
+      "uniqueness": 3
     },
     {
       "sport": "농구",
@@ -66,8 +90,71 @@
       "korean_relevance": 3,
       "source_reliability": 5,
       "explainability": 5,
-      "source_ids": ["S3"],
-      "caution": "진행 중 수치는 최종 결과로 표현하면 안 됩니다."
+      "source_ids": [
+        "S3"
+      ],
+      "caution": "진행 중 수치는 최종 결과로 표현하면 안 됩니다.",
+      "freshness": 3,
+      "fan_interest": 3,
+      "visual_potential": 3,
+      "uniqueness": 3
+    },
+    {
+      "sport": "야구",
+      "league": "KBO",
+      "title": "데모: KBO 경기 결과 확인",
+      "summary": "KBO 공식 경기센터에서 종료된 경기의 최종 점수와 경기 상태를 함께 확인하는 두 번째 국내 야구 데모 이슈입니다.",
+      "game_status": "종료",
+      "importance": 4,
+      "korean_relevance": 5,
+      "source_reliability": 5,
+      "explainability": 5,
+      "freshness": 4,
+      "fan_interest": 4,
+      "visual_potential": 5,
+      "uniqueness": 4,
+      "source_ids": [
+        "S1"
+      ],
+      "caution": "실제 발행에서는 당일 종료 경기의 공식 결과로 교체합니다."
+    },
+    {
+      "sport": "축구",
+      "league": "EPL",
+      "title": "데모: EPL 공식 일정 변화",
+      "summary": "Premier League 공식 일정에서 경기 날짜와 시작 시각 변경 여부를 다시 확인하는 두 번째 EPL 데모 이슈입니다.",
+      "game_status": "예정",
+      "importance": 4,
+      "korean_relevance": 4,
+      "source_reliability": 5,
+      "explainability": 4,
+      "freshness": 4,
+      "fan_interest": 5,
+      "visual_potential": 4,
+      "uniqueness": 4,
+      "source_ids": [
+        "S2"
+      ],
+      "caution": "서머타임과 일정 변경 공지를 함께 확인해야 합니다."
+    },
+    {
+      "sport": "농구",
+      "league": "NBA",
+      "title": "데모: NBA 최종 결과 확인",
+      "summary": "NBA 공식 일정에서 종료 상태와 최종 점수를 구분해 확인하는 두 번째 NBA 데모 이슈입니다.",
+      "game_status": "종료",
+      "importance": 4,
+      "korean_relevance": 4,
+      "source_reliability": 5,
+      "explainability": 5,
+      "freshness": 4,
+      "fan_interest": 5,
+      "visual_potential": 5,
+      "uniqueness": 4,
+      "source_ids": [
+        "S3"
+      ],
+      "caution": "진행 중 점수와 종료 점수를 혼동하지 않습니다."
     }
   ],
   "selected_candidate_title": "데모: 경기 전 확인해야 할 세 가지",
@@ -158,104 +245,393 @@
     {
       "slide": 1,
       "league": "COVER",
-      "headline": "오늘의 스포츠\n5대 이슈",
-      "body": "KBO·KBL·NPB·EPL·NBA의 공식 정보를 한 장씩 순서대로 전합니다.",
-      "source_ids": ["S1", "S2", "S3", "S4", "S5"],
-      "visual_template": "cover",
-      "visual_title": "오늘 다섯 리그",
-      "visual_items": [
-        {"label": "KBO", "value": "공식 일정", "note": "2페이지"},
-        {"label": "KBL", "value": "국내 농구", "note": "3페이지"},
-        {"label": "NPB", "value": "당일 경기", "note": "4페이지"},
-        {"label": "EPL", "value": "한국 시각", "note": "5페이지"},
-        {"label": "NBA", "value": "경기 상태", "note": "6페이지"}
+      "candidate_title": "",
+      "headline": "오늘의 스포츠\n8대 이슈",
+      "body": "KBO·KBL·NPB·EPL·NBA 다섯 카테고리에서 오늘 확인할 핵심 이슈 8개를 정리합니다.",
+      "source_ids": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5"
       ],
-      "visual_direction": "다섯 리그를 하나의 흐름으로 연결한 자체 제작 스포츠 필드 도형",
-      "alt_text": "오늘의 스포츠 다섯 이슈를 KBO, KBL, NPB, EPL, NBA 순서로 전한다는 표지다."
+      "content_type": "auto",
+      "kicker": "",
+      "visual_template": "cover",
+      "visual_title": "5개 카테고리 · 8개 이슈",
+      "visual_items": [
+        {
+          "label": "KBO",
+          "value": "2개 이슈",
+          "note": "국내 야구"
+        },
+        {
+          "label": "KBL",
+          "value": "1개 이슈",
+          "note": "국내 농구"
+        },
+        {
+          "label": "NPB",
+          "value": "1개 이슈",
+          "note": "일본 야구"
+        },
+        {
+          "label": "EPL",
+          "value": "2개 이슈",
+          "note": "유럽 축구"
+        },
+        {
+          "label": "NBA",
+          "value": "2개 이슈",
+          "note": "미국 농구"
+        }
+      ],
+      "visual_direction": "다섯 카테고리와 여덟 이슈를 하나의 데일리 에디션으로 보여 주는 표지",
+      "asset_ids": [],
+      "alt_text": "KBO, KBL, NPB, EPL, NBA 다섯 카테고리에서 여덟 개 스포츠 이슈를 소개하는 표지다."
     },
     {
       "slide": 2,
       "league": "KBO",
-      "headline": "KBO 공식 일정",
-      "body": "KBO 공식 일정에서 경기 날짜, 시작 시각, 경기 상태를 확인합니다. 변경 공지도 게시 전에 다시 살핍니다.",
-      "source_ids": ["S1"],
-      "visual_template": "timeline",
-      "visual_title": "게시 전 세 가지 확인",
-      "visual_items": [
-        {"label": "날짜", "value": "공식 경기일", "note": "편집일과 대조"},
-        {"label": "시각", "value": "한국시간", "note": "시작 시각 확인"},
-        {"label": "상태", "value": "예정", "note": "변경 공지 재조회"}
+      "candidate_title": "데모: 경기 전 확인해야 할 세 가지",
+      "headline": "KBO 경기 전 체크",
+      "body": "KBO 공식 일정에서 경기 날짜, 시작 시각, 경기 상태를 확인하고 변경 공지도 게시 전에 다시 살핍니다.",
+      "source_ids": [
+        "S1"
       ],
-      "visual_direction": "달력 모양을 단순 선과 숫자로 표현",
-      "alt_text": "KBO 공식 일정에서 날짜와 시작 시각, 경기 상태를 확인하라는 카드다."
+      "content_type": "match_preview",
+      "kicker": "MAIN 01",
+      "visual_template": "match_preview",
+      "visual_title": "경기 전 세 가지",
+      "visual_items": [
+        {
+          "label": "날짜",
+          "value": "공식 경기일",
+          "note": "편집일 대조"
+        },
+        {
+          "label": "시각",
+          "value": "한국시간",
+          "note": "시작 시각"
+        },
+        {
+          "label": "상태",
+          "value": "예정",
+          "note": "변경 공지"
+        }
+      ],
+      "visual_direction": "대진과 시작 시각, 경기 상태를 프리뷰 카드로 표현",
+      "asset_ids": [],
+      "alt_text": "KBO 경기 전 날짜와 시각, 경기 상태를 공식 일정에서 확인하는 카드다."
     },
     {
       "slide": 3,
       "league": "KBL",
+      "candidate_title": "데모: KBL 공식 일정 확인",
       "headline": "KBL 공식 소식",
-      "body": "KBL 공식 일정과 공지에서 국내 농구의 최신 경기 정보를 확인합니다. 확정되지 않은 내용은 단정하지 않습니다.",
-      "source_ids": ["S4"],
-      "visual_template": "key_fact",
-      "visual_title": "KBL 원문 확인 항목",
-      "visual_items": [
-        {"label": "일정", "value": "공식 경기 정보", "note": "리그 페이지"},
-        {"label": "공지", "value": "최신 발표", "note": "원문 직접 확인"},
-        {"label": "표현", "value": "확정 사실만", "note": "추측 제외"}
+      "body": "KBL 공식 일정과 공지에서 국내 농구의 최신 경기 정보를 확인하고 확정되지 않은 내용은 단정하지 않습니다.",
+      "source_ids": [
+        "S4"
       ],
-      "visual_direction": "농구공과 핵심 정보 세 줄을 자체 제작 도형으로 표현",
+      "content_type": "schedule",
+      "kicker": "MAIN 02",
+      "visual_template": "schedule",
+      "visual_title": "KBL 원문 확인",
+      "visual_items": [
+        {
+          "label": "일정",
+          "value": "공식 경기 정보",
+          "note": "리그 페이지"
+        },
+        {
+          "label": "공지",
+          "value": "최신 발표",
+          "note": "원문 확인"
+        },
+        {
+          "label": "표현",
+          "value": "확정 사실만",
+          "note": "추측 제외"
+        }
+      ],
+      "visual_direction": "일정과 공지를 순서형 데이터로 보여 준다",
+      "asset_ids": [],
       "alt_text": "KBL 공식 일정과 공지에서 최신 경기 정보를 확인하라는 카드다."
     },
     {
       "slide": 4,
       "league": "NPB",
+      "candidate_title": "데모: NPB 당일 경기 확인",
       "headline": "NPB 오늘의 경기",
-      "body": "NPB 공식 일정에서 당일 대진과 시작 시각을 확인합니다. 예정·진행·종료 여부는 게시 직전에 다시 확인합니다.",
-      "source_ids": ["S5"],
+      "body": "NPB 공식 일정에서 당일 대진과 시작 시각을 확인하고 예정·진행·종료 여부는 게시 직전에 다시 확인합니다.",
+      "source_ids": [
+        "S5"
+      ],
+      "content_type": "schedule",
+      "kicker": "MAIN 03",
       "visual_template": "timeline",
       "visual_title": "NPB 당일 일정",
       "visual_items": [
-        {"label": "대진", "value": "공식 편성", "note": "팀명 확인"},
-        {"label": "시각", "value": "일본·한국 동일", "note": "시차 없음"},
-        {"label": "상태", "value": "게시 직전 재확인", "note": "우천 변경 주의"}
+        {
+          "label": "대진",
+          "value": "공식 편성",
+          "note": "팀명 확인"
+        },
+        {
+          "label": "시각",
+          "value": "일본·한국 동일",
+          "note": "시차 없음"
+        },
+        {
+          "label": "상태",
+          "value": "게시 직전 확인",
+          "note": "우천 주의"
+        }
       ],
-      "visual_direction": "경기 시작 시각을 순서대로 보여 주는 자체 제작 타임라인",
+      "visual_direction": "경기 시작 시각을 타임라인으로 표현",
+      "asset_ids": [],
       "alt_text": "NPB 당일 대진과 시작 시각, 경기 상태를 확인하라는 카드다."
     },
     {
       "slide": 5,
       "league": "EPL",
+      "candidate_title": "데모: 현지 시각과 한국 시각 구분법",
       "headline": "EPL 한국 시각",
-      "body": "EPL 공식 일정의 영국 현지 시각을 한국 시각으로 바꿔 확인합니다. 날짜가 다음 날로 넘어가는지도 함께 살핍니다.",
-      "source_ids": ["S2"],
+      "body": "EPL 공식 일정의 영국 현지 시각을 한국 시각으로 바꿔 확인하고 날짜가 다음 날로 넘어가는지도 함께 살핍니다.",
+      "source_ids": [
+        "S2"
+      ],
+      "content_type": "explainer",
+      "kicker": "MAIN 04",
       "visual_template": "comparison",
-      "visual_title": "현지 시각과 한국 시각",
+      "visual_title": "현지와 한국 시각",
       "visual_items": [
-        {"label": "영국", "value": "현지 날짜·시각", "note": "서머타임 확인"},
-        {"label": "한국", "value": "Asia/Seoul", "note": "날짜 변경 확인"}
+        {
+          "label": "영국",
+          "value": "현지 날짜·시각",
+          "note": "서머타임"
+        },
+        {
+          "label": "한국",
+          "value": "Asia/Seoul",
+          "note": "날짜 변경"
+        }
       ],
       "visual_direction": "영국 현지 시각과 한국 시각을 두 열로 비교",
+      "asset_ids": [],
       "alt_text": "EPL 영국 현지 시각과 한국 시각을 비교해 날짜 차이를 확인하는 카드다."
     },
     {
       "slide": 6,
       "league": "NBA",
+      "candidate_title": "데모: 진행 중 점수를 결과로 쓰지 않는 법",
       "headline": "NBA 경기 상태",
-      "body": "NBA 공식 경기 페이지에서 예정·진행·종료 상태를 구분합니다. 진행 중 점수는 최종 결과로 표현하지 않습니다.",
-      "source_ids": ["S3"],
+      "body": "NBA 공식 경기 페이지에서 예정·진행·종료 상태를 구분하고 진행 중 점수는 최종 결과처럼 표현하지 않습니다.",
+      "source_ids": [
+        "S3"
+      ],
+      "content_type": "explainer",
+      "kicker": "MAIN 05",
       "visual_template": "status",
       "visual_title": "NBA 경기 상태",
       "visual_items": [
-        {"label": "상태", "value": "진행 중", "note": "조회 시점 기준"},
-        {"label": "점수", "value": "최종 아님", "note": "종료 후 확정"},
-        {"label": "표현", "value": "현재 상황", "note": "결과 단정 금지"}
+        {
+          "label": "상태",
+          "value": "진행 중",
+          "note": "조회 시점"
+        },
+        {
+          "label": "점수",
+          "value": "최종 아님",
+          "note": "종료 후 확정"
+        },
+        {
+          "label": "표현",
+          "value": "현재 상황",
+          "note": "단정 금지"
+        }
       ],
-      "visual_direction": "다섯 가지 경기 상태를 원형 진행 표시로 표현",
-      "alt_text": "NBA 경기의 예정, 진행, 종료 상태를 구분하고 진행 중 점수를 최종 결과로 쓰지 말라는 카드다."
+      "visual_direction": "경기 상태와 점수 확정 여부를 상태 카드로 표현",
+      "asset_ids": [],
+      "alt_text": "NBA 진행 중 경기 점수를 최종 결과와 구분해야 한다는 카드다."
+    },
+    {
+      "slide": 7,
+      "league": "KBO",
+      "candidate_title": "데모: KBO 경기 결과 확인",
+      "headline": "KBO 최종 결과",
+      "body": "종료된 KBO 경기는 공식 경기센터의 최종 점수와 종료 상태를 함께 확인해 결과형 카드로 전달합니다.",
+      "source_ids": [
+        "S1"
+      ],
+      "content_type": "match_result",
+      "kicker": "MAIN 06",
+      "visual_template": "match_result",
+      "visual_title": "최종 결과 확인",
+      "visual_items": [
+        {
+          "label": "HOME",
+          "value": "최종 점수",
+          "note": "공식 결과"
+        },
+        {
+          "label": "AWAY",
+          "value": "최종 점수",
+          "note": "공식 결과"
+        },
+        {
+          "label": "상태",
+          "value": "종료",
+          "note": "확정"
+        }
+      ],
+      "visual_direction": "두 팀 최종 결과와 종료 상태를 스코어보드 형태로 표현",
+      "asset_ids": [],
+      "alt_text": "KBO 종료 경기의 최종 점수와 종료 상태를 확인하는 결과형 카드다."
+    },
+    {
+      "slide": 8,
+      "league": "EPL",
+      "candidate_title": "데모: EPL 공식 일정 변화",
+      "headline": "EPL 일정 변경 체크",
+      "body": "Premier League 공식 일정에서 경기 날짜와 시작 시각의 변경 여부를 확인하고 한국 기준 날짜까지 다시 계산합니다.",
+      "source_ids": [
+        "S2"
+      ],
+      "content_type": "schedule",
+      "kicker": "MAIN 07",
+      "visual_template": "schedule",
+      "visual_title": "일정 변경 포인트",
+      "visual_items": [
+        {
+          "label": "날짜",
+          "value": "공식 일정",
+          "note": "변경 여부"
+        },
+        {
+          "label": "시각",
+          "value": "영국 현지",
+          "note": "공식 표기"
+        },
+        {
+          "label": "한국",
+          "value": "날짜 재계산",
+          "note": "시차 반영"
+        }
+      ],
+      "visual_direction": "변경된 일정 요소를 세 구역으로 나눠 보여 준다",
+      "asset_ids": [],
+      "alt_text": "EPL 경기 날짜와 시작 시각 변경 여부를 공식 일정에서 확인하는 카드다."
+    },
+    {
+      "slide": 9,
+      "league": "NBA",
+      "candidate_title": "데모: NBA 최종 결과 확인",
+      "headline": "NBA 종료 경기 확인",
+      "body": "NBA 공식 일정에서 종료 여부를 먼저 확인하고 종료된 경기만 최종 점수와 결과로 정리합니다.",
+      "source_ids": [
+        "S3"
+      ],
+      "content_type": "match_result",
+      "kicker": "MAIN 08",
+      "visual_template": "stat",
+      "visual_title": "NBA 결과 확정",
+      "visual_items": [
+        {
+          "label": "상태",
+          "value": "FINAL",
+          "note": "종료 확인"
+        },
+        {
+          "label": "점수",
+          "value": "최종 점수",
+          "note": "공식 페이지"
+        },
+        {
+          "label": "표현",
+          "value": "결과 확정",
+          "note": "진행 중 제외"
+        }
+      ],
+      "visual_direction": "종료 상태와 최종 점수를 큰 숫자 데이터로 표현",
+      "asset_ids": [],
+      "alt_text": "NBA 종료 경기만 최종 결과로 정리한다는 카드다."
+    },
+    {
+      "slide": 10,
+      "league": "SUMMARY",
+      "candidate_title": "",
+      "headline": "오늘의 스포츠 한눈에",
+      "body": "다섯 카테고리에서 확인한 여덟 개 이슈를 한 장에 다시 모아 오늘의 핵심 흐름을 정리합니다.",
+      "source_ids": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5"
+      ],
+      "content_type": "summary",
+      "kicker": "DAILY RECAP",
+      "visual_template": "summary",
+      "visual_title": "8개 이슈 한눈 요약",
+      "visual_items": [
+        {
+          "label": "KBO",
+          "value": "경기 전 일정 확인",
+          "note": "이슈 1"
+        },
+        {
+          "label": "KBL",
+          "value": "공식 일정·공지",
+          "note": "이슈 2"
+        },
+        {
+          "label": "NPB",
+          "value": "당일 대진 확인",
+          "note": "이슈 3"
+        },
+        {
+          "label": "EPL",
+          "value": "한국 시각 변환",
+          "note": "이슈 4"
+        },
+        {
+          "label": "NBA",
+          "value": "진행 상태 구분",
+          "note": "이슈 5"
+        },
+        {
+          "label": "KBO",
+          "value": "최종 결과 확인",
+          "note": "이슈 6"
+        },
+        {
+          "label": "EPL",
+          "value": "일정 변경 체크",
+          "note": "이슈 7"
+        },
+        {
+          "label": "NBA",
+          "value": "종료 경기 확정",
+          "note": "이슈 8"
+        }
+      ],
+      "visual_direction": "여덟 이슈를 2열 4행 요약 그리드로 정리",
+      "asset_ids": [],
+      "alt_text": "오늘 다섯 스포츠 카테고리의 여덟 개 주요 이슈를 한눈에 정리한 마무리 카드다."
     }
   ],
   "caption": "스포츠 카드뉴스는 빠르기만 해서는 안 됩니다. 공식 일정, 공식 발표, 경기 상태를 각각 확인하고 모든 핵심 주장에 원문 링크를 연결하세요. 진행 중 경기는 최종 결과처럼 쓰지 않고, 출처가 충돌하면 제작을 멈춥니다. 이 샘플은 자동 생성 흐름을 보여 주는 데모이며 실제 발행 전에는 당일 정보로 교체하고 종목 담당·팩트체크 담당·편집장의 승인을 받아야 합니다. 제작 과정에서는 경기 날짜와 시작 시각이 한국 표준시 기준인지 먼저 확인하고, 정규시즌·포스트시즌·친선경기처럼 대회의 성격도 분명하게 표시해야 합니다. 선수와 팀 이름은 공식 표기를 우선하며, 이적·부상·징계와 관련된 내용은 구단이나 리그의 공식 발표가 있는지 다시 확인합니다. 통계 수치는 집계 시점에 따라 달라질 수 있으므로 기준 경기와 조회 시각을 함께 기록하고, 서로 다른 매체의 숫자가 충돌하면 원문 데이터까지 추적합니다. 카드 한 장에는 핵심 주장 하나만 담아 독자가 사실과 해석을 쉽게 구분하도록 구성하며, 전망이나 분석은 확정된 결과처럼 표현하지 않습니다. 외부 사진과 로고를 사용할 때에는 라이선스와 사용 범위를 확인하고, 권리가 불분명하면 자체 제작한 도형과 텍스트 디자인으로 대체합니다. 완성된 카드와 캡션은 게시 전에 맞춤법, 숫자, 링크, 경기 상태, 인물 표기, 이미지 권리를 차례로 점검합니다. 마지막으로 담당자가 모든 체크리스트를 확인하고 승인한 뒤에만 게시하며, 게시 후 공식 발표가 바뀌거나 오류가 발견되면 수정 이력을 남기고 신속하게 정정합니다.",
-  "hashtags": ["#스포츠카드뉴스", "#KBO", "#KBL", "#NPB", "#EPL", "#NBA", "#데일리이슈"],
-  "design_brief": "외부 사진과 로고를 쓰지 않고 따뜻한 아이보리 지면, 노란 강조색, 큰 제목, 자체 제작 도형만 사용한다. 표지 뒤에 다섯 리그를 고정 순서로 배치한다.",
+  "hashtags": [
+    "#스포츠카드뉴스",
+    "#KBO",
+    "#KBL",
+    "#NPB",
+    "#EPL",
+    "#NBA",
+    "#데일리이슈"
+  ],
+  "design_brief": "따뜻한 아이보리 지면과 검정 타이포그래피, 옐로·레드 포인트를 유지한다. 2~9번은 다섯 카테고리의 서로 다른 8개 이슈를 스포츠 전용 템플릿으로 보여 주고 10번은 8개 이슈를 2열 요약 그리드로 정리한다. 라이브 생성에서는 검증된 원문 페이지의 대표 이미지를 자동 연결할 수 있다.",
   "rights_status": "자체 제작",
   "risk_flags": [],
   "approval_checklist": {
@@ -265,7 +641,7 @@
     ],
     "fact_rights": [
       "모든 숫자와 고유명사가 원문과 일치하는가",
-      "외부 사진·영상·로고를 사용하지 않았는가"
+      "자동 연결된 뉴스 이미지가 해당 카드의 검증된 원문 페이지 이미지인지 확인했는가"
     ],
     "editor_in_chief": [
       "후보 비교와 선정 이유가 타당한가",
@@ -273,4 +649,3 @@
     ]
   }
 }
-

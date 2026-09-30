@@ -32,6 +32,10 @@ class Settings:
     structured_data_dir: str
     weights: dict[str, float]
     trusted_domains: tuple[str, ...]
+    allow_news_images: bool
+    auto_approve_verified_news_images: bool
+    render_news_images: bool
+    news_image_timeout_seconds: float
 
 
 def load_settings(path: str | Path = "config/settings.toml") -> Settings:
@@ -41,6 +45,7 @@ def load_settings(path: str | Path = "config/settings.toml") -> Settings:
 
     editorial = raw["editorial"]
     sources = raw["sources"]
+    assets = raw.get("assets", {})
     return Settings(
         timezone=raw["timezone"],
         model=os.getenv("OPENAI_MODEL", raw["model"]),
@@ -56,12 +61,12 @@ def load_settings(path: str | Path = "config/settings.toml") -> Settings:
         api_timeout_seconds=max(10.0, float(raw.get("api_timeout_seconds", 120))),
         leagues=tuple(editorial["leagues"]),
         candidate_sports_min=int(editorial["candidate_sports_min"]),
-        candidate_pool_target=min(20, max(5, int(editorial.get("candidate_pool_target", 10)))),
+        candidate_pool_target=min(20, max(8, int(editorial.get("candidate_pool_target", 16)))),
         min_distinct_story_leagues=min(
-            5, max(1, int(editorial.get("min_distinct_story_leagues", 3)))
+            5, max(1, int(editorial.get("min_distinct_story_leagues", 5)))
         ),
         max_cards_per_league=min(
-            5, max(1, int(editorial.get("max_cards_per_league", 2)))
+            2, max(1, int(editorial.get("max_cards_per_league", 2)))
         ),
         visual_repeat_limit=min(5, max(1, int(editorial.get("visual_repeat_limit", 2)))),
         recent_days=max(1, int(editorial["recent_days"])),
@@ -69,4 +74,12 @@ def load_settings(path: str | Path = "config/settings.toml") -> Settings:
         structured_data_dir=str(editorial.get("structured_data_dir", "data/structured")),
         weights=dict(editorial["weights"]),
         trusted_domains=tuple(sources["trusted_domains"]),
+        allow_news_images=bool(assets.get("allow_news_images", True)),
+        auto_approve_verified_news_images=bool(
+            assets.get("auto_approve_verified_news_images", True)
+        ),
+        render_news_images=bool(assets.get("render_news_images", True)),
+        news_image_timeout_seconds=max(
+            2.0, float(assets.get("news_image_timeout_seconds", 8))
+        ),
     )

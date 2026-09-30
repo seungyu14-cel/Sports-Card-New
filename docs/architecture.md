@@ -2,47 +2,49 @@
 
 ## 하루 한 편 흐름
 
-1. `generator.py`가 **Research → Editorial → Design** 3단계로 분리되어 동작합니다. 리서치 단계만 웹 검색을 사용하고, 편집·디자인 단계는 검증된 리서치 결과만 사용합니다.
-2. Research 단계는 KBO·KBL·NPB·EPL·NBA를 모두 조사하고 후보 풀을 만듭니다. 후보마다 중요도·한국 독자 관련성·출처 신뢰도·설명 가치·최신성·팬 관심도·시각화 잠재력·독창성을 1~5점으로 기록합니다.
-3. `data/structured/YYYY-MM-DD.json` 또는 `data/structured/latest.json`이 있으면 공식 API/수집기에서 만든 구조화 데이터를 사전 컨텍스트로 사용합니다. provenance가 있어도 공식 원문을 재확인합니다.
-4. 최근 게시 이력과 `output/*/performance.json` 성과 데이터는 반복 방지와 편집 참고에만 사용합니다. 팩트 판정 근거로 사용하지 않습니다.
-5. Editorial 단계는 표지 1장 + 스토리 5장을 고릅니다. 과거의 `KBO → KBL → NPB → EPL → NBA` 고정 순서를 사용하지 않고, 뉴스 가치·최소 리그 다양성·리그당 최대 카드 수 규칙으로 편성합니다.
-6. Design 단계는 원고를 바꾸지 않고 `match_result`, `match_preview`, `player`, `stat`, `ranking`, `breaking`, `schedule` 등 스포츠 전용 템플릿과 실제 `visual_items`를 설계합니다.
-7. `validation.py`는 공식 원문 직접 확인, 조회일·유효기한, 후보-카드 연결, 리그 다양성, 템플릿 반복, 권리 승인된 asset만 사용했는지 검사합니다.
-8. 검증 실패 시 `pipeline.py`가 공식 원문을 다시 조사해 전체 패키지를 복구합니다. 검증 규칙은 완화하지 않습니다.
-9. `renderer.py`는 1080×1350 PNG를 만들고, 경기 결과·프리뷰·선수·기록·순위·속보·일정에 맞는 서로 다른 스포츠 모듈을 사용합니다. 외부 사진이 없어도 데이터 그래픽으로 완성되도록 설계했습니다.
-10. `visual_qa.py`가 렌더 후 이미지 규격, 제목·본문 밀도, headline 중복, 데이터 포인트 부족, 템플릿 과반 반복을 검사하고 `visual-qa.md`를 남깁니다.
-11. 게시 패키지는 캡션, 대체 텍스트, 출처 감사 문서, 권리 자산 정보, Visual QA, 승인 대기 manifest와 ZIP으로 묶입니다.
-12. GitHub Actions는 API 호출 전 테스트, 생성 후 검증, ZIP 무결성 검사를 수행하고 날짜별 Draft PR을 만들거나 갱신합니다. 병합은 사람이 합니다.
+1. **Research**가 KBO·KBL·NPB·EPL·NBA 5개 카테고리를 모두 조사하고 8개 이슈를 고를 수 있도록 후보 풀을 만듭니다.
+2. 후보마다 중요도·한국 독자 관련성·출처 신뢰도·설명 가치·최신성·팬 관심도·시각화 잠재력·독창성을 기록합니다.
+3. **Editorial**은 총 10장을 구성합니다. 1번은 COVER, 2~9번은 서로 다른 8개 이슈, 10번은 SUMMARY입니다.
+4. 2~9번에는 5개 카테고리가 모두 들어가며 카테고리당 최대 2개까지만 허용합니다. 정상 분포는 2·2·2·1·1입니다.
+5. **Design**은 이슈 유형에 맞춰 match_result, match_preview, player, stat, ranking, breaking, schedule 등을 배치하고 10번에는 summary 템플릿을 사용합니다.
+6. AI는 뉴스 이미지 URL을 추측하지 않습니다. `assets.py`가 검증 완료된 실제 원문 페이지에서 `og:image` / `twitter:image`를 읽어 대표 이미지를 발견합니다.
+7. 운영 정책상 사용 허용된 뉴스 이미지는 `VisualAsset`에 원문 Fact, URL, 크레딧, 사용 범위와 승인 근거를 기록한 뒤 카드와 연결합니다.
+8. `validation.py`가 10장 구조, 8개 이슈 중복 여부, 5개 카테고리 포함, 2개 상한, 후보-카드-출처 관계, 뉴스 이미지와 원문 Fact 관계를 검사합니다.
+9. 검증 실패 시 공식 원문 재조사와 전체 패키지 자동 복구를 제한 횟수만큼 수행합니다.
+10. `renderer.py`는 승인된 뉴스 이미지가 있으면 사진 중심 패널을 렌더링하고 이미지 로드가 실패하면 데이터 그래픽으로 fallback 합니다.
+11. `visual_qa.py`는 정확히 10장의 PNG, 중복 headline, 템플릿 편중, 마무리 summary 등을 검사합니다.
+12. 결과는 Draft PR과 Artifact로 제출되며 게시 여부는 사람이 최종 결정합니다.
 
-## 역할별 산출물
+## 카드 데이터 역할
 
-| 운영 역할 | 코드·파일 |
-|---|---|
-| 리서치 데스크 | `ResearchBrief`, `candidates`, `facts`, 구조화 데이터 컨텍스트 |
-| 편집장·카피 | `EditorialPlan`, `selected_candidate_title`, `cards`, `caption`, `hashtags` |
-| 아트디렉션 | `DesignPlan`, 스포츠 전용 `visual_template`, `visual_items`, `assets` |
-| 팩트체크·권리 | `validation.py`, `sources.md`, `rights_status`, asset 승인 게이트 |
-| Visual QA | `visual_qa.py`, `visual-qa.md` |
-| 성장 피드백 | `performance.json`을 다음 편집의 참고 데이터로 사용 |
-| 최종 승인 | `editorial-review.md`와 Draft PR 사람 승인 |
+| 페이지 | league | candidate_title | 역할 |
+|---|---|---|---|
+| 1 | COVER | 빈 값 | 표지 |
+| 2~9 | KBO/KBL/NPB/EPL/NBA | 실제 후보 title | 서로 다른 8개 메인 이슈 |
+| 10 | SUMMARY | 빈 값 | 여덟 이슈 한눈 요약 |
 
-## 시각 자산 원칙
+## 뉴스 이미지 자산
 
-`VisualAsset`은 선수 사진·팀/리그 로고·경기장·일러스트·데이터 그래픽의 출처와 권리 상태를 저장합니다. 카드가 외부 자산을 참조하려면 다음 조건을 모두 만족해야 합니다.
+뉴스 이미지는 다음 조건을 충족할 때 자동 연결됩니다.
 
-- `approved_for_publish=true`
-- `rights_status`가 `자체 제작` 또는 `사용 허가`
-- 카드의 `asset_ids`가 실제 등록 자산을 참조
+- 카드가 2~9번 메인 이슈일 것
+- 카드의 `source_ids` 중 하나가 원문 직접 확인 + 검증 완료일 것
+- 해당 원문 페이지에 `og:image` 또는 `twitter:image`가 있을 것
+- `allow_news_images=true`
+- `auto_approve_verified_news_images=true`
 
-자동화는 인터넷에서 사진이나 로고를 임의로 다운로드하지 않습니다. 승인 자산이 없으면 자체 제작 데이터 그래픽으로 렌더링합니다.
+등록되는 주요 필드:
 
-## 의도적으로 자동화하지 않은 것
+- `asset_type = news_image`
+- `source_fact_id`
+- `source_url`
+- `rights_status = 뉴스 이미지 사용 승인`
+- `usage_scope = ["instagram_post"]`
+- `license_evidence`
+- `approved_for_publish = true`
 
-- 인스타그램 게시·예약
-- Draft PR 자동 병합
-- 권리가 확인되지 않은 외부 사진·영상·로고 수집
-- 광고·협찬 표기 판단
-- 출처 충돌이나 미확인 부상·이적 정보를 근거 없이 자동 확정
+렌더러가 이미지 다운로드에 실패해도 카드 자체는 데이터 그래픽으로 생성됩니다.
 
-AI는 조사·정리·초안·시각 설계를 돕고, 게시 여부는 사람이 결정합니다.
+## 사람 승인
+
+자동화는 인스타그램 게시, Draft PR 병합, 정정 판단을 자동 수행하지 않습니다. 팩트·이미지·최종 문구를 검토한 뒤 사람이 게시를 결정합니다.

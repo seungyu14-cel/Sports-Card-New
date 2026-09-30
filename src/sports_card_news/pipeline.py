@@ -9,6 +9,7 @@ from datetime import date, timedelta
 from pathlib import Path
 
 from .analytics import recent_performance_summary
+from .assets import attach_verified_news_images
 from .config import Settings
 from .generator import generate_daily_package, repair_daily_package
 from .history import recent_publication_summary
@@ -21,7 +22,18 @@ from .visual_qa import run_visual_qa
 
 def load_package(path: str | Path) -> DailyPackage:
     payload = json.loads(Path(path).read_text(encoding="utf-8"))
-    legacy_leagues = ("COVER", "KBO", "KBL", "NPB", "EPL", "NBA")
+    legacy_leagues = (
+        "COVER",
+        "KBO",
+        "KBL",
+        "NPB",
+        "EPL",
+        "NBA",
+        "KBO",
+        "EPL",
+        "NBA",
+        "SUMMARY",
+    )
     candidates = payload.get("candidates", [])
     candidate_by_league = {}
     for candidate in candidates:
@@ -61,6 +73,10 @@ def load_package(path: str | Path) -> DailyPackage:
         fact.setdefault("evidence", str(fact.get("claim", "공식 원문 확인"))[:500])
 
     payload.setdefault("assets", [])
+    for asset in payload["assets"]:
+        asset.setdefault("source_fact_id", "")
+        asset.setdefault("usage_scope", [])
+        asset.setdefault("license_evidence", "")
     return DailyPackage.model_validate(payload)
 
 
@@ -116,6 +132,7 @@ def run_daily(
             performance_summary=performance,
             structured_context=structured_context,
         )
+        package = attach_verified_news_images(package, settings)
 
     report = _validate_for_edition(package, settings, edition_date)
     if not fixture:
@@ -143,6 +160,7 @@ def run_daily(
                 warnings=list(report.warnings),
                 attempt=attempt,
             )
+            package = attach_verified_news_images(package, settings)
             report = _validate_for_edition(package, settings, edition_date)
 
     if not report.ok:
@@ -280,7 +298,10 @@ def _sources_markdown(package: DailyPackage) -> str:
                 f"- 권리 상태: {asset.rights_status.value}\n"
                 f"- 게시 승인: {'예' if asset.approved_for_publish else '아니오'}\n"
                 f"- 출처: {asset.source_url or '외부 URL 없음'}\n"
+                f"- 원문 Fact: {asset.source_fact_id or '없음'}\n"
                 f"- 크레딧: {asset.credit or '없음'}\n"
+                f"- 사용 범위: {', '.join(asset.usage_scope) or '없음'}\n"
+                f"- 승인 근거: {asset.license_evidence or '없음'}\n"
                 f"- 권리 메모: {asset.rights_note}"
             )
     return "\n\n".join(blocks) + "\n"
@@ -360,8 +381,8 @@ def _editorial_markdown(package: DailyPackage, settings: Settings) -> str:
         f"| {fact.id} | {fact.claim.replace('|', '\\|')} | [{fact.title}]({fact.url}) | {fact.status.value} |"
         for fact in package.facts
     ]
-    story_mix = Counter(card.league.value for card in package.cards[1:])
-    template_mix = Counter(card.visual_template.value for card in package.cards[1:])
+    story_mix = Counter(card.league.value for card in package.cards[1:9])
+    template_mix = Counter(card.visual_template.value for card in package.cards[1:9])
     checklist = package.approval_checklist
     return f"""# 편집 검토: {package.edition_date}
 
@@ -382,7 +403,9 @@ def _editorial_markdown(package: DailyPackage, settings: Settings) -> str:
 ## 오늘의 편성
 - 리그 구성: {dict(story_mix)}
 - 템플릿 구성: {dict(template_mix)}
-- 고정 리그 순서가 아니라 뉴스 가치와 다양성 규칙으로 편성
+- 2~9번: 다섯 카테고리에서 서로 다른 8개 이슈
+- 카테고리 분포: 2·2·2·1·1
+- 10번: 마무리/한눈 요약
 
 ## 팩트 카드
 

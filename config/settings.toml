@@ -1,8 +1,8 @@
 timezone = "Asia/Seoul"
 model = "gpt-6-astra"
 reasoning_effort = "medium"
-cards_min = 6
-cards_max = 6
+cards_min = 10
+cards_max = 10
 caption_min_chars = 500
 caption_max_chars = 2000
 output_width = 1080
@@ -14,13 +14,14 @@ api_timeout_seconds = 120
 [editorial]
 leagues = ["KBO", "KBL", "NPB", "EPL", "NBA"]
 candidate_sports_min = 3
-candidate_pool_target = 10
-min_distinct_story_leagues = 3
+candidate_pool_target = 16
+min_distinct_story_leagues = 5
 max_cards_per_league = 2
 visual_repeat_limit = 2
 recent_days = 7
 analytics_days = 30
 structured_data_dir = "data/structured"
+
 [editorial.weights]
 importance = 0.20
 korean_relevance = 0.15
@@ -30,6 +31,12 @@ freshness = 0.15
 fan_interest = 0.10
 visual_potential = 0.10
 uniqueness = 0.05
+
+[assets]
+allow_news_images = true
+auto_approve_verified_news_images = true
+render_news_images = true
+news_image_timeout_seconds = 8
 
 [sources]
 trusted_domains = [

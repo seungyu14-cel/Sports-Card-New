@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import os
 import re
+from io import BytesIO
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFont
+import httpx
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 from .config import Settings
-from .models import Card, DailyPackage, VisualItem, VisualTemplate
+from .models import AssetType, Card, DailyPackage, VisualAsset, VisualItem, VisualTemplate
 
 
 CANVAS = (1080, 1350)
@@ -29,26 +31,41 @@ def render_package(package: DailyPackage, destination: str | Path, settings: Set
     output = Path(destination)
     output.mkdir(parents=True, exist_ok=True)
     selected = next(item for item in package.candidates if item.title == package.selected_candidate_title)
-    candidates_by_league = {item.league.upper(): item for item in package.candidates}
-    issue_candidates = [
-        item for league, item in candidates_by_league.items() if league in {"KBO", "KBL", "NPB", "EPL", "NBA"}
-    ]
-    cover_sport = f"{len({item.sport for item in issue_candidates})} SPORTS"
+    candidates_by_title = {item.title: item for item in package.candidates}
+    facts_by_id = {item.id: item for item in package.facts}
+    assets_by_id = {item.id: item for item in package.assets}
+    issue_cards = package.cards[1:9]
     total_slides = len(package.cards)
     paths: list[Path] = []
 
     for card in package.cards:
-        candidate = candidates_by_league.get(card.league.value, selected)
+        candidate = candidates_by_title.get(card.candidate_title, selected)
+        visual_asset = next(
+            (
+                assets_by_id[asset_id]
+                for asset_id in card.asset_ids
+                if asset_id in assets_by_id
+                and assets_by_id[asset_id].asset_type == AssetType.NEWS_IMAGE
+                and assets_by_id[asset_id].approved_for_publish
+            ),
+            None,
+        )
+        source_page_url = ""
+        if visual_asset and visual_asset.source_fact_id in facts_by_id:
+            source_page_url = facts_by_id[visual_asset.source_fact_id].url
+
         path = output / f"card-{card.slide:02d}.png"
         _render_card(
             card=card,
-            sport=cover_sport if card.slide == 1 else candidate.sport,
-            league=f"{len(issue_candidates)} LEAGUES" if card.slide == 1 else candidate.league,
+            sport=f"{len(issue_cards)} ISSUES" if card.slide == 1 else candidate.sport,
+            league="5 CATEGORIES" if card.slide == 1 else card.league.value,
             game_status=str(candidate.game_status),
             edition_date=package.edition_date,
             total_slides=total_slides,
             path=path,
             settings=settings,
+            visual_asset=visual_asset,
+            source_page_url=source_page_url,
         )
         paths.append(path)
     return paths
@@ -63,6 +80,8 @@ def _render_card(
     total_slides: int,
     path: Path,
     settings: Settings,
+    visual_asset: VisualAsset | None = None,
+    source_page_url: str = "",
 ) -> None:
     image = Image.new("RGB", CANVAS, PAPER)
     draw = ImageDraw.Draw(image)
@@ -74,7 +93,16 @@ def _render_card(
     if card.slide == 1:
         _draw_cover(draw, fonts, card, sport, league, edition_date)
     else:
-        _draw_story_card(draw, fonts, card, game_status)
+        _draw_story_card(
+            image,
+            draw,
+            fonts,
+            card,
+            game_status,
+            settings,
+            visual_asset=visual_asset,
+            source_page_url=source_page_url,
+        )
 
     _draw_footer(draw, fonts, card, total_slides)
 
@@ -201,7 +229,7 @@ def _draw_cover_facts(
     edition_date: str,
 ) -> None:
     top, bottom = 1000, 1185
-    labels = (("SPORT", sport), ("LEAGUE", league), ("EDITION", edition_date[5:]), ("REVIEW", "REQUIRED"))
+    labels = (("ISSUES", sport), ("CATEGORIES", league), ("EDITION", edition_date[5:]), ("REVIEW", "REQUIRED"))
     cell_width = 940 / len(labels)
     draw.rectangle((70, top, 1010, bottom), outline=INK, width=3)
     draw.rectangle((70, top, 1010, top + 52), fill=YELLOW)
@@ -232,12 +260,18 @@ def _draw_cover_facts(
 
 
 def _draw_story_card(
+    image: Image.Image,
     draw: ImageDraw.ImageDraw,
     fonts: dict[str, str],
     card: Card,
     game_status: str,
+    settings: Settings,
+    visual_asset: VisualAsset | None = None,
+    source_page_url: str = "",
 ) -> None:
-    draw.text((70, 185), f"{card.slide - 1:02d}", font=_font(fonts, 108, "bold"), fill=INK)
+    number_text = "END" if card.league.value == "SUMMARY" else f"{card.slide - 1:02d}"
+    number_size = 72 if number_text == "END" else 108
+    draw.text((70, 185), number_text, font=_font(fonts, number_size, "bold"), fill=INK)
     draw.ellipse((202, 267, 220, 285), fill=RED)
     draw.text(
         (1010, 205),
@@ -289,7 +323,22 @@ def _draw_story_card(
     panel_top = max(745, body_y + len(body_lines) * _line_height(body_font, 15) + 40)
     panel_top = min(panel_top, 835)
     template = _resolve_visual_template(card)
-    if template == VisualTemplate.MATCH_RESULT:
+    if template == VisualTemplate.SUMMARY:
+        _draw_summary_module(draw, fonts, panel_top, card)
+    elif visual_asset is not None and settings.render_news_images:
+        rendered = _draw_news_image_module(
+            image,
+            draw,
+            fonts,
+            panel_top,
+            card,
+            visual_asset,
+            source_page_url,
+            settings,
+        )
+        if not rendered:
+            _draw_visual_rows(draw, fonts, panel_top, card.visual_title, card.visual_items[:4])
+    elif template == VisualTemplate.MATCH_RESULT:
         _draw_match_result_module(draw, fonts, panel_top, card)
     elif template == VisualTemplate.MATCH_PREVIEW:
         _draw_match_preview_module(draw, fonts, panel_top, card)
@@ -345,6 +394,7 @@ def _resolve_visual_template(card: Card) -> VisualTemplate:
         (("비교", "구분", "확정", "발표"), VisualTemplate.COMPARISON),
         (("상태", "진행", "종료", "연기", "취소"), VisualTemplate.STATUS),
         (("출처", "근거", "자료"), VisualTemplate.SOURCES),
+        (("요약", "한눈", "summary"), VisualTemplate.SUMMARY),
         (("승인", "검토", "체크"), VisualTemplate.APPROVAL),
     )
     for keywords, template in keyword_templates:
@@ -446,6 +496,142 @@ def _draw_steps_module(draw: ImageDraw.ImageDraw, fonts: dict[str, str], top: in
         draw.text((135, row_top + row_height // 2), number, font=_font(fonts, 34, "bold"), fill=INK if index == 0 else WHITE, anchor="mm")
         draw.text((245, row_top + row_height // 2), label, font=_font(fonts, 33, "bold"), fill=INK, anchor="lm")
         draw.text((955, row_top + row_height // 2), "→", font=_font(fonts, 34, "bold"), fill=RED, anchor="rm")
+
+
+def _draw_news_image_module(
+    image: Image.Image,
+    draw: ImageDraw.ImageDraw,
+    fonts: dict[str, str],
+    top: int,
+    card: Card,
+    asset: VisualAsset,
+    source_page_url: str,
+    settings: Settings,
+) -> bool:
+    try:
+        headers = {"User-Agent": "Mozilla/5.0 (compatible; SportsCardNews/1.1)"}
+        if source_page_url:
+            headers["Referer"] = source_page_url
+        response = httpx.get(
+            asset.source_url,
+            timeout=settings.news_image_timeout_seconds,
+            follow_redirects=True,
+            headers=headers,
+        )
+        response.raise_for_status()
+        if len(response.content) > 12_000_000:
+            return False
+        source = Image.open(BytesIO(response.content)).convert("RGB")
+    except (httpx.HTTPError, OSError, ValueError):
+        return False
+
+    _panel(draw, top)
+    image_top = top + 64
+    image_bottom = min(1050, top + 315)
+    hero = ImageOps.fit(
+        source,
+        (880, image_bottom - image_top),
+        method=Image.Resampling.LANCZOS,
+        centering=(0.5, 0.42),
+    )
+    image.paste(hero, (100, image_top))
+
+    draw.rectangle((100, top + 24, 980, top + 76), fill=INK)
+    draw.text((125, top + 50), card.visual_title, font=_font(fonts, 22, "bold"), fill=WHITE, anchor="lm")
+
+    items = card.visual_items[:3]
+    if items:
+        width = 880 / len(items)
+        strip_top = image_bottom + 18
+        for index, item in enumerate(items):
+            left = round(100 + index * width)
+            right = round(100 + (index + 1) * width)
+            if index:
+                draw.line((left, strip_top, left, 1145), fill=HAIRLINE, width=2)
+            draw.text(
+                ((left + right) // 2, strip_top + 18),
+                item.label,
+                font=_font(fonts, 17, "bold"),
+                fill=RED,
+                anchor="ma",
+            )
+            value_font, value_lines = _fit_text(
+                draw,
+                item.value,
+                fonts["bold"],
+                int(width - 24),
+                2,
+                25,
+                18,
+            )
+            draw.multiline_text(
+                ((left + right) // 2, strip_top + 68),
+                "\n".join(value_lines),
+                font=value_font,
+                fill=INK,
+                spacing=3,
+                anchor="ma",
+                align="center",
+            )
+
+    credit = asset.credit or "NEWS SOURCE"
+    draw.text(
+        (980, 1150),
+        f"IMAGE · {credit}"[:70],
+        font=_font(fonts, 15, "bold"),
+        fill=MUTED,
+        anchor="ra",
+    )
+    return True
+
+
+def _draw_summary_module(
+    draw: ImageDraw.ImageDraw,
+    fonts: dict[str, str],
+    top: int,
+    card: Card,
+) -> None:
+    _panel(draw, top)
+    draw.rectangle((70, top, 1010, top + 70), fill=INK)
+    draw.text((100, top + 35), card.visual_title, font=_font(fonts, 27, "bold"), fill=WHITE, anchor="lm")
+
+    items = card.visual_items[:8]
+    cell_width = 430
+    cell_height = max(72, (1070 - top) // 4)
+    for index, item in enumerate(items):
+        row, col = divmod(index, 2)
+        left = 95 + col * 465
+        upper = top + 92 + row * cell_height
+        fill = YELLOW if index in {0, 3, 6} else WHITE
+        draw.rounded_rectangle(
+            (left, upper, left + cell_width, upper + cell_height - 14),
+            radius=12,
+            fill=fill,
+            outline=INK,
+            width=2,
+        )
+        draw.text(
+            (left + 18, upper + 18),
+            f"{index + 1:02d} · {item.label}",
+            font=_font(fonts, 17, "bold"),
+            fill=RED if fill == WHITE else INK,
+        )
+        value_font, value_lines = _fit_text(
+            draw,
+            item.value,
+            fonts["bold"],
+            385,
+            2,
+            24,
+            18,
+        )
+        draw.multiline_text(
+            (left + 18, upper + 49),
+            "\n".join(value_lines),
+            font=value_font,
+            fill=INK,
+            spacing=2,
+        )
 
 
 def _draw_match_result_module(
