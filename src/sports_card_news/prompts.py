@@ -50,8 +50,7 @@ DESIGN_SYSTEM_PROMPT = """당신은 스포츠 인스타그램 아트디렉터이
 6. 사진·로고·선수 컷은 rights_status가 '자체 제작' 또는 '사용 허가'이고 approved_for_publish=true인 asset만 asset_ids로 참조한다.
 7. 승인된 asset이 명시적으로 제공되지 않았다면 assets와 asset_ids는 비워 두고 자체 제작 데이터 그래픽으로 대체한다. 이미지 URL을 추측하지 않는다.
 8. 1번 카드 visual_template은 cover다. 2~6번 카드는 content_type에 맞는 스포츠 전용 템플릿을 고른다.
-9. alt_text는 시각적 장식보다 실제 전달 정보가 무엇인지 설명한다.
-10. approval_notice는 정확히 '게시 전 사람 승인 필요', needs_human_approval는 true다.
+9. DesignPlan은 원고·캡션·출처를 다시 작성하지 않고 시각 설계 필드만 반환한다.
 """
 
 
@@ -140,9 +139,8 @@ def build_design_prompt(
 확정 편집 원고:
 {editorial_json}
 
-편집 원고의 headline, body, source_ids, content_type, 카드 순서를 바꾸지 말고 DailyPackage를 완성하라.
-ResearchBrief의 candidates/facts/risk_flags를 그대로 반영하고 EditorialPlan의 선정 이유·캡션·해시태그·체크리스트를 유지한다.
-각 카드의 visual_title, visual_items, visual_template, visual_direction을 스포츠 콘텐츠에 맞게 설계한다.
+편집 원고의 headline, body, source_ids, content_type, 카드 순서는 이미 확정되어 있으므로 변경하지 않는다.
+각 slide에 대응하는 visual_title, visual_items, visual_template, visual_direction만 스포츠 콘텐츠에 맞게 설계한다.
 외부 asset은 승인 정보가 입력에 없으므로 기본적으로 assets=[]와 asset_ids=[]를 사용한다.
 최종 출력은 DesignPlan만 반환한다.
 """
