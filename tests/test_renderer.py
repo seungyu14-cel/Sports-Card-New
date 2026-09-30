@@ -35,7 +35,7 @@ def test_story_cards_render_distinct_data_modules(tmp_path: Path) -> None:
 
     paths = render_package(package, tmp_path, settings)
 
-    with Image.open(paths[1]) as schedule, Image.open(paths[3]) as status:
+    with Image.open(paths[1]) as schedule, Image.open(paths[5]) as status:
         assert schedule.tobytes() != status.tobytes()
 
 

@@ -29,16 +29,22 @@ def render_package(package: DailyPackage, destination: str | Path, settings: Set
     output = Path(destination)
     output.mkdir(parents=True, exist_ok=True)
     selected = next(item for item in package.candidates if item.title == package.selected_candidate_title)
+    candidates_by_league = {item.league.upper(): item for item in package.candidates}
+    issue_candidates = [
+        item for league, item in candidates_by_league.items() if league in {"KBO", "KBL", "NPB", "EPL", "NBA"}
+    ]
+    cover_sport = f"{len({item.sport for item in issue_candidates})} SPORTS"
     total_slides = len(package.cards)
     paths: list[Path] = []
 
     for card in package.cards:
+        candidate = candidates_by_league.get(card.league.value, selected)
         path = output / f"card-{card.slide:02d}.png"
         _render_card(
             card=card,
-            sport=selected.sport,
-            league=selected.league,
-            game_status=str(selected.game_status),
+            sport=cover_sport if card.slide == 1 else candidate.sport,
+            league=f"{len(issue_candidates)} LEAGUES" if card.slide == 1 else candidate.league,
+            game_status=str(candidate.game_status),
             edition_date=package.edition_date,
             total_slides=total_slides,
             path=path,
@@ -63,14 +69,14 @@ def _render_card(
     fonts = _load_fonts()
 
     _draw_paper_texture(draw)
-    _draw_header(draw, fonts, edition_date, card.slide, total_slides)
+    _draw_header(draw, fonts, edition_date)
 
     if card.slide == 1:
         _draw_cover(draw, fonts, card, sport, league, edition_date)
     else:
         _draw_story_card(draw, fonts, card, game_status)
 
-    _draw_footer(draw, fonts, card)
+    _draw_footer(draw, fonts, card, total_slides)
 
     if (settings.output_width, settings.output_height) != CANVAS:
         image = image.resize((settings.output_width, settings.output_height), Image.Resampling.LANCZOS)
@@ -102,15 +108,12 @@ def _draw_header(
     draw: ImageDraw.ImageDraw,
     fonts: dict[str, str],
     edition_date: str,
-    slide: int,
-    total_slides: int,
 ) -> None:
     draw.line((70, 72, 1010, 72), fill=INK, width=3)
-    draw.text((70, 90), "SPORTS DESK", font=_font(fonts, 25, "bold"), fill=INK)
-    draw.text((285, 93), "/  DAILY EDITION", font=_font(fonts, 20), fill=MUTED)
+    draw.text((70, 90), "DAILY ISSUE", font=_font(fonts, 25, "bold"), fill=INK)
     draw.text(
         (1010, 88),
-        f"{edition_date.replace('-', '.')}   |   {slide:02d} / {total_slides:02d}",
+        edition_date.replace("-", "."),
         font=_font(fonts, 23),
         fill=INK,
         anchor="ra",
@@ -236,7 +239,13 @@ def _draw_story_card(
 ) -> None:
     draw.text((70, 185), f"{card.slide - 1:02d}", font=_font(fonts, 108, "bold"), fill=INK)
     draw.ellipse((202, 267, 220, 285), fill=RED)
-    draw.text((1010, 205), "ONE CARD / ONE CLAIM", font=_font(fonts, 19, "bold"), fill=MUTED, anchor="ra")
+    draw.text(
+        (1010, 205),
+        f"{card.league.value} / DAILY BRIEF",
+        font=_font(fonts, 19, "bold"),
+        fill=MUTED,
+        anchor="ra",
+    )
     headline_text = _clean_card_text(card.headline)
     body_text = _clean_card_text(card.body)
 
@@ -398,7 +407,8 @@ def _draw_key_fact_module(
     source_ids: list[str],
 ) -> None:
     _panel(draw, top)
-    labels = (("핵심", "한 카드에 한 가지 주장"), ("시점", "최신 발표 기준"), ("근거", " · ".join(source_ids) or "편집 검토"))
+    evidence = "공식 자료 확인" if source_ids else "편집 검토"
+    labels = (("핵심", "한 카드에 한 가지 주장"), ("시점", "최신 발표 기준"), ("근거", evidence))
     row_height = (1165 - top) // len(labels)
     for index, (label, value) in enumerate(labels):
         row_top = top + index * row_height
@@ -464,17 +474,17 @@ def _draw_sources_module(
     source_ids: list[str],
 ) -> None:
     _panel(draw, top)
-    source_ids = source_ids or ["CHECK"]
+    source_count = max(1, len(source_ids))
     center = (540, top + 188)
     draw.rounded_rectangle((395, top + 128, 685, top + 248), radius=18, fill=INK)
     draw.text(center, "핵심 주장", font=_font(fonts, 31, "bold"), fill=WHITE, anchor="mm")
-    count = len(source_ids)
-    for index, source_id in enumerate(source_ids):
-        x = round(175 + index * (730 / max(count - 1, 1))) if count > 1 else 540
+    for index in range(source_count):
+        source_label = f"공식 {index + 1}"
+        x = round(175 + index * (730 / max(source_count - 1, 1))) if source_count > 1 else 540
         y = top + 330
         draw.line((center[0], center[1] + 60, x, y - 42), fill=RED, width=3)
         draw.ellipse((x - 48, y - 48, x + 48, y + 48), fill=YELLOW, outline=INK, width=3)
-        draw.text((x, y), source_id, font=_font(fonts, 25, "bold"), fill=INK, anchor="mm")
+        draw.text((x, y), source_label, font=_font(fonts, 22, "bold"), fill=INK, anchor="mm")
 
 
 def _draw_approval_module(draw: ImageDraw.ImageDraw, fonts: dict[str, str], top: int) -> None:
@@ -496,12 +506,17 @@ def _panel(draw: ImageDraw.ImageDraw, top: int) -> None:
     draw.rounded_rectangle((70, top, 1010, 1165), radius=18, fill=WHITE, outline=INK, width=3)
 
 
-def _draw_footer(draw: ImageDraw.ImageDraw, fonts: dict[str, str], card: Card) -> None:
-    source_text = "SOURCE  " + (" · ".join(card.source_ids) if card.source_ids else "EDITORIAL CHECKLIST")
+def _draw_footer(
+    draw: ImageDraw.ImageDraw,
+    fonts: dict[str, str],
+    card: Card,
+    total_slides: int,
+) -> None:
+    page_text = f"PAGE  {card.slide:02d} / {total_slides:02d}"
     draw.line((70, 1232, 1010, 1232), fill=INK, width=2)
-    draw.text((70, 1267), source_text, font=_font(fonts, 21, "bold"), fill=MUTED)
-    draw.rectangle((793, 1259, 811, 1282), fill=RED)
-    draw.text((1010, 1267), "HUMAN REVIEW REQUIRED", font=_font(fonts, 20, "bold"), fill=INK, anchor="ra")
+    draw.text((70, 1267), page_text, font=_font(fonts, 21, "bold"), fill=MUTED)
+    draw.rectangle((851, 1259, 869, 1282), fill=RED)
+    draw.text((1010, 1267), "Daily._.hor", font=_font(fonts, 20, "bold"), fill=INK, anchor="ra")
 
 
 def _fit_text(

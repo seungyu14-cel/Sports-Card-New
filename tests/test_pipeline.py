@@ -9,7 +9,7 @@ import pytest
 
 from sports_card_news.config import load_settings
 from sports_card_news.history import recent_publication_summary
-from sports_card_news.models import FactStatus, RightsStatus, VisualTemplate
+from sports_card_news.models import CardLeague, FactStatus, RightsStatus, VisualTemplate
 from sports_card_news.pipeline import load_package, run_daily
 from sports_card_news.validation import validate_package
 
@@ -23,6 +23,14 @@ def test_demo_package_passes_validation() -> None:
     report = validate_package(package, settings)
     assert report.ok, report.errors
     assert len(package.cards) == 6
+    assert [card.league.value for card in package.cards] == [
+        "COVER",
+        "KBO",
+        "KBL",
+        "NPB",
+        "EPL",
+        "NBA",
+    ]
     assert len({candidate.sport for candidate in package.candidates}) == 3
     assert 500 <= len(package.caption) <= 2000
 
@@ -65,10 +73,11 @@ def test_card_copy_with_markdown_or_url_is_blocked() -> None:
     assert any("URL·도메인·Markdown 링크" in error for error in report.errors)
 
 
-def test_legacy_package_without_visual_template_is_migrated(tmp_path: Path) -> None:
+def test_legacy_package_without_card_layout_fields_is_migrated(tmp_path: Path) -> None:
     payload = json.loads((ROOT / "fixtures/demo_package.json").read_text(encoding="utf-8"))
     for card in payload["cards"]:
         card.pop("visual_template")
+        card.pop("league")
     legacy_path = tmp_path / "legacy-package.json"
     legacy_path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
 
@@ -76,6 +85,26 @@ def test_legacy_package_without_visual_template_is_migrated(tmp_path: Path) -> N
 
     assert package.cards[0].visual_template == VisualTemplate.COVER
     assert all(card.visual_template == VisualTemplate.AUTO for card in package.cards[1:])
+    assert [card.league.value for card in package.cards] == [
+        "COVER",
+        "KBO",
+        "KBL",
+        "NPB",
+        "EPL",
+        "NBA",
+    ]
+
+
+def test_wrong_league_page_order_is_blocked() -> None:
+    settings = load_settings(ROOT / "config/settings.toml")
+    package = load_package(ROOT / "fixtures/demo_package.json")
+    wrong_card = package.cards[1].model_copy(update={"league": CardLeague.NBA})
+    wrong = package.model_copy(update={"cards": [package.cards[0], wrong_card, *package.cards[2:]]})
+
+    report = validate_package(wrong, settings)
+
+    assert not report.ok
+    assert any("카드 리그 순서" in error for error in report.errors)
 
 
 def test_rights_needs_review_is_warning_not_blocking() -> None:

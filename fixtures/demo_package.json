@@ -18,6 +18,32 @@
       "caution": "실제 발행 전 당일 경기 정보로 교체해야 합니다."
     },
     {
+      "sport": "농구",
+      "league": "KBL",
+      "title": "데모: KBL 공식 일정 확인",
+      "summary": "KBL 공식 일정과 공지에서 국내 농구의 최신 정보를 확인하는 데모 후보입니다.",
+      "game_status": "예정",
+      "importance": 4,
+      "korean_relevance": 5,
+      "source_reliability": 5,
+      "explainability": 4,
+      "source_ids": ["S4"],
+      "caution": "실제 발행 전 최신 공식 공지로 교체해야 합니다."
+    },
+    {
+      "sport": "야구",
+      "league": "NPB",
+      "title": "데모: NPB 당일 경기 확인",
+      "summary": "NPB 공식 일정에서 당일 경기와 시작 시각을 확인하는 데모 후보입니다.",
+      "game_status": "예정",
+      "importance": 3,
+      "korean_relevance": 3,
+      "source_reliability": 5,
+      "explainability": 4,
+      "source_ids": ["S5"],
+      "caution": "우천 취소와 경기 상태 변경을 게시 전에 확인해야 합니다."
+    },
+    {
       "sport": "축구",
       "league": "EPL",
       "title": "데모: 현지 시각과 한국 시각 구분법",
@@ -85,67 +111,99 @@
       "korea_time": "Asia/Seoul",
       "status": "검증 완료",
       "rights_note": "링크와 텍스트 사실만 참조하며 이미지·로고는 재사용하지 않음"
+    },
+    {
+      "id": "S4",
+      "claim": "KBL 정보는 공식 경기 일정과 공지에서 최신 상태를 확인해야 한다.",
+      "title": "KBL 공식 경기 일정",
+      "url": "https://www.kbl.or.kr/game/schedule",
+      "source_type": "공식",
+      "checked_at": "2026-09-29T08:00:00+09:00",
+      "published_at": "",
+      "local_time": "Asia/Seoul",
+      "korea_time": "Asia/Seoul",
+      "status": "검증 완료",
+      "rights_note": "링크와 텍스트 사실만 참조하며 이미지·로고는 재사용하지 않음"
+    },
+    {
+      "id": "S5",
+      "claim": "NPB 경기 일정은 공식 일정 페이지에서 시작 시각과 상태를 확인해야 한다.",
+      "title": "NPB 공식 경기 일정",
+      "url": "https://npb.jp/games/2026/schedule_09_detail.html",
+      "source_type": "공식",
+      "checked_at": "2026-09-29T08:00:00+09:00",
+      "published_at": "",
+      "local_time": "Asia/Tokyo",
+      "korea_time": "Asia/Seoul",
+      "status": "검증 완료",
+      "rights_note": "링크와 텍스트 사실만 참조하며 이미지·로고는 재사용하지 않음"
     }
   ],
   "cards": [
     {
       "slide": 1,
-      "headline": "경기 전, 세 번 확인",
-      "body": "일정·발표·경기 상태를 따로 확인하면 성급한 속보와 잘못된 결과 표기를 줄일 수 있습니다.",
-      "source_ids": ["S1"],
+      "league": "COVER",
+      "headline": "오늘의 스포츠\n5대 이슈",
+      "body": "KBO·KBL·NPB·EPL·NBA의 공식 정보를 한 장씩 순서대로 전합니다.",
+      "source_ids": ["S1", "S2", "S3", "S4", "S5"],
       "visual_template": "cover",
-      "visual_direction": "짙은 남색 배경에 세 개의 확인 표시를 자체 제작 도형으로 배치",
-      "alt_text": "짙은 남색 카드에 경기 전 세 번 확인이라는 제목과 일정, 발표, 상태 확인 안내가 적혀 있다."
+      "visual_direction": "다섯 리그를 하나의 흐름으로 연결한 자체 제작 스포츠 필드 도형",
+      "alt_text": "오늘의 스포츠 다섯 이슈를 KBO, KBL, NPB, EPL, NBA 순서로 전한다는 표지다."
     },
     {
       "slide": 2,
-      "headline": "1. 공식 일정",
-      "body": "리그 공식 일정에서 경기 날짜와 시작 시각을 확인합니다. 근거는 출처 ID로 분리해 보관합니다.",
+      "league": "KBO",
+      "headline": "KBO 공식 일정",
+      "body": "KBO 공식 일정에서 경기 날짜, 시작 시각, 경기 상태를 확인합니다. 변경 공지도 게시 전에 다시 살핍니다.",
       "source_ids": ["S1"],
       "visual_template": "timeline",
       "visual_direction": "달력 모양을 단순 선과 숫자로 표현",
-      "alt_text": "공식 일정의 날짜와 시작 시각을 확인하고 근거를 별도로 보관하라는 설명 카드다."
+      "alt_text": "KBO 공식 일정에서 날짜와 시작 시각, 경기 상태를 확인하라는 카드다."
     },
     {
       "slide": 3,
-      "headline": "2. 공식 발표",
-      "body": "선발, 부상, 등록 정보는 추측과 공식 발표를 구분합니다. 확정되지 않았다면 확인 중으로 표시합니다.",
-      "source_ids": ["S1"],
-      "visual_template": "comparison",
-      "visual_direction": "확정과 확인 중을 대비하는 두 개의 텍스트 배지",
-      "alt_text": "공식 발표와 추측을 구분하고 미확정 정보는 확인 중으로 표시하라는 카드다."
+      "league": "KBL",
+      "headline": "KBL 공식 소식",
+      "body": "KBL 공식 일정과 공지에서 국내 농구의 최신 경기 정보를 확인합니다. 확정되지 않은 내용은 단정하지 않습니다.",
+      "source_ids": ["S4"],
+      "visual_template": "key_fact",
+      "visual_direction": "농구공과 핵심 정보 세 줄을 자체 제작 도형으로 표현",
+      "alt_text": "KBL 공식 일정과 공지에서 최신 경기 정보를 확인하라는 카드다."
     },
     {
       "slide": 4,
-      "headline": "3. 경기 상태",
-      "body": "예정·진행 중·종료·연기·취소를 구분합니다. 진행 중 점수는 최종 결과로 쓰지 않습니다.",
-      "source_ids": ["S1", "S3"],
-      "visual_template": "status",
-      "visual_direction": "다섯 가지 상태를 원형 진행 표시로 표현",
-      "alt_text": "경기 상태 다섯 가지와 진행 중 점수를 최종 결과로 쓰지 말라는 안내 카드다."
+      "league": "NPB",
+      "headline": "NPB 오늘의 경기",
+      "body": "NPB 공식 일정에서 당일 대진과 시작 시각을 확인합니다. 예정·진행·종료 여부는 게시 직전에 다시 확인합니다.",
+      "source_ids": ["S5"],
+      "visual_template": "timeline",
+      "visual_direction": "경기 시작 시각을 순서대로 보여 주는 자체 제작 타임라인",
+      "alt_text": "NPB 당일 대진과 시작 시각, 경기 상태를 확인하라는 카드다."
     },
     {
       "slide": 5,
-      "headline": "출처는 주장 옆에",
-      "body": "숫자·이름·소속·시간마다 출처 ID를 연결합니다. 출처가 충돌하면 자동 발행을 중단합니다.",
-      "source_ids": ["S1", "S2", "S3"],
-      "visual_template": "sources",
-      "visual_direction": "주장과 출처를 선으로 연결한 자체 제작 다이어그램",
-      "alt_text": "각 주장과 출처 ID가 선으로 연결되고 출처 충돌 시 발행 중단이라고 적힌 카드다."
+      "league": "EPL",
+      "headline": "EPL 한국 시각",
+      "body": "EPL 공식 일정의 영국 현지 시각을 한국 시각으로 바꿔 확인합니다. 날짜가 다음 날로 넘어가는지도 함께 살핍니다.",
+      "source_ids": ["S2"],
+      "visual_template": "comparison",
+      "visual_direction": "영국 현지 시각과 한국 시각을 두 열로 비교",
+      "alt_text": "EPL 영국 현지 시각과 한국 시각을 비교해 날짜 차이를 확인하는 카드다."
     },
     {
       "slide": 6,
-      "headline": "마지막은 사람 승인",
-      "body": "종목 담당, 팩트체크·권리 담당, 편집장이 차례로 확인한 뒤에만 게시합니다.",
-      "source_ids": [],
-      "visual_template": "approval",
-      "visual_direction": "세 역할의 체크박스를 순서대로 배치",
-      "alt_text": "종목 담당, 팩트체크와 권리 담당, 편집장의 세 단계 승인 체크박스가 있는 카드다."
+      "league": "NBA",
+      "headline": "NBA 경기 상태",
+      "body": "NBA 공식 경기 페이지에서 예정·진행·종료 상태를 구분합니다. 진행 중 점수는 최종 결과로 표현하지 않습니다.",
+      "source_ids": ["S3"],
+      "visual_template": "status",
+      "visual_direction": "다섯 가지 경기 상태를 원형 진행 표시로 표현",
+      "alt_text": "NBA 경기의 예정, 진행, 종료 상태를 구분하고 진행 중 점수를 최종 결과로 쓰지 말라는 카드다."
     }
   ],
   "caption": "스포츠 카드뉴스는 빠르기만 해서는 안 됩니다. 공식 일정, 공식 발표, 경기 상태를 각각 확인하고 모든 핵심 주장에 원문 링크를 연결하세요. 진행 중 경기는 최종 결과처럼 쓰지 않고, 출처가 충돌하면 제작을 멈춥니다. 이 샘플은 자동 생성 흐름을 보여 주는 데모이며 실제 발행 전에는 당일 정보로 교체하고 종목 담당·팩트체크 담당·편집장의 승인을 받아야 합니다. 제작 과정에서는 경기 날짜와 시작 시각이 한국 표준시 기준인지 먼저 확인하고, 정규시즌·포스트시즌·친선경기처럼 대회의 성격도 분명하게 표시해야 합니다. 선수와 팀 이름은 공식 표기를 우선하며, 이적·부상·징계와 관련된 내용은 구단이나 리그의 공식 발표가 있는지 다시 확인합니다. 통계 수치는 집계 시점에 따라 달라질 수 있으므로 기준 경기와 조회 시각을 함께 기록하고, 서로 다른 매체의 숫자가 충돌하면 원문 데이터까지 추적합니다. 카드 한 장에는 핵심 주장 하나만 담아 독자가 사실과 해석을 쉽게 구분하도록 구성하며, 전망이나 분석은 확정된 결과처럼 표현하지 않습니다. 외부 사진과 로고를 사용할 때에는 라이선스와 사용 범위를 확인하고, 권리가 불분명하면 자체 제작한 도형과 텍스트 디자인으로 대체합니다. 완성된 카드와 캡션은 게시 전에 맞춤법, 숫자, 링크, 경기 상태, 인물 표기, 이미지 권리를 차례로 점검합니다. 마지막으로 담당자가 모든 체크리스트를 확인하고 승인한 뒤에만 게시하며, 게시 후 공식 발표가 바뀌거나 오류가 발견되면 수정 이력을 남기고 신속하게 정정합니다.",
-  "hashtags": ["#스포츠카드뉴스", "#팩트체크", "#KBO", "#EPL", "#NBA", "#콘텐츠자동화"],
-  "design_brief": "외부 사진과 로고를 쓰지 않고 짙은 배경, 강조색, 큰 제목, 자체 제작 도형만 사용한다. 카드마다 주장 하나와 출처 ID를 표시한다.",
+  "hashtags": ["#스포츠카드뉴스", "#KBO", "#KBL", "#NPB", "#EPL", "#NBA", "#데일리이슈"],
+  "design_brief": "외부 사진과 로고를 쓰지 않고 따뜻한 아이보리 지면, 노란 강조색, 큰 제목, 자체 제작 도형만 사용한다. 표지 뒤에 다섯 리그를 고정 순서로 배치한다.",
   "rights_status": "자체 제작",
   "risk_flags": [],
   "approval_checklist": {

@@ -54,6 +54,15 @@ class VisualTemplate(StrEnum):
     AUTO = "auto"
 
 
+class CardLeague(StrEnum):
+    COVER = "COVER"
+    KBO = "KBO"
+    KBL = "KBL"
+    NPB = "NPB"
+    EPL = "EPL"
+    NBA = "NBA"
+
+
 Score = Annotated[int, Field(ge=1, le=5)]
 
 
@@ -106,6 +115,7 @@ class FactSource(StrictModel):
 
 class Card(StrictModel):
     slide: int = Field(ge=1, le=6)
+    league: CardLeague
     headline: str = Field(min_length=2, max_length=40)
     body: str = Field(min_length=10, max_length=240)
     source_ids: list[str] = Field(default_factory=list)
@@ -125,11 +135,11 @@ class DailyPackage(StrictModel):
     needs_human_approval: bool
     edition_date: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
     generated_at: datetime
-    candidates: list[Candidate] = Field(min_length=3)
+    candidates: list[Candidate] = Field(min_length=5, max_length=5)
     selected_candidate_title: str
     selection_reason: str = Field(min_length=10, max_length=500)
     facts: list[FactSource] = Field(min_length=1)
-    cards: list[Card] = Field(min_length=5, max_length=6)
+    cards: list[Card] = Field(min_length=6, max_length=6)
     caption: str = Field(min_length=500, max_length=2000)
     hashtags: list[str] = Field(min_length=5, max_length=8)
     design_brief: str = Field(min_length=10, max_length=500)

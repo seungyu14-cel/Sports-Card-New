@@ -15,11 +15,15 @@ from .validation import ValidationReport, validate_package
 
 def load_package(path: str | Path) -> DailyPackage:
     payload = json.loads(Path(path).read_text(encoding="utf-8"))
-    # Packages generated before v0.7.0 did not contain visual_template.
-    # Keep publication history readable and let the renderer infer a safe template.
+    # Keep packages from earlier releases readable. The fixed league sequence is
+    # also used as a safe migration default for publication history.
+    legacy_leagues = ("COVER", "KBO", "KBL", "NPB", "EPL", "NBA")
     for card in payload.get("cards", []):
         default_template = "cover" if card.get("slide") == 1 else "auto"
         card.setdefault("visual_template", default_template)
+        slide_index = int(card.get("slide", 1)) - 1
+        if 0 <= slide_index < len(legacy_leagues):
+            card.setdefault("league", legacy_leagues[slide_index])
     return DailyPackage.model_validate(payload)
 
 

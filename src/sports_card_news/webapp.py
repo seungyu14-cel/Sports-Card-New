@@ -68,7 +68,7 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
 
     app = FastAPI(
         title="Sports Card News Studio",
-        version="0.7.0",
+        version="0.8.0",
         docs_url=None,
         redoc_url=None,
         openapi_url=None,
@@ -270,6 +270,7 @@ def _edition_detail(output_root: Path, edition_date: str) -> dict[str, object]:
         "cards": [
             {
                 "slide": card.slide,
+                "league": card.league.value,
                 "headline": card.headline,
                 "body": card.body,
                 "alt_text": card.alt_text,
