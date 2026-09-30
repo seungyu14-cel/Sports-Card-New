@@ -45,8 +45,38 @@ class RightsStatus(StrEnum):
     NEEDS_REVIEW = "확인 필요"
 
 
+class AssetType(StrEnum):
+    PLAYER_PHOTO = "player_photo"
+    TEAM_LOGO = "team_logo"
+    LEAGUE_LOGO = "league_logo"
+    STADIUM = "stadium"
+    ILLUSTRATION = "illustration"
+    DATA_GRAPHIC = "data_graphic"
+
+
+class ContentType(StrEnum):
+    AUTO = "auto"
+    MATCH_RESULT = "match_result"
+    MATCH_PREVIEW = "match_preview"
+    BREAKING = "breaking"
+    PLAYER = "player"
+    STAT = "stat"
+    RANKING = "ranking"
+    TRANSFER = "transfer"
+    INJURY = "injury"
+    SCHEDULE = "schedule"
+    EXPLAINER = "explainer"
+
+
 class VisualTemplate(StrEnum):
     COVER = "cover"
+    MATCH_RESULT = "match_result"
+    MATCH_PREVIEW = "match_preview"
+    PLAYER = "player"
+    STAT = "stat"
+    RANKING = "ranking"
+    BREAKING = "breaking"
+    SCHEDULE = "schedule"
     KEY_FACT = "key_fact"
     THREE_SCREEN = "three_screen"
     SEAT_SPLIT = "seat_split"
@@ -82,16 +112,27 @@ class Candidate(StrictModel):
     korean_relevance: Score
     source_reliability: Score
     explainability: Score
+    freshness: Score = 3
+    fan_interest: Score = 3
+    visual_potential: Score = 3
+    uniqueness: Score = 3
     source_ids: list[str] = Field(min_length=1)
     caution: str = Field(default="", max_length=300)
 
     def editorial_score(self, weights: dict[str, float]) -> float:
+        dimensions = {
+            "importance": self.importance,
+            "korean_relevance": self.korean_relevance,
+            "source_reliability": self.source_reliability,
+            "explainability": self.explainability,
+            "freshness": self.freshness,
+            "fan_interest": self.fan_interest,
+            "visual_potential": self.visual_potential,
+            "uniqueness": self.uniqueness,
+        }
         return round(
-            self.importance * weights["importance"]
-            + self.korean_relevance * weights["korean_relevance"]
-            + self.source_reliability * weights["source_reliability"]
-            + self.explainability * weights["explainability"],
-            1,
+            sum(value * float(weights.get(name, 0.0)) for name, value in dimensions.items()),
+            2,
         )
 
 
@@ -99,9 +140,6 @@ class FactSource(StrictModel):
     id: str = Field(pattern=r"^S\d+$")
     claim: str = Field(min_length=5, max_length=500)
     title: str = Field(min_length=2, max_length=200)
-    # Keep the Structured Outputs schema simple: Pydantic HttpUrl emits
-    # JSON Schema format="uri", which the OpenAI response_format validator
-    # rejects. Validate http(s) URLs at the model layer instead.
     url: str = Field(min_length=8, max_length=2048)
     source_type: SourceType
     checked_at: datetime
@@ -122,6 +160,17 @@ class FactSource(StrictModel):
         return value
 
 
+class VisualAsset(StrictModel):
+    id: str = Field(pattern=r"^A\d+$")
+    asset_type: AssetType
+    title: str = Field(min_length=2, max_length=120)
+    source_url: str = Field(default="", max_length=2048)
+    rights_status: RightsStatus
+    rights_note: str = Field(min_length=2, max_length=300)
+    credit: str = Field(default="", max_length=120)
+    approved_for_publish: bool = False
+
+
 class VisualItem(StrictModel):
     label: str = Field(min_length=1, max_length=24)
     value: str = Field(min_length=1, max_length=60)
@@ -131,13 +180,17 @@ class VisualItem(StrictModel):
 class Card(StrictModel):
     slide: int = Field(ge=1, le=6)
     league: CardLeague
+    candidate_title: str = Field(default="", max_length=100)
     headline: str = Field(min_length=2, max_length=40)
     body: str = Field(min_length=10, max_length=240)
     source_ids: list[str] = Field(default_factory=list)
+    content_type: ContentType = ContentType.AUTO
+    kicker: str = Field(default="", max_length=32)
     visual_template: VisualTemplate
     visual_title: str = Field(min_length=2, max_length=60)
     visual_items: list[VisualItem] = Field(min_length=1, max_length=5)
     visual_direction: str = Field(min_length=4, max_length=240)
+    asset_ids: list[str] = Field(default_factory=list, max_length=3)
     alt_text: str = Field(min_length=10, max_length=400)
 
 
@@ -147,12 +200,65 @@ class ApprovalChecklist(StrictModel):
     editor_in_chief: list[str] = Field(min_length=1)
 
 
+class ResearchBrief(StrictModel):
+    edition_date: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
+    generated_at: datetime
+    candidates: list[Candidate] = Field(min_length=5, max_length=20)
+    facts: list[FactSource] = Field(min_length=1)
+    risk_flags: list[str] = Field(default_factory=list)
+
+
+class EditorialCard(StrictModel):
+    slide: int = Field(ge=1, le=6)
+    league: CardLeague
+    candidate_title: str = Field(default="", max_length=100)
+    headline: str = Field(min_length=2, max_length=40)
+    body: str = Field(min_length=10, max_length=180)
+    source_ids: list[str] = Field(default_factory=list)
+    content_type: ContentType
+    kicker: str = Field(default="", max_length=32)
+    alt_text: str = Field(min_length=10, max_length=400)
+
+
+class EditorialPlan(StrictModel):
+    edition_date: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
+    selected_candidate_title: str
+    selection_reason: str = Field(min_length=10, max_length=500)
+    cards: list[EditorialCard] = Field(min_length=6, max_length=6)
+    caption: str = Field(min_length=500, max_length=2000)
+    hashtags: list[str] = Field(min_length=5, max_length=8)
+    approval_checklist: ApprovalChecklist
+
+    @field_validator("hashtags")
+    @classmethod
+    def validate_hashtags(cls, values: list[str]) -> list[str]:
+        if any(not value.startswith("#") or " " in value for value in values):
+            raise ValueError("해시태그는 공백 없이 #으로 시작해야 합니다")
+        return values
+
+
+class DesignCard(StrictModel):
+    slide: int = Field(ge=1, le=6)
+    visual_template: VisualTemplate
+    visual_title: str = Field(min_length=2, max_length=60)
+    visual_items: list[VisualItem] = Field(min_length=1, max_length=5)
+    visual_direction: str = Field(min_length=4, max_length=240)
+    asset_ids: list[str] = Field(default_factory=list, max_length=3)
+
+
+class DesignPlan(StrictModel):
+    design_brief: str = Field(min_length=10, max_length=500)
+    rights_status: RightsStatus
+    assets: list[VisualAsset] = Field(default_factory=list, max_length=30)
+    cards: list[DesignCard] = Field(min_length=6, max_length=6)
+
+
 class DailyPackage(StrictModel):
     approval_notice: str = Field(pattern="^게시 전 사람 승인 필요$")
     needs_human_approval: bool
     edition_date: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
     generated_at: datetime
-    candidates: list[Candidate] = Field(min_length=5, max_length=5)
+    candidates: list[Candidate] = Field(min_length=5, max_length=20)
     selected_candidate_title: str
     selection_reason: str = Field(min_length=10, max_length=500)
     facts: list[FactSource] = Field(min_length=1)
@@ -160,6 +266,7 @@ class DailyPackage(StrictModel):
     caption: str = Field(min_length=500, max_length=2000)
     hashtags: list[str] = Field(min_length=5, max_length=8)
     design_brief: str = Field(min_length=10, max_length=500)
+    assets: list[VisualAsset] = Field(default_factory=list, max_length=30)
     rights_status: RightsStatus
     risk_flags: list[str] = Field(default_factory=list)
     approval_checklist: ApprovalChecklist

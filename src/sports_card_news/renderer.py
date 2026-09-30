@@ -246,6 +246,15 @@ def _draw_story_card(
         fill=MUTED,
         anchor="ra",
     )
+    if card.kicker:
+        draw.rectangle((760, 242, 1010, 285), fill=INK)
+        draw.text(
+            (985, 263),
+            card.kicker.upper(),
+            font=_font(fonts, 17, "bold"),
+            fill=WHITE,
+            anchor="rm",
+        )
     headline_text = _clean_card_text(card.headline)
     body_text = _clean_card_text(card.body)
 
@@ -280,14 +289,22 @@ def _draw_story_card(
     panel_top = max(745, body_y + len(body_lines) * _line_height(body_font, 15) + 40)
     panel_top = min(panel_top, 835)
     template = _resolve_visual_template(card)
-    if template == VisualTemplate.THREE_SCREEN:
+    if template == VisualTemplate.MATCH_RESULT:
+        _draw_match_result_module(draw, fonts, panel_top, card)
+    elif template == VisualTemplate.MATCH_PREVIEW:
+        _draw_match_preview_module(draw, fonts, panel_top, card)
+    elif template == VisualTemplate.PLAYER:
+        _draw_player_module(draw, fonts, panel_top, card)
+    elif template in {VisualTemplate.STAT, VisualTemplate.RANKING}:
+        _draw_stat_module(draw, fonts, panel_top, card)
+    elif template == VisualTemplate.BREAKING:
+        _draw_breaking_module(draw, fonts, panel_top, card)
+    elif template == VisualTemplate.SCHEDULE:
+        _draw_schedule_module(draw, fonts, panel_top, card.visual_title, card.visual_items)
+    elif template == VisualTemplate.THREE_SCREEN:
         _draw_three_screen_module(draw, fonts, panel_top, card)
-    elif template == VisualTemplate.SEAT_SPLIT:
-        _draw_seat_split_module(draw, fonts, panel_top)
-    elif template == VisualTemplate.LOCATION:
-        _draw_location_module(draw, fonts, panel_top)
-    elif template == VisualTemplate.STEPS:
-        _draw_steps_module(draw, fonts, panel_top)
+    elif template in {VisualTemplate.SEAT_SPLIT, VisualTemplate.LOCATION, VisualTemplate.STEPS}:
+        _draw_visual_rows(draw, fonts, panel_top, card.visual_title, card.visual_items)
     elif template == VisualTemplate.TIMELINE:
         _draw_schedule_module(draw, fonts, panel_top, card.visual_title, card.visual_items)
     elif template == VisualTemplate.COMPARISON:
@@ -429,6 +446,110 @@ def _draw_steps_module(draw: ImageDraw.ImageDraw, fonts: dict[str, str], top: in
         draw.text((135, row_top + row_height // 2), number, font=_font(fonts, 34, "bold"), fill=INK if index == 0 else WHITE, anchor="mm")
         draw.text((245, row_top + row_height // 2), label, font=_font(fonts, 33, "bold"), fill=INK, anchor="lm")
         draw.text((955, row_top + row_height // 2), "→", font=_font(fonts, 34, "bold"), fill=RED, anchor="rm")
+
+
+def _draw_match_result_module(
+    draw: ImageDraw.ImageDraw,
+    fonts: dict[str, str],
+    top: int,
+    card: Card,
+) -> None:
+    _panel(draw, top)
+    draw.rectangle((70, top, 1010, top + 68), fill=INK)
+    draw.text((100, top + 34), card.visual_title, font=_font(fonts, 25, "bold"), fill=WHITE, anchor="lm")
+    items = list(card.visual_items[:4])
+    if len(items) >= 2:
+        left, right = items[0], items[1]
+        draw.text((260, top + 150), left.label, font=_font(fonts, 24, "bold"), fill=MUTED, anchor="mm")
+        draw.text((820, top + 150), right.label, font=_font(fonts, 24, "bold"), fill=MUTED, anchor="mm")
+        lf, ll = _fit_text(draw, left.value, fonts["bold"], 310, 2, 62, 36)
+        rf, rl = _fit_text(draw, right.value, fonts["bold"], 310, 2, 62, 36)
+        draw.multiline_text((260, top + 245), "\n".join(ll), font=lf, fill=INK, spacing=6, anchor="mm", align="center")
+        draw.multiline_text((820, top + 245), "\n".join(rl), font=rf, fill=INK, spacing=6, anchor="mm", align="center")
+        draw.text((540, top + 240), "—", font=_font(fonts, 70, "bold"), fill=RED, anchor="mm")
+    if len(items) > 2:
+        note = " · ".join(f"{item.label} {item.value}" for item in items[2:])
+        nf, nl = _fit_text(draw, note, fonts["bold"], 840, 2, 28, 21)
+        draw.multiline_text((540, top + 390), "\n".join(nl), font=nf, fill=INK, spacing=4, anchor="mm", align="center")
+
+
+def _draw_match_preview_module(
+    draw: ImageDraw.ImageDraw,
+    fonts: dict[str, str],
+    top: int,
+    card: Card,
+) -> None:
+    _panel(draw, top)
+    draw.rectangle((70, top, 1010, top + 68), fill=YELLOW)
+    draw.text((100, top + 34), card.visual_title, font=_font(fonts, 25, "bold"), fill=INK, anchor="lm")
+    items = list(card.visual_items[:4])
+    if items:
+        lead = items[0]
+        vf, vl = _fit_text(draw, lead.value, fonts["bold"], 760, 2, 52, 34)
+        draw.multiline_text((540, top + 175), "\n".join(vl), font=vf, fill=INK, spacing=5, anchor="mm", align="center")
+        draw.text((540, top + 255), lead.label, font=_font(fonts, 22, "bold"), fill=RED, anchor="mm")
+    for index, item in enumerate(items[1:4]):
+        left = 115 + index * 300
+        draw.rounded_rectangle((left, top + 310, left + 250, top + 415), radius=14, outline=INK, width=3)
+        draw.text((left + 125, top + 340), item.label, font=_font(fonts, 19, "bold"), fill=MUTED, anchor="mm")
+        value_font, value_lines = _fit_text(draw, item.value, fonts["bold"], 215, 2, 27, 20)
+        draw.multiline_text((left + 125, top + 382), "\n".join(value_lines), font=value_font, fill=INK, spacing=3, anchor="mm", align="center")
+
+
+def _draw_player_module(
+    draw: ImageDraw.ImageDraw,
+    fonts: dict[str, str],
+    top: int,
+    card: Card,
+) -> None:
+    _panel(draw, top)
+    draw.ellipse((105, top + 105, 345, top + 345), fill=YELLOW, outline=INK, width=4)
+    draw.text((225, top + 225), "PLAYER", font=_font(fonts, 27, "bold"), fill=INK, anchor="mm")
+    draw.text((400, top + 88), card.visual_title, font=_font(fonts, 28, "bold"), fill=INK)
+    for index, item in enumerate(card.visual_items[:4]):
+        y = top + 145 + index * 72
+        draw.text((405, y), item.label, font=_font(fonts, 20, "bold"), fill=RED)
+        vf, vl = _fit_text(draw, item.value, fonts["bold"], 430, 1, 34, 24)
+        draw.text((575, y), vl[0], font=vf, fill=INK)
+
+
+def _draw_stat_module(
+    draw: ImageDraw.ImageDraw,
+    fonts: dict[str, str],
+    top: int,
+    card: Card,
+) -> None:
+    _panel(draw, top)
+    draw.text((100, top + 42), card.visual_title, font=_font(fonts, 27, "bold"), fill=INK)
+    items = list(card.visual_items[:4])
+    cell_w = 430
+    for index, item in enumerate(items):
+        row, col = divmod(index, 2)
+        left = 95 + col * 465
+        upper = top + 90 + row * 165
+        draw.rounded_rectangle((left, upper, left + cell_w, upper + 140), radius=16, fill=WHITE, outline=INK, width=3)
+        draw.text((left + 24, upper + 28), item.label, font=_font(fonts, 19, "bold"), fill=RED)
+        vf, vl = _fit_text(draw, item.value, fonts["bold"], 360, 2, 42, 27)
+        draw.multiline_text((left + 24, upper + 72), "\n".join(vl), font=vf, fill=INK, spacing=3)
+
+
+def _draw_breaking_module(
+    draw: ImageDraw.ImageDraw,
+    fonts: dict[str, str],
+    top: int,
+    card: Card,
+) -> None:
+    _panel(draw, top)
+    draw.rectangle((70, top, 1010, top + 92), fill=RED)
+    draw.text((100, top + 46), "BREAKING", font=_font(fonts, 31, "bold"), fill=WHITE, anchor="lm")
+    tf, tl = _fit_text(draw, card.visual_title, fonts["bold"], 840, 2, 46, 31)
+    draw.multiline_text((100, top + 145), "\n".join(tl), font=tf, fill=INK, spacing=6)
+    if card.visual_items:
+        item = card.visual_items[0]
+        vf, vl = _fit_text(draw, item.value, fonts["bold"], 820, 2, 42, 27)
+        draw.multiline_text((100, top + 300), "\n".join(vl), font=vf, fill=INK, spacing=4)
+        if item.note:
+            draw.text((100, top + 395), item.note, font=_font(fonts, 20), fill=MUTED)
 
 
 def _draw_key_fact_module(

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from collections import Counter
 from dataclasses import dataclass, field
 from datetime import date
 from urllib.parse import urlparse
@@ -9,6 +10,7 @@ from zoneinfo import ZoneInfo
 from .config import Settings
 from .models import (
     CardLeague,
+    ContentType,
     DailyPackage,
     FactStatus,
     GameStatus,
@@ -23,15 +25,6 @@ CARD_LINK_PATTERN = re.compile(
     r"https?://|www\.|\[[^\]]+\]\([^)]*\)|\b[a-z0-9-]+(?:\.[a-z0-9-]+)+\b",
     re.IGNORECASE,
 )
-CARD_LEAGUE_SEQUENCE = (
-    CardLeague.COVER,
-    CardLeague.KBO,
-    CardLeague.KBL,
-    CardLeague.NPB,
-    CardLeague.EPL,
-    CardLeague.NBA,
-)
-ISSUE_LEAGUES = {item.value for item in CARD_LEAGUE_SEQUENCE[1:]}
 
 
 @dataclass
@@ -66,6 +59,9 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
     all_source_ids = [source.id for source in package.facts]
     source_ids = set(all_source_ids)
     facts_by_id = {source.id: source for source in package.facts}
+    candidates_by_title = {candidate.title: candidate for candidate in package.candidates}
+    asset_ids = [asset.id for asset in package.assets]
+    assets_by_id = {asset.id: asset for asset in package.assets}
 
     def is_trusted_official(source_id: str) -> bool:
         source = facts_by_id.get(source_id)
@@ -76,12 +72,13 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
 
     if len(source_ids) != len(all_source_ids):
         report.errors.append("출처 ID가 중복되었습니다.")
+    if len(set(asset_ids)) != len(asset_ids):
+        report.errors.append("시각 자산 ID가 중복되었습니다.")
 
     candidate_titles = [candidate.title for candidate in package.candidates]
     if len(set(candidate_titles)) != len(candidate_titles):
         report.errors.append("후보 제목이 중복되었습니다.")
-
-    if package.selected_candidate_title not in set(candidate_titles):
+    if package.selected_candidate_title not in candidates_by_title:
         report.errors.append("선정 제목이 후보 목록에 없습니다.")
 
     if package.generated_at.tzinfo is None:
@@ -95,31 +92,126 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
             f"서로 다른 종목 후보가 {settings.candidate_sports_min}개보다 적습니다: {sorted(sports)}"
         )
 
-    if len(package.cards) != len(CARD_LEAGUE_SEQUENCE):
-        report.errors.append("카드는 표지 포함 정확히 6장이어야 합니다.")
+    configured_leagues = {league.upper() for league in settings.leagues}
+    candidate_leagues = {candidate.league.upper() for candidate in package.candidates}
+    missing_candidate_leagues = sorted(configured_leagues - candidate_leagues)
+    if missing_candidate_leagues:
+        report.errors.append(
+            f"리서치 후보 풀에 필수 조사 리그가 없습니다: {missing_candidate_leagues}"
+        )
 
-    expected_slides = list(range(1, len(package.cards) + 1))
+    if len(package.cards) != 6:
+        report.errors.append("카드는 표지 포함 정확히 6장이어야 합니다.")
     actual_slides = [card.slide for card in package.cards]
-    if actual_slides != expected_slides:
+    if actual_slides != list(range(1, len(package.cards) + 1)):
         report.errors.append(f"카드 번호가 연속적이지 않습니다: {actual_slides}")
 
-    actual_leagues = tuple(card.league for card in package.cards)
-    if actual_leagues != CARD_LEAGUE_SEQUENCE:
-        expected = " → ".join(item.value for item in CARD_LEAGUE_SEQUENCE)
-        actual = " → ".join(item.value for item in actual_leagues)
-        report.errors.append(f"카드 리그 순서는 {expected}여야 합니다: {actual}")
+    if package.cards:
+        if package.cards[0].league != CardLeague.COVER:
+            report.errors.append("1번 카드는 COVER여야 합니다.")
+        if package.cards[0].visual_template != VisualTemplate.COVER:
+            report.errors.append("1번 카드의 visual_template은 cover여야 합니다.")
 
-    candidate_leagues = {candidate.league.upper() for candidate in package.candidates}
-    missing_leagues = sorted(ISSUE_LEAGUES - candidate_leagues)
-    if missing_leagues:
-        report.errors.append(f"필수 리그 후보가 없습니다: {missing_leagues}")
-    duplicate_leagues = sorted(
-        league
-        for league in ISSUE_LEAGUES
-        if sum(candidate.league.upper() == league for candidate in package.candidates) != 1
-    )
-    if duplicate_leagues:
-        report.errors.append(f"필수 리그 후보는 리그마다 정확히 하나여야 합니다: {duplicate_leagues}")
+    story_cards = package.cards[1:]
+    story_leagues = [card.league.value for card in story_cards]
+    unknown_story_leagues = sorted(set(story_leagues) - configured_leagues)
+    if unknown_story_leagues:
+        report.errors.append(f"지원하지 않는 카드 리그가 있습니다: {unknown_story_leagues}")
+    distinct_story_leagues = len(set(story_leagues))
+    if distinct_story_leagues < settings.min_distinct_story_leagues:
+        report.errors.append(
+            f"스토리 카드의 리그 다양성이 부족합니다: {distinct_story_leagues}개 "
+            f"(최소 {settings.min_distinct_story_leagues}개)"
+        )
+    league_counts = Counter(story_leagues)
+    crowded = {league: count for league, count in league_counts.items() if count > settings.max_cards_per_league}
+    if crowded:
+        report.errors.append(
+            f"한 리그의 카드 수가 최대 {settings.max_cards_per_league}장을 넘었습니다: {crowded}"
+        )
+
+    previous_template: VisualTemplate | None = None
+    repeat_count = 0
+    for card in package.cards:
+        missing = sorted(set(card.source_ids) - source_ids)
+        if missing:
+            report.errors.append(f"카드 {card.slide}의 출처 ID가 없습니다: {missing}")
+        unresolved = sorted(
+            source_id
+            for source_id in card.source_ids
+            if source_id in facts_by_id and facts_by_id[source_id].status != FactStatus.VERIFIED
+        )
+        if unresolved:
+            report.errors.append(
+                f"카드 {card.slide}가 검증 완료되지 않은 출처를 참조합니다: {unresolved}"
+            )
+        if CARD_LINK_PATTERN.search(card.headline) or CARD_LINK_PATTERN.search(card.body):
+            report.errors.append(
+                f"카드 {card.slide} 문구에 URL·도메인·Markdown 링크가 포함되어 있습니다. "
+                "출처는 source_ids와 facts.url로만 연결하세요."
+            )
+        if len(card.body) > 180:
+            report.errors.append(
+                f"카드 {card.slide} 본문이 180자를 초과했습니다: {len(card.body)}자"
+            )
+        if card.slide > 1 and card.visual_template == VisualTemplate.COVER:
+            report.errors.append(f"카드 {card.slide}에는 cover 템플릿을 사용할 수 없습니다.")
+
+        if card.visual_template == previous_template and card.slide > 1:
+            repeat_count += 1
+        else:
+            repeat_count = 1
+            previous_template = card.visual_template
+        if card.slide > 1 and repeat_count > settings.visual_repeat_limit:
+            report.errors.append(
+                f"같은 시각 템플릿이 연속 {repeat_count}회 반복되었습니다: {card.visual_template.value}"
+            )
+
+        if card.league != CardLeague.COVER:
+            if not card.candidate_title:
+                report.errors.append(f"카드 {card.slide}에 candidate_title이 없습니다.")
+            candidate = candidates_by_title.get(card.candidate_title)
+            if candidate is None:
+                report.errors.append(
+                    f"카드 {card.slide}의 후보 제목이 리서치 후보에 없습니다: {card.candidate_title}"
+                )
+            else:
+                if candidate.league.upper() != card.league.value:
+                    report.errors.append(
+                        f"카드 {card.slide}의 리그와 후보 리그가 다릅니다: "
+                        f"{card.league.value} != {candidate.league}"
+                    )
+                if not set(card.source_ids).intersection(candidate.source_ids):
+                    report.errors.append(
+                        f"카드 {card.slide}가 선택 후보의 직접 출처를 참조하지 않습니다."
+                    )
+            if not card.source_ids:
+                report.errors.append(f"{card.league.value} 카드에 직접 연결된 출처가 없습니다.")
+
+        for asset_id in card.asset_ids:
+            asset = assets_by_id.get(asset_id)
+            if asset is None:
+                report.errors.append(f"카드 {card.slide}의 시각 자산 ID가 없습니다: {asset_id}")
+                continue
+            if not asset.approved_for_publish:
+                report.errors.append(f"게시 승인되지 않은 시각 자산을 참조합니다: {asset_id}")
+            if asset.rights_status == RightsStatus.NEEDS_REVIEW:
+                report.errors.append(f"권리 확인이 끝나지 않은 시각 자산을 참조합니다: {asset_id}")
+
+        recommended = {
+            ContentType.MATCH_RESULT: {VisualTemplate.MATCH_RESULT, VisualTemplate.STAT},
+            ContentType.MATCH_PREVIEW: {VisualTemplate.MATCH_PREVIEW, VisualTemplate.SCHEDULE},
+            ContentType.PLAYER: {VisualTemplate.PLAYER, VisualTemplate.STAT},
+            ContentType.STAT: {VisualTemplate.STAT, VisualTemplate.RANKING},
+            ContentType.RANKING: {VisualTemplate.RANKING, VisualTemplate.STAT},
+            ContentType.BREAKING: {VisualTemplate.BREAKING, VisualTemplate.KEY_FACT},
+            ContentType.SCHEDULE: {VisualTemplate.SCHEDULE, VisualTemplate.TIMELINE},
+        }
+        if card.content_type in recommended and card.visual_template not in recommended[card.content_type]:
+            report.warnings.append(
+                f"카드 {card.slide}의 콘텐츠 유형({card.content_type.value})과 "
+                f"시각 템플릿({card.visual_template.value}) 조합을 사람이 확인하세요."
+            )
 
     for candidate in package.candidates:
         missing = sorted(set(candidate.source_ids) - source_ids)
@@ -154,46 +246,6 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
             if not expiring_sources:
                 report.errors.append(
                     f"시간 민감형 후보 '{candidate.title}'에 출처 유효 기한(expires_at)이 없습니다."
-                )
-
-    for card in package.cards:
-        missing = sorted(set(card.source_ids) - source_ids)
-        if missing:
-            report.errors.append(f"카드 {card.slide}의 출처 ID가 없습니다: {missing}")
-        unresolved = sorted(
-            source_id
-            for source_id in card.source_ids
-            if source_id in facts_by_id and facts_by_id[source_id].status != FactStatus.VERIFIED
-        )
-        if unresolved:
-            report.errors.append(
-                f"카드 {card.slide}가 검증 완료되지 않은 출처를 참조합니다: {unresolved}"
-            )
-        if CARD_LINK_PATTERN.search(card.headline) or CARD_LINK_PATTERN.search(card.body):
-            report.errors.append(
-                f"카드 {card.slide} 문구에 URL·도메인·Markdown 링크가 포함되어 있습니다. "
-                "출처는 source_ids와 facts.url로만 연결하세요."
-            )
-        if len(card.body) > 180:
-            report.errors.append(
-                f"카드 {card.slide} 본문이 180자를 초과했습니다: {len(card.body)}자"
-            )
-        if card.slide == 1 and card.visual_template != VisualTemplate.COVER:
-            report.errors.append("카드 1의 visual_template은 cover여야 합니다.")
-        if card.slide > 1 and card.visual_template == VisualTemplate.COVER:
-            report.errors.append(f"카드 {card.slide}에는 cover 템플릿을 사용할 수 없습니다.")
-        if card.league != CardLeague.COVER:
-            if not card.source_ids:
-                report.errors.append(f"{card.league.value} 카드에 직접 연결된 출처가 없습니다.")
-            league_source_ids = {
-                source_id
-                for candidate in package.candidates
-                if candidate.league.upper() == card.league.value
-                for source_id in candidate.source_ids
-            }
-            if card.source_ids and not set(card.source_ids).intersection(league_source_ids):
-                report.errors.append(
-                    f"{card.league.value} 카드가 같은 리그 후보의 출처를 참조하지 않습니다."
                 )
 
     if package.rights_status == RightsStatus.NEEDS_REVIEW:
@@ -237,10 +289,7 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
     if trusted_official == 0:
         report.warnings.append("등록된 리그 공식 도메인의 출처가 없습니다.")
 
-    selected = next(
-        (item for item in package.candidates if item.title == package.selected_candidate_title),
-        None,
-    )
+    selected = candidates_by_title.get(package.selected_candidate_title)
     if selected and selected.game_status == GameStatus.LIVE:
         report.warnings.append("선정 주제가 진행 중 경기입니다. 최종 결과 표현이 없는지 다시 확인하세요.")
 
