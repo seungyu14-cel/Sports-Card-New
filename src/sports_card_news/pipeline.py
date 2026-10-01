@@ -11,7 +11,7 @@ from pathlib import Path
 from .analytics import recent_performance_summary
 from .assets import attach_verified_news_images
 from .config import Settings
-from .generator import generate_daily_package, repair_daily_package
+from .generator import OutputTokenBudget, generate_daily_package, repair_daily_package
 from .history import recent_publication_summary
 from .models import DailyPackage
 from .renderer import render_package
@@ -25,10 +25,8 @@ def load_package(path: str | Path) -> DailyPackage:
     legacy_leagues = (
         "COVER",
         "KBO",
-        "KBL",
+        "MLB",
         "NPB",
-        "EPL",
-        "NBA",
         "SUMMARY",
     )
     candidates = payload.get("candidates", [])
@@ -88,6 +86,7 @@ def run_daily(
     performance = "성과 데이터 없음"
     structured_context = "사전 구조화 데이터 없음"
     recovery_attempts: list[tuple[int, list[str]]] = []
+    token_budget = OutputTokenBudget(settings.daily_output_token_budget)
 
     if fixture:
         package = load_package(fixture)
@@ -128,6 +127,7 @@ def run_daily(
             history,
             performance_summary=performance,
             structured_context=structured_context,
+            budget=token_budget,
         )
         package = attach_verified_news_images(package, settings)
 
@@ -156,6 +156,7 @@ def run_daily(
                 errors=errors,
                 warnings=list(report.warnings),
                 attempt=attempt,
+                budget=token_budget,
             )
             package = attach_verified_news_images(package, settings)
             report = _validate_for_edition(package, settings, edition_date)
@@ -378,8 +379,8 @@ def _editorial_markdown(package: DailyPackage, settings: Settings) -> str:
         f"| {fact.id} | {fact.claim.replace('|', '\\|')} | [{fact.title}]({fact.url}) | {fact.status.value} |"
         for fact in package.facts
     ]
-    story_mix = Counter(card.league.value for card in package.cards[1:6])
-    template_mix = Counter(card.visual_template.value for card in package.cards[1:6])
+    story_mix = Counter(card.league.value for card in package.cards[1:4])
+    template_mix = Counter(card.visual_template.value for card in package.cards[1:4])
     checklist = package.approval_checklist
     return f"""# 편집 검토: {package.edition_date}
 
@@ -400,9 +401,9 @@ def _editorial_markdown(package: DailyPackage, settings: Settings) -> str:
 ## 오늘의 편성
 - 리그 구성: {dict(story_mix)}
 - 템플릿 구성: {dict(template_mix)}
-- 2~6번: 다섯 카테고리에서 서로 다른 5개 이슈
-- 카테고리 분포: KBO/KBL/NPB/EPL/NBA 각 1개
-- 7번: 마무리/한눈 요약
+- 2~4번: KBO/MLB/NPB에서 서로 다른 3개 이슈
+- 리그 분포: KBO/MLB/NPB 각 1개
+- 5번: 마무리/한눈 요약
 
 ## 팩트 카드
 
@@ -433,3 +434,4 @@ def _checklist(items: list[str]) -> str:
 
 def _write_text(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8", newline="\n")
+

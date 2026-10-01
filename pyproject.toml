@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sports-card-news"
-version = "1.2.0"
+version = "1.3.0"
 description = "Human-approved multi-sport Instagram editorial quality automation"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -37,3 +37,4 @@ include = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+

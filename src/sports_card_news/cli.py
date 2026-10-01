@@ -15,7 +15,7 @@ from .pipeline import render_file, run_daily, validate_file
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="sports-card-news",
-        description="사람 승인형 멀티스포츠 인스타그램 카드뉴스 자동화",
+        description="사람 승인형 KBO·MLB·NPB 인스타그램 카드뉴스 자동화",
     )
     parser.add_argument("--config", default="config/settings.toml", help="TOML 설정 파일")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -66,4 +66,5 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
 

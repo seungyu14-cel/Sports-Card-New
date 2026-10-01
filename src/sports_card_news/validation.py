@@ -101,8 +101,8 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
             f"리서치 후보 풀에 필수 조사 카테고리가 없습니다: {missing_candidate_leagues}"
         )
 
-    if len(package.cards) != 7:
-        report.errors.append("카드는 표지 포함 정확히 7장이어야 합니다.")
+    if len(package.cards) != 5:
+        report.errors.append("카드는 표지 포함 정확히 5장이어야 합니다.")
 
     actual_slides = [card.slide for card in package.cards]
     if actual_slides != list(range(1, len(package.cards) + 1)):
@@ -116,23 +116,23 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
         if first.visual_template != VisualTemplate.COVER:
             report.errors.append("1번 카드의 visual_template은 cover여야 합니다.")
         if last.league != CardLeague.SUMMARY:
-            report.errors.append("7번 카드는 SUMMARY여야 합니다.")
+            report.errors.append("5번 카드는 SUMMARY여야 합니다.")
         if last.content_type != ContentType.SUMMARY:
-            report.errors.append("7번 카드의 content_type은 summary여야 합니다.")
+            report.errors.append("5번 카드의 content_type은 summary여야 합니다.")
         if last.visual_template != VisualTemplate.SUMMARY:
-            report.errors.append("7번 카드의 visual_template은 summary여야 합니다.")
+            report.errors.append("5번 카드의 visual_template은 summary여야 합니다.")
         if last.candidate_title:
-            report.errors.append("7번 SUMMARY 카드의 candidate_title은 비워야 합니다.")
+            report.errors.append("5번 SUMMARY 카드의 candidate_title은 비워야 합니다.")
 
-    issue_cards = package.cards[1:6]
-    if len(issue_cards) != 5:
-        report.errors.append("2~6번에는 정확히 5개의 메인 이슈가 있어야 합니다.")
+    issue_cards = package.cards[1:4]
+    if len(issue_cards) != 3:
+        report.errors.append("2~4번에는 정확히 3개의 메인 이슈가 있어야 합니다.")
 
     issue_titles = [card.candidate_title for card in issue_cards]
     if any(not title for title in issue_titles):
-        report.errors.append("2~6번 모든 이슈 카드에 candidate_title이 필요합니다.")
-    if len(set(issue_titles)) != 5:
-        report.errors.append("2~6번은 서로 다른 5개의 이슈를 사용해야 합니다.")
+        report.errors.append("2~4번 모든 이슈 카드에 candidate_title이 필요합니다.")
+    if len(set(issue_titles)) != 3:
+        report.errors.append("2~4번은 서로 다른 3개의 이슈를 사용해야 합니다.")
 
     issue_leagues = [card.league.value for card in issue_cards]
     unknown_story_leagues = sorted(set(issue_leagues) - configured_leagues)
@@ -143,7 +143,7 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
         missing = sorted(configured_leagues - set(issue_leagues))
         extra = sorted(set(issue_leagues) - configured_leagues)
         report.errors.append(
-            f"2~6번에는 KBO/KBL/NPB/EPL/NBA가 정확히 1개씩 필요합니다. "
+            f"2~4번에는 KBO/MLB/NPB가 정확히 1개씩 필요합니다. "
             f"누락={missing}, 기타={extra}"
         )
 
@@ -190,7 +190,7 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
         if card.slide > 1 and card.visual_template == VisualTemplate.COVER:
             report.errors.append(f"카드 {card.slide}에는 cover 템플릿을 사용할 수 없습니다.")
 
-        if 2 <= card.slide <= 6:
+        if 2 <= card.slide <= 4:
             if card.visual_template == previous_template:
                 repeat_count += 1
             else:
@@ -277,7 +277,7 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
     if summary is not None:
         issue_source_ids = {source_id for card in issue_cards for source_id in card.source_ids}
         if summary.source_ids and not set(summary.source_ids).issubset(issue_source_ids):
-            report.errors.append("7번 요약 카드가 2~6번에서 사용하지 않은 출처를 참조합니다.")
+            report.errors.append("5번 요약 카드가 2~4번에서 사용하지 않은 출처를 참조합니다.")
 
     for candidate in package.candidates:
         missing = sorted(set(candidate.source_ids) - source_ids)
@@ -373,3 +373,4 @@ def validate_package(package: DailyPackage, settings: Settings) -> ValidationRep
         report.warnings.extend(f"AI 위험 표시: {flag}" for flag in package.risk_flags)
 
     return report
+
