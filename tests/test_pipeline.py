@@ -33,16 +33,16 @@ def test_demo_package_passes_validation() -> None:
     report = validate_package(package, settings)
 
     assert report.ok, report.errors
-    assert len(package.cards) == 7
+    assert len(package.cards) == 5
     assert package.cards[0].league.value == "COVER"
     assert package.cards[-1].league.value == "SUMMARY"
 
-    issue_cards = package.cards[1:6]
-    assert len(issue_cards) == 5
-    assert len({card.candidate_title for card in issue_cards}) == 5
+    issue_cards = package.cards[1:4]
+    assert len(issue_cards) == 3
+    assert len({card.candidate_title for card in issue_cards}) == 3
     counts = Counter(card.league.value for card in issue_cards)
-    assert counts == {"KBO": 1, "KBL": 1, "NPB": 1, "EPL": 1, "NBA": 1}
-    assert len(package.candidates) == 5
+    assert counts == {"KBO": 1, "MLB": 1, "NPB": 1}
+    assert len(package.candidates) == 3
     assert 500 <= len(package.caption) <= 2000
 
 
@@ -56,17 +56,17 @@ def test_daily_fixture_renders_png_and_review_files(tmp_path: Path) -> None:
     )
 
     assert report.ok
-    assert len(list(destination.glob("card-*.png"))) == 7
+    assert len(list(destination.glob("card-*.png"))) == 5
     assert (destination / "editorial-review.md").exists()
     assert (destination / "validation.md").exists()
     assert (destination / "visual-qa.md").exists()
 
     manifest = json.loads((destination / "publish-manifest.json").read_text(encoding="utf-8"))
-    assert manifest["cards"] == [f"card-{index:02d}.png" for index in range(1, 8)]
+    assert manifest["cards"] == [f"card-{index:02d}.png" for index in range(1, 6)]
 
     with zipfile.ZipFile(destination / "instagram-carousel.zip") as archive:
         assert set(archive.namelist()) == {
-            *(f"card-{index:02d}.png" for index in range(1, 8)),
+            *(f"card-{index:02d}.png" for index in range(1, 6)),
             "caption-instagram.md",
             "alt-text.json",
             "sources.md",
@@ -128,7 +128,7 @@ def test_legacy_package_without_card_layout_fields_is_migrated(tmp_path: Path) -
 
     assert package.cards[0].visual_template == VisualTemplate.COVER
     assert all(card.visual_template == VisualTemplate.AUTO for card in package.cards[1:])
-    assert all(card.candidate_title for card in package.cards[1:6])
+    assert all(card.candidate_title for card in package.cards[1:4])
     assert package.cards[-1].league.value == "SUMMARY"
     assert package.cards[-1].candidate_title == ""
     assert all(
@@ -140,7 +140,7 @@ def test_legacy_package_without_card_layout_fields_is_migrated(tmp_path: Path) -
 def test_card_candidate_league_mismatch_is_blocked() -> None:
     settings = load_settings(ROOT / "config/settings.toml")
     package = load_package(ROOT / "fixtures/demo_package.json")
-    wrong_card = package.cards[1].model_copy(update={"league": CardLeague.NBA})
+    wrong_card = package.cards[1].model_copy(update={"league": CardLeague.MLB})
     wrong = package.model_copy(update={"cards": [package.cards[0], wrong_card, *package.cards[2:]]})
 
     report = validate_package(wrong, settings)
@@ -154,12 +154,10 @@ def test_flexible_issue_order_is_allowed() -> None:
     package = load_package(ROOT / "fixtures/demo_package.json")
     reordered = [
         package.cards[0],
-        package.cards[5],
-        package.cards[1],
-        package.cards[4],
         package.cards[2],
         package.cards[3],
-        package.cards[6],
+        package.cards[1],
+        package.cards[4],
     ]
     cards = [card.model_copy(update={"slide": index}) for index, card in enumerate(reordered, start=1)]
     changed = package.model_copy(update={"cards": cards})
@@ -169,7 +167,7 @@ def test_flexible_issue_order_is_allowed() -> None:
     assert report.ok, report.errors
 
 
-def test_duplicate_category_in_five_issues_is_blocked() -> None:
+def test_duplicate_category_in_three_issues_is_blocked() -> None:
     settings = load_settings(ROOT / "config/settings.toml")
     package = load_package(ROOT / "fixtures/demo_package.json")
     duplicate = package.cards[2].model_copy(
@@ -186,7 +184,7 @@ def test_duplicate_category_in_five_issues_is_blocked() -> None:
     report = validate_package(changed, settings)
 
     assert not report.ok
-    assert any("정확히 1개씩" in error or "서로 다른 5개의 이슈" in error for error in report.errors)
+    assert any("정확히 1개씩" in error or "서로 다른 3개의 이슈" in error for error in report.errors)
 
 
 def test_news_image_from_verified_source_is_allowed() -> None:
@@ -289,7 +287,7 @@ def test_live_generation_repairs_conflicts_and_writes_recovery_log(
 
     assert report.ok
     assert len(repair_calls) == 1
-    assert len(list(destination.glob("card-*.png"))) == 7
+    assert len(list(destination.glob("card-*.png"))) == 5
     assert (destination / "recovery-log.md").exists()
 
 
@@ -306,3 +304,4 @@ def test_recent_history_uses_only_prior_seven_days(tmp_path: Path) -> None:
     assert "2026-09-27" in summary
     assert "2026-09-20" not in summary
     assert "2026-09-29" not in summary
+

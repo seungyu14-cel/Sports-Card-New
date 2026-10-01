@@ -72,7 +72,7 @@ def attach_verified_news_images(
 
     with client:
         for index, card in enumerate(updated_cards):
-            if not 2 <= card.slide <= 6 or card.asset_ids:
+            if not 2 <= card.slide <= 4 or card.asset_ids:
                 continue
 
             chosen_asset: VisualAsset | None = None
@@ -164,3 +164,4 @@ def _next_asset_id(assets: list[VisualAsset]) -> int:
         except ValueError:
             continue
     return highest + 1
+

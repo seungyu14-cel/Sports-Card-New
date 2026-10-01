@@ -97,10 +97,8 @@ class VisualTemplate(StrEnum):
 class CardLeague(StrEnum):
     COVER = "COVER"
     KBO = "KBO"
-    KBL = "KBL"
+    MLB = "MLB"
     NPB = "NPB"
-    EPL = "EPL"
-    NBA = "NBA"
     SUMMARY = "SUMMARY"
 
 
@@ -186,7 +184,7 @@ class VisualItem(StrictModel):
 
 
 class Card(StrictModel):
-    slide: int = Field(ge=1, le=7)
+    slide: int = Field(ge=1, le=5)
     league: CardLeague
     candidate_title: str = Field(default="", max_length=100)
     headline: str = Field(min_length=2, max_length=40)
@@ -211,13 +209,13 @@ class ApprovalChecklist(StrictModel):
 class ResearchBrief(StrictModel):
     edition_date: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
     generated_at: datetime
-    candidates: list[Candidate] = Field(min_length=5, max_length=20)
+    candidates: list[Candidate] = Field(min_length=3, max_length=12)
     facts: list[FactSource] = Field(min_length=1)
     risk_flags: list[str] = Field(default_factory=list)
 
 
 class EditorialCard(StrictModel):
-    slide: int = Field(ge=1, le=7)
+    slide: int = Field(ge=1, le=5)
     league: CardLeague
     candidate_title: str = Field(default="", max_length=100)
     headline: str = Field(min_length=2, max_length=40)
@@ -232,7 +230,7 @@ class EditorialPlan(StrictModel):
     edition_date: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
     selected_candidate_title: str
     selection_reason: str = Field(min_length=10, max_length=500)
-    cards: list[EditorialCard] = Field(min_length=7, max_length=7)
+    cards: list[EditorialCard] = Field(min_length=5, max_length=5)
     caption: str = Field(min_length=500, max_length=2000)
     hashtags: list[str] = Field(min_length=5, max_length=8)
     approval_checklist: ApprovalChecklist
@@ -246,7 +244,7 @@ class EditorialPlan(StrictModel):
 
 
 class DesignCard(StrictModel):
-    slide: int = Field(ge=1, le=7)
+    slide: int = Field(ge=1, le=5)
     visual_template: VisualTemplate
     visual_title: str = Field(min_length=2, max_length=60)
     visual_items: list[VisualItem] = Field(min_length=1, max_length=8)
@@ -258,7 +256,7 @@ class DesignPlan(StrictModel):
     design_brief: str = Field(min_length=10, max_length=500)
     rights_status: RightsStatus
     assets: list[VisualAsset] = Field(default_factory=list, max_length=30)
-    cards: list[DesignCard] = Field(min_length=7, max_length=7)
+    cards: list[DesignCard] = Field(min_length=5, max_length=5)
 
 
 class DailyPackage(StrictModel):
@@ -266,11 +264,11 @@ class DailyPackage(StrictModel):
     needs_human_approval: bool
     edition_date: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
     generated_at: datetime
-    candidates: list[Candidate] = Field(min_length=5, max_length=20)
+    candidates: list[Candidate] = Field(min_length=3, max_length=12)
     selected_candidate_title: str
     selection_reason: str = Field(min_length=10, max_length=500)
     facts: list[FactSource] = Field(min_length=1)
-    cards: list[Card] = Field(min_length=7, max_length=7)
+    cards: list[Card] = Field(min_length=5, max_length=5)
     caption: str = Field(min_length=500, max_length=2000)
     hashtags: list[str] = Field(min_length=5, max_length=8)
     design_brief: str = Field(min_length=10, max_length=500)
@@ -292,3 +290,4 @@ class DailyPackage(StrictModel):
         if any(not value.startswith("#") or " " in value for value in values):
             raise ValueError("해시태그는 공백 없이 #으로 시작해야 합니다")
         return values
+

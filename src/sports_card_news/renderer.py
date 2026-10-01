@@ -34,7 +34,7 @@ def render_package(package: DailyPackage, destination: str | Path, settings: Set
     candidates_by_title = {item.title: item for item in package.candidates}
     facts_by_id = {item.id: item for item in package.facts}
     assets_by_id = {item.id: item for item in package.assets}
-    issue_cards = package.cards[1:6]
+    issue_cards = package.cards[1:4]
     total_slides = len(package.cards)
     paths: list[Path] = []
 
@@ -58,7 +58,7 @@ def render_package(package: DailyPackage, destination: str | Path, settings: Set
         _render_card(
             card=card,
             sport=f"{len(issue_cards)} ISSUES" if card.slide == 1 else candidate.sport,
-            league="5 CATEGORIES" if card.slide == 1 else card.league.value,
+            league="3 LEAGUES" if card.slide == 1 else card.league.value,
             game_status=str(candidate.game_status),
             edition_date=package.edition_date,
             total_slides=total_slides,
@@ -1047,3 +1047,4 @@ def _find_font(weight: str = "regular") -> str:
     raise FileNotFoundError(
         "한글 폰트를 찾지 못했습니다. CARD_NEWS_FONT 환경 변수에 TTF/TTC 경로를 지정하세요."
     )
+

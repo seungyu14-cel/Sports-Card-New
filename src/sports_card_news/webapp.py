@@ -68,7 +68,7 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
 
     app = FastAPI(
         title="Sports Card News Studio",
-        version="1.2.0",
+        version="1.3.0",
         docs_url=None,
         redoc_url=None,
         openapi_url=None,
@@ -372,3 +372,4 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

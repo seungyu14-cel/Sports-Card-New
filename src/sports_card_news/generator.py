@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import os
+import sys
 import time
+from dataclasses import dataclass
 from datetime import date
 
 from openai import OpenAI
@@ -30,6 +32,29 @@ class GenerationError(RuntimeError):
     """AI 생성 결과가 없거나 사용할 수 없을 때 발생한다."""
 
 
+@dataclass
+class OutputTokenBudget:
+    """하루 실행에서 API에 예약할 수 있는 최대 출력 토큰을 제한한다."""
+
+    limit: int
+    reserved: int = 0
+
+    def reserve(self, amount: int, phase: str) -> None:
+        if self.reserved + amount > self.limit:
+            raise GenerationError(
+                f"{phase} 요청을 보내지 않았습니다. 일일 출력 토큰 예산 "
+                f"{self.limit:,}을 초과합니다 "
+                f"(예약 {self.reserved:,} + 요청 {amount:,})."
+            )
+        self.reserved += amount
+        print(
+            f"[토큰 예산] {phase}: 최대 {amount:,}, "
+            f"누적 예약 {self.reserved:,}/{self.limit:,}",
+            file=sys.stderr,
+            flush=True,
+        )
+
+
 def generate_daily_package(
     edition_date: date,
     settings: Settings,
@@ -37,7 +62,9 @@ def generate_daily_package(
     performance_summary: str = "성과 데이터 없음",
     structured_context: str = "사전 구조화 데이터 없음",
     client: OpenAI | None = None,
+    budget: OutputTokenBudget | None = None,
 ) -> DailyPackage:
+    budget = budget or OutputTokenBudget(settings.daily_output_token_budget)
     research = _request_model(
         settings=settings,
         instructions=RESEARCH_SYSTEM_PROMPT,
@@ -52,6 +79,8 @@ def generate_daily_package(
         phase="리서치",
         client=client,
         require_web=True,
+        max_output_tokens=settings.research_max_output_tokens,
+        budget=budget,
     )
     editorial = _request_model(
         settings=settings,
@@ -61,12 +90,14 @@ def generate_daily_package(
             settings,
             history_summary,
             performance_summary,
-            research.model_dump_json(indent=2),
+            research.model_dump_json(),
         ),
         output_type=EditorialPlan,
         phase="편집",
         client=client,
         require_web=False,
+        max_output_tokens=settings.editorial_max_output_tokens,
+        budget=budget,
     )
     design = _request_model(
         settings=settings,
@@ -74,13 +105,15 @@ def generate_daily_package(
         prompt=build_design_prompt(
             edition_date,
             settings,
-            research.model_dump_json(indent=2),
-            editorial.model_dump_json(indent=2),
+            research.model_dump_json(),
+            editorial.model_dump_json(),
         ),
         output_type=DesignPlan,
         phase="디자인",
         client=client,
         require_web=False,
+        max_output_tokens=settings.design_max_output_tokens,
+        budget=budget,
     )
     return _compose_package(research, editorial, design)
 
@@ -96,6 +129,7 @@ def repair_daily_package(
     performance_summary: str = "성과 데이터 없음",
     structured_context: str = "사전 구조화 데이터 없음",
     client: OpenAI | None = None,
+    budget: OutputTokenBudget | None = None,
 ) -> DailyPackage:
     prompt = build_repair_prompt(
         edition_date=edition_date,
@@ -116,6 +150,8 @@ def repair_daily_package(
         phase=f"자동 복구 {attempt}차",
         client=client,
         require_web=True,
+        max_output_tokens=settings.repair_max_output_tokens,
+        budget=budget or OutputTokenBudget(settings.daily_output_token_budget),
     )
 
 
@@ -180,12 +216,22 @@ def _request_model(
     phase: str,
     client: OpenAI | None,
     require_web: bool,
+    max_output_tokens: int,
+    budget: OutputTokenBudget,
 ):
     if not os.getenv("OPENAI_API_KEY") and client is None:
         raise GenerationError(
             "OPENAI_API_KEY가 없습니다. GitHub Actions secret 또는 로컬 환경 변수에 등록하세요."
         )
 
+    prompt_chars = len(instructions) + len(prompt)
+    if prompt_chars > settings.max_prompt_chars:
+        raise GenerationError(
+            f"{phase} 요청을 보내지 않았습니다. 프롬프트가 안전 상한 "
+            f"{settings.max_prompt_chars:,}자를 넘었습니다: {prompt_chars:,}자"
+        )
+
+    budget.reserve(max_output_tokens, phase)
     api = client or OpenAI(timeout=settings.api_timeout_seconds, max_retries=0)
     response = None
     last_error: Exception | None = None
@@ -195,13 +241,19 @@ def _request_model(
         "instructions": instructions,
         "input": prompt,
         "text_format": output_type,
-        "max_output_tokens": 16000,
+        "max_output_tokens": max_output_tokens,
         "store": False,
     }
     if require_web:
         kwargs.update(
             {
-                "tools": [{"type": "web_search", "external_web_access": True}],
+                "tools": [
+                    {
+                        "type": "web_search",
+                        "filters": {"allowed_domains": list(settings.trusted_domains)},
+                        "external_web_access": True,
+                    }
+                ],
                 "tool_choice": "required",
                 "include": ["web_search_call.action.sources"],
             }
@@ -214,7 +266,14 @@ def _request_model(
         except Exception as error:
             last_error = error
             if not _is_retryable(error) or request_attempt >= settings.api_retry_attempts:
-                raise GenerationError(f"OpenAI {phase} 요청에 실패했습니다: {error}") from error
+                timeout_note = (
+                    " 비용 중복을 막기 위해 시간 초과 요청은 자동 재시도하지 않았습니다."
+                    if _is_timeout(error)
+                    else ""
+                )
+                raise GenerationError(
+                    f"OpenAI {phase} 요청에 실패했습니다: {error}.{timeout_note}"
+                ) from error
             time.sleep(min(8, 2 ** (request_attempt - 1)))
 
     if response is None:
@@ -225,19 +284,36 @@ def _request_model(
         refusal = _extract_refusal(response)
         detail = f" 모델 응답: {refusal}" if refusal else ""
         raise GenerationError(f"{phase} 단계에서 구조화된 결과를 받지 못했습니다.{detail}")
+    _log_usage(response, phase)
     return parsed
 
 
 def _is_retryable(error: Exception) -> bool:
     status_code = getattr(error, "status_code", None)
-    if status_code == 429 or isinstance(status_code, int) and status_code >= 500:
+    if status_code == 429:
         return True
     return error.__class__.__name__ in {
         "APIConnectionError",
-        "APITimeoutError",
-        "InternalServerError",
         "RateLimitError",
     }
+
+
+def _is_timeout(error: Exception) -> bool:
+    return error.__class__.__name__ in {"APITimeoutError", "TimeoutError"}
+
+
+def _log_usage(response: object, phase: str) -> None:
+    usage = getattr(response, "usage", None)
+    if usage is None:
+        return
+    input_tokens = getattr(usage, "input_tokens", 0) or 0
+    output_tokens = getattr(usage, "output_tokens", 0) or 0
+    total_tokens = getattr(usage, "total_tokens", input_tokens + output_tokens) or 0
+    print(
+        f"[실제 토큰] {phase}: 입력 {input_tokens:,}, 출력 {output_tokens:,}, 합계 {total_tokens:,}",
+        file=sys.stderr,
+        flush=True,
+    )
 
 
 def _extract_refusal(response: object) -> str:
@@ -246,3 +322,4 @@ def _extract_refusal(response: object) -> str:
             if getattr(content, "type", "") == "refusal":
                 return str(getattr(content, "refusal", ""))
     return ""
+

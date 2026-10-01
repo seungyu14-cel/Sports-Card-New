@@ -8,7 +8,7 @@ from types import SimpleNamespace
 import pytest
 
 from sports_card_news.config import load_settings
-from sports_card_news.generator import generate_daily_package, repair_daily_package
+from sports_card_news.generator import GenerationError, generate_daily_package, repair_daily_package
 from sports_card_news.models import (
     DesignCard,
     DesignPlan,
@@ -99,6 +99,20 @@ class FlakyStageResponses(StageResponses):
         return super().parse(**kwargs)
 
 
+class APITimeoutError(RuntimeError):
+    pass
+
+
+class TimeoutStageResponses(StageResponses):
+    def __init__(self) -> None:
+        super().__init__([])
+        self.calls = 0
+
+    def parse(self, **kwargs: object) -> SimpleNamespace:
+        self.calls += 1
+        raise APITimeoutError("Request timed out")
+
+
 def test_generation_uses_three_stage_research_editorial_design_pipeline() -> None:
     package, research, editorial, design = _stages()
     responses = StageResponses([research, editorial, design])
@@ -117,16 +131,25 @@ def test_generation_uses_three_stage_research_editorial_design_pipeline() -> Non
     assert len(responses.kwargs_history) == 3
     research_call, editorial_call, design_call = responses.kwargs_history
     assert research_call["model"] == "gpt-6-astra"
-    assert research_call["tools"] == [{"type": "web_search", "external_web_access": True}]
+    assert research_call["tools"] == [
+        {
+            "type": "web_search",
+            "filters": {
+                "allowed_domains": ["koreabaseball.com", "npb.jp", "mlb.com"]
+            },
+            "external_web_access": True,
+        }
+    ]
     assert research_call["tool_choice"] == "required"
     assert "tools" not in editorial_call
     assert "tools" not in design_call
     assert research_call["store"] is False
     assert editorial_call["store"] is False
     assert design_call["store"] is False
-    assert research_call["max_output_tokens"] == 16000
-    assert editorial_call["max_output_tokens"] == 16000
-    assert design_call["max_output_tokens"] == 16000
+    assert research_call["reasoning"] == {"effort": "low"}
+    assert research_call["max_output_tokens"] == 8000
+    assert editorial_call["max_output_tokens"] == 6000
+    assert design_call["max_output_tokens"] == 4000
 
 
 def test_schema_includes_quality_and_rights_fields() -> None:
@@ -161,6 +184,27 @@ def test_generation_retries_a_transient_api_failure(
     assert sleeps == [1]
 
 
+def test_generation_does_not_retry_a_timeout(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    responses = TimeoutStageResponses()
+    client = SimpleNamespace(responses=responses)
+    settings = replace(load_settings(ROOT / "config/settings.toml"), api_retry_attempts=2)
+    sleeps: list[int] = []
+    monkeypatch.setattr("sports_card_news.generator.time.sleep", sleeps.append)
+
+    with pytest.raises(GenerationError, match="자동 재시도하지 않았습니다"):
+        generate_daily_package(
+            date(2026, 9, 29),
+            settings,
+            "최근 게시 이력 없음",
+            client=client,  # type: ignore[arg-type]
+        )
+
+    assert responses.calls == 1
+    assert sleeps == []
+
+
 def test_repair_generation_includes_validation_errors_and_invalid_package() -> None:
     package, _, _, _ = _stages()
     conflicted_fact = package.facts[0].model_copy(update={"status": FactStatus.CONFLICT})
@@ -186,3 +230,5 @@ def test_repair_generation_includes_validation_errors_and_invalid_package() -> N
     assert "검증에 실패한 이전 초안" in str(request["input"])
     assert '"status": "출처 충돌"' in str(request["input"])
     assert "자동 복구" in str(request["instructions"])
+    assert request["max_output_tokens"] == 9000
+

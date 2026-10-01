@@ -1,21 +1,28 @@
 timezone = "Asia/Seoul"
 model = "gpt-6-astra"
-reasoning_effort = "medium"
-cards_min = 7
-cards_max = 7
+reasoning_effort = "low"
+cards_min = 5
+cards_max = 5
 caption_min_chars = 500
 caption_max_chars = 2000
 output_width = 1080
 output_height = 1350
-auto_repair_attempts = 2
-api_retry_attempts = 3
-api_timeout_seconds = 120
+auto_repair_attempts = 1
+api_retry_attempts = 2
+api_timeout_seconds = 300
+research_max_output_tokens = 8000
+editorial_max_output_tokens = 6000
+design_max_output_tokens = 4000
+repair_max_output_tokens = 9000
+daily_output_token_budget = 27000
+max_prompt_chars = 40000
+context_max_chars = 4000
 
 [editorial]
-leagues = ["KBO", "KBL", "NPB", "EPL", "NBA"]
-candidate_sports_min = 3
-candidate_pool_target = 10
-min_distinct_story_leagues = 5
+leagues = ["KBO", "MLB", "NPB"]
+candidate_sports_min = 1
+candidate_pool_target = 6
+min_distinct_story_leagues = 3
 max_cards_per_league = 1
 visual_repeat_limit = 2
 recent_days = 7
@@ -43,10 +50,5 @@ trusted_domains = [
   "koreabaseball.com",
   "npb.jp",
   "mlb.com",
-  "premierleague.com",
-  "kbl.or.kr",
-  "nba.com",
-  "the-afc.com",
-  "fifa.com",
-  "olympics.com",
 ]
+
