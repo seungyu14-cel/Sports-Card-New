@@ -1,0 +1,32 @@
+[
+  {
+    "slide": 1,
+    "league": "COVER",
+    "content_type": "summary",
+    "alt_text": "KBO 잔여 경기, MLB 디비전시리즈, NPB 클라이맥스시리즈 일정을 다루는 10월 1일 야구 브리핑 표지."
+  },
+  {
+    "slide": 2,
+    "league": "KBO",
+    "content_type": "schedule",
+    "alt_text": "KBO 미편성 잔여 11경기가 10월 12일까지 배치됐다는 안내. 일정은 변경될 수 있음."
+  },
+  {
+    "slide": 3,
+    "league": "MLB",
+    "content_type": "schedule",
+    "alt_text": "MLB 디비전시리즈 개막 예정일인 미국 현지 10월 3일을 표시한 일정 카드. 한국시간 날짜는 미확인."
+  },
+  {
+    "slide": 4,
+    "league": "NPB",
+    "content_type": "schedule",
+    "alt_text": "NPB 양 리그 클라이맥스시리즈 일정. 퍼스트스테이지는 10월 10일, 파이널스테이지는 10월 14일 개막 예정."
+  },
+  {
+    "slide": 5,
+    "league": "SUMMARY",
+    "content_type": "summary",
+    "alt_text": "앞선 세 이슈 요약. KBO 잔여 경기 편성은 10월 12일까지, MLB 디비전시리즈 개막은 미국 현지 10월 3일, NPB 클라이맥스시리즈 단계별 개막은 10월 10일과 14일."
+  }
+]
