@@ -1,0 +1,470 @@
+{
+  "approval_notice": "게시 전 사람 승인 필요",
+  "needs_human_approval": true,
+  "edition_date": "2026-10-02",
+  "generated_at": "2026-10-02T10:54:10+09:00",
+  "candidates": [
+    {
+      "sport": "야구",
+      "league": "KBO",
+      "title": "KT·삼성 선두 경쟁 현황",
+      "summary": "10월 1일 기준 KT가 84승 49패 4무로 선두, 삼성은 81승 52패 3무로 3경기 뒤다. 두 팀은 각각 4연승·5연승 중이다. ([koreabaseball.com](https://www.koreabaseball.com/Record/TeamRank/TeamRankDaily.aspx))",
+      "game_status": "종료",
+      "importance": 5,
+      "korean_relevance": 5,
+      "source_reliability": 5,
+      "explainability": 5,
+      "freshness": 5,
+      "fan_interest": 5,
+      "visual_potential": 5,
+      "uniqueness": 3,
+      "source_ids": [
+        "S1"
+      ],
+      "caution": "종료는 순위 집계 대상 경기 기준이다. 정규시즌 우승 확정이나 매직넘버를 뜻하지 않는다."
+    },
+    {
+      "sport": "야구",
+      "league": "KBO",
+      "title": "LG·KIA·두산의 3~5위 현황",
+      "summary": "10월 1일 기준 LG·KIA·두산이 차례로 3~5위다. LG는 5연패, KIA는 3연패, 두산은 3연승으로 최근 흐름이 갈린다. ([koreabaseball.com](https://www.koreabaseball.com/Record/TeamRank/TeamRankDaily.aspx))",
+      "game_status": "종료",
+      "importance": 4,
+      "korean_relevance": 5,
+      "source_reliability": 5,
+      "explainability": 4,
+      "freshness": 5,
+      "fan_interest": 5,
+      "visual_potential": 4,
+      "uniqueness": 3,
+      "source_ids": [
+        "S2"
+      ],
+      "caution": "현재 순위와 연속 승패만 검증했다. 포스트시즌 진출·탈락 확정 판단은 포함하지 않는다."
+    },
+    {
+      "sport": "야구",
+      "league": "MLB",
+      "title": "양키스 와일드카드 통과",
+      "summary": "보스턴에 시리즈 2승 무패. ([mlb.com](https://www.mlb.com/postseason/bracket-schedule))",
+      "game_status": "종료",
+      "importance": 4,
+      "korean_relevance": 2,
+      "source_reliability": 5,
+      "explainability": 4,
+      "freshness": 4,
+      "fan_interest": 5,
+      "visual_potential": 4,
+      "uniqueness": 3,
+      "source_ids": [
+        "S3"
+      ],
+      "caution": "선수별 활약은 별도 박스스코어 검증 전까지 추가하지 않는다."
+    },
+    {
+      "sport": "야구",
+      "league": "MLB",
+      "title": "필라델피아·애틀랜타 최종전",
+      "summary": "와일드카드 3차전 진행 중. ([mlb.com](https://www.mlb.com/amp/news/2026-mlb-playoff-and-world-series-schedule.html))",
+      "game_status": "진행 중",
+      "importance": 5,
+      "korean_relevance": 2,
+      "source_reliability": 5,
+      "explainability": 4,
+      "freshness": 5,
+      "fan_interest": 4,
+      "visual_potential": 4,
+      "uniqueness": 4,
+      "source_ids": [
+        "S4"
+      ],
+      "caution": "승자·최종 점수는 미확정으로 처리한다. 게시 직전 재조회가 필수다."
+    },
+    {
+      "sport": "야구",
+      "league": "NPB",
+      "title": "소프트뱅크, 라쿠텐전 8-2 승리",
+      "summary": "10월 1일 소프트뱅크가 라쿠텐에 8-2로 승리했다. 공식 결과에 우와사와가 승리투수, 다키나카가 패전투수로 기재돼 있다. ([npb.jp](https://npb.jp/games/2026/schedule_10_detail.html))",
+      "game_status": "종료",
+      "importance": 3,
+      "korean_relevance": 2,
+      "source_reliability": 5,
+      "explainability": 3,
+      "freshness": 5,
+      "fan_interest": 3,
+      "visual_potential": 4,
+      "uniqueness": 3,
+      "source_ids": [
+        "S5"
+      ],
+      "caution": "투구 이닝·득점 과정·순위 영향은 검증 범위 밖이다."
+    },
+    {
+      "sport": "야구",
+      "league": "NPB",
+      "title": "10월 2일 저녁 공식 경기 일정",
+      "summary": "한국시간 18시에 진구구장 야쿠르트-요미우리, ZOZO마린 롯데-소프트뱅크가 예정돼 있다. 히로시마-주니치는 예비일 표기이므로 실제 경기 목록과 구분해야 한다. ([npb.jp](https://npb.jp/games/2026/schedule_10_detail.html))",
+      "game_status": "예정",
+      "importance": 3,
+      "korean_relevance": 2,
+      "source_reliability": 5,
+      "explainability": 4,
+      "freshness": 5,
+      "fan_interest": 3,
+      "visual_potential": 4,
+      "uniqueness": 3,
+      "source_ids": [
+        "S6"
+      ],
+      "caution": "우천 취소·일정 변경을 경기 전 재확인한다. 예비일을 개최 확정으로 표현하지 않는다."
+    }
+  ],
+  "selected_candidate_title": "KT·삼성 선두 경쟁 현황",
+  "selection_reason": "제공된 가중치로 합산한 리그별 최고점 후보를 선정했다. KBO는 ‘KT·삼성 선두 경쟁 현황’ 4.90점(다른 후보 4.50점), MLB는 ‘필라델피아·애틀랜타 최종전’ 4.20점(다른 후보 3.90점), NPB는 ‘10월 2일 저녁 공식 경기 일정’ 3.65점(다른 후보 3.55점)이다. 전체 최고점인 KBO 이슈를 대표로 삼았다. 점수는 편집 판단이며 성과 예측이 아니다. MLB는 검증 당시 상태로 작성했으며 게시 직전 재검증을 승인 조건으로 둔다.",
+  "facts": [
+    {
+      "id": "S1",
+      "claim": "KT 1위·삼성 2위, 승차 3경기이며 각각 4연승·5연승이다.",
+      "title": "KBO 일자별 팀 순위",
+      "url": "https://www.koreabaseball.com/Record/TeamRank/TeamRankDaily.aspx",
+      "source_type": "공식",
+      "checked_at": "2026-10-02T10:54:10+09:00",
+      "expires_at": "2026-10-02T17:00:00+09:00",
+      "verification_method": "원문 직접 확인",
+      "evidence": "본문 집계일 2026.10.01. KT 137경기 84승49패4무, 삼성 136경기 81승52패3무. 게임차·연속 열 직접 확인. ([koreabaseball.com](https://www.koreabaseball.com/Record/TeamRank/TeamRankDaily.aspx))",
+      "published_at": "게시 시각 미표기; 집계 기준일 2026-10-01",
+      "local_time": "2026-10-01 기준, Asia/Seoul",
+      "korea_time": "2026-10-01 기준, Asia/Seoul",
+      "status": "검증 완료",
+      "rights_note": "수치를 출처와 함께 자체 요약한다. 원본 표·로고·사진의 복제 허가는 별도 확인한다."
+    },
+    {
+      "id": "S2",
+      "claim": "LG·KIA·두산은 각각 3·4·5위이며 5연패·3연패·3연승이다.",
+      "title": "KBO 일자별 팀 순위",
+      "url": "https://www.koreabaseball.com/Record/TeamRank/TeamRankDaily.aspx",
+      "source_type": "공식",
+      "checked_at": "2026-10-02T10:54:10+09:00",
+      "expires_at": "2026-10-02T17:00:00+09:00",
+      "verification_method": "원문 직접 확인",
+      "evidence": "2026.10.01 기준 순위표의 LG·KIA·두산 행과 연속 열 확인. ([koreabaseball.com](https://www.koreabaseball.com/Record/TeamRank/TeamRankDaily.aspx))",
+      "published_at": "게시 시각 미표기; 집계 기준일 2026-10-01",
+      "local_time": "2026-10-01 기준, Asia/Seoul",
+      "korea_time": "2026-10-01 기준, Asia/Seoul",
+      "status": "검증 완료",
+      "rights_note": "사실 요약만 사용하고 원본 화면·사진은 별도 권리 확인한다."
+    },
+    {
+      "id": "S3",
+      "claim": "양키스 2승 무패.",
+      "title": "Postseason Breakdown",
+      "url": "https://www.mlb.com/postseason/bracket-schedule",
+      "source_type": "공식",
+      "checked_at": "2026-10-02T10:54:10+09:00",
+      "expires_at": null,
+      "verification_method": "원문 직접 확인",
+      "evidence": "9월30일 결과란 확인. ([mlb.com](https://www.mlb.com/postseason/bracket-schedule))",
+      "published_at": "미표기",
+      "local_time": "2026-09-30, America/New_York",
+      "korea_time": "2026-10-01, Asia/Seoul",
+      "status": "검증 완료",
+      "rights_note": "영상·사진 사용권 별도."
+    },
+    {
+      "id": "S4",
+      "claim": "PHI-ATL 3차전 진행 중.",
+      "title": "2026 postseason schedule",
+      "url": "https://www.mlb.com/amp/news/2026-mlb-playoff-and-world-series-schedule.html",
+      "source_type": "공식",
+      "checked_at": "2026-10-02T10:54:10+09:00",
+      "expires_at": "2026-10-02T10:59:10+09:00",
+      "verification_method": "원문 직접 확인",
+      "evidence": "LIVE 표기 확인. ([mlb.com](https://www.mlb.com/amp/news/2026-mlb-playoff-and-world-series-schedule.html))",
+      "published_at": "8:05 PM EDT; 날짜 미표기",
+      "local_time": "2026-10-01, America/New_York",
+      "korea_time": "2026-10-02, Asia/Seoul",
+      "status": "검증 완료",
+      "rights_note": "중계 화면 재사용 금지; 사용권 별도."
+    },
+    {
+      "id": "S5",
+      "claim": "10월 1일 라쿠텐 2-8 소프트뱅크, 승리투수 우와사와·패전투수 다키나카.",
+      "title": "NPB 2026년 10월 경기 일정·결과 상세",
+      "url": "https://npb.jp/games/2026/schedule_10_detail.html",
+      "source_type": "공식",
+      "checked_at": "2026-10-02T10:54:10+09:00",
+      "expires_at": null,
+      "verification_method": "원문 직접 확인",
+      "evidence": "10/1 라쿠텐-소프트뱅크 행에서 2-8 및 책임투수 확인. ([npb.jp](https://npb.jp/games/2026/schedule_10_detail.html))",
+      "published_at": "게시·갱신 시각 미표기",
+      "local_time": "2026-10-01 18:00 시작 예정시각, Asia/Tokyo",
+      "korea_time": "2026-10-01 18:00 시작 예정시각, Asia/Seoul",
+      "status": "검증 완료",
+      "rights_note": "원문은 정보·이미지·영상의 무단 전재 및 2차 이용 금지를 고지한다. 사실 요약 외 재사용은 허가 확인."
+    },
+    {
+      "id": "S6",
+      "claim": "10월 2일 야쿠르트-요미우리와 롯데-소프트뱅크는 18시 예정이며 히로시마-주니치는 예비일이다.",
+      "title": "NPB 2026년 10월 경기 일정·결과 상세",
+      "url": "https://npb.jp/games/2026/schedule_10_detail.html",
+      "source_type": "공식",
+      "checked_at": "2026-10-02T10:54:10+09:00",
+      "expires_at": "2026-10-02T17:00:00+09:00",
+      "verification_method": "원문 직접 확인",
+      "evidence": "10/2 행의 진구·ZOZO마린 18:00 및 마쓰다스타디움 예비일 표기 확인. ([npb.jp](https://npb.jp/games/2026/schedule_10_detail.html))",
+      "published_at": "게시·갱신 시각 미표기",
+      "local_time": "2026-10-02T18:00:00+09:00, Asia/Tokyo",
+      "korea_time": "2026-10-02T18:00:00+09:00, Asia/Seoul",
+      "status": "검증 완료",
+      "rights_note": "일정을 자체 문장으로 요약한다. 원본 일정표·구단 로고의 재사용은 별도 허가 확인."
+    }
+  ],
+  "cards": [
+    {
+      "slide": 1,
+      "league": "COVER",
+      "candidate_title": "",
+      "headline": "오늘의 야구, 세 리그 핵심 체크",
+      "body": "KBO 선두 경쟁부터 MLB 와일드카드 최종전, NPB 저녁 일정까지. 세 리그에서 하나씩 고른 오늘의 체크포인트.",
+      "source_ids": [
+        "S1",
+        "S4",
+        "S6"
+      ],
+      "content_type": "summary",
+      "kicker": "2026.10.02 | BASEBALL",
+      "visual_template": "cover",
+      "visual_title": "오늘의 야구, 세 리그 핵심 체크",
+      "visual_items": [
+        {
+          "label": "KBO",
+          "value": "선두 경쟁",
+          "note": "10월 1일 집계"
+        },
+        {
+          "label": "MLB",
+          "value": "와일드카드 최종전",
+          "note": "검증 시점 기준"
+        },
+        {
+          "label": "NPB",
+          "value": "저녁 일정",
+          "note": "한국시간 기준"
+        }
+      ],
+      "visual_direction": "상단에 원고 키커, 중앙에 큰 헤드라인, 하단에 원고 본문을 그대로 배치한다. 자체 제작 다이아몬드 라인과 세 개의 리그 텍스트 탭을 사용해 야구 브리핑임을 표현한다. 세 탭은 동등한 크기로 구성하고 경기 결과나 우승을 암시하는 장식은 배제한다. 하단에 페이지 번호 01/05를 표시한다.",
+      "asset_ids": [],
+      "alt_text": "KBO 선두 경쟁, MLB 와일드카드 최종전, NPB 저녁 일정을 소개하는 표지."
+    },
+    {
+      "slide": 2,
+      "league": "KBO",
+      "candidate_title": "KT·삼성 선두 경쟁 현황",
+      "headline": "선두 KT와 2위 삼성, 3경기 차",
+      "body": "10월 1일 기준 KT는 84승 49패 4무, 삼성은 81승 52패 3무다. 각각 4연승·5연승 중인 두 팀의 격차는 3경기. 정규시즌 우승 확정을 뜻하지 않는다.",
+      "source_ids": [
+        "S1"
+      ],
+      "content_type": "ranking",
+      "kicker": "KBO | 10월 1일 집계",
+      "visual_template": "ranking",
+      "visual_title": "선두 KT와 2위 삼성, 3경기 차",
+      "visual_items": [
+        {
+          "label": "1위 KT",
+          "value": "84승 49패 4무",
+          "note": "4연승"
+        },
+        {
+          "label": "2위 삼성",
+          "value": "81승 52패 3무",
+          "note": "5연승"
+        },
+        {
+          "label": "승차",
+          "value": "3경기",
+          "note": "10월 1일 기준 · 정규시즌 우승 확정을 뜻하지 않는다."
+        }
+      ],
+      "visual_direction": "야구 순위 보드형 구성. 원고 키커와 헤드라인 아래에 KT·삼성을 두 행으로 배치하고 순위, 팀명, 승·패·무, 연속 승패를 정렬한다. 두 행 아래의 별도 강조 영역에 ‘3경기’를 크게 표시한다. 원본 순위표를 모사하지 않고 두 팀만 담은 자체 레이아웃을 사용한다. 원고 본문은 하단에 그대로 유지하고 집계일과 우승 미확정 주의 문구를 충분한 대비로 읽히게 한다. 출처는 S1·KBO 공식 일자별 팀 순위로 표기한다.",
+      "asset_ids": [
+        "A1"
+      ],
+      "alt_text": "1위 KT의 84승 49패 4무와 2위 삼성의 81승 52패 3무를 비교한 자체 제작 순위 카드. 승차는 3경기다."
+    },
+    {
+      "slide": 3,
+      "league": "MLB",
+      "candidate_title": "필라델피아·애틀랜타 최종전",
+      "headline": "필라델피아·애틀랜타, 3차전 진행 중",
+      "body": "10월 2일 오전 10시 54분 한국시간 확인 기준, 두 팀의 와일드카드 3차전은 진행 중이다. 승자와 최종 점수는 이번 검증에 포함되지 않았다.",
+      "source_ids": [
+        "S4"
+      ],
+      "content_type": "breaking",
+      "kicker": "MLB | 검증 시점 기준",
+      "visual_template": "breaking",
+      "visual_title": "필라델피아·애틀랜타, 3차전 진행 중",
+      "visual_items": [
+        {
+          "label": "대진",
+          "value": "필라델피아–애틀랜타",
+          "note": "MLB 와일드카드"
+        },
+        {
+          "label": "3차전",
+          "value": "진행 중",
+          "note": "10월 2일 10:54 한국시간 확인 당시"
+        },
+        {
+          "label": "승자·최종 점수",
+          "value": "이번 검증에 포함되지 않음",
+          "note": "최종 결과 표시 없음"
+        }
+      ],
+      "visual_direction": "야구 속보 보드형 구성. 원고 키커·헤드라인 아래에 두 팀 이름을 대칭 배치하고 중앙에 ‘3차전’을 표시한다. ‘진행 중’ 배지 바로 옆에 확인 시각을 붙여 현재 실시간 상태로 오인하지 않도록 한다. 점수 칸, 0–0 표기, 이닝, 승리 팀 강조는 넣지 않는다. 원고 본문을 그대로 배치하고 출처 S4·MLB 공식 일정을 하단에 표기한다. 제작 단계에서 게시 승인 보류 상태로 관리하며 재검증에 따른 변경은 편집 승인된 원고로만반",
+      "asset_ids": [],
+      "alt_text": "필라델피아와 애틀랜타의 와일드카드 3차전이 검증 시점에 진행 중임을 알리는 카드. 최종 결과는 표시하지 않는다."
+    },
+    {
+      "slide": 4,
+      "league": "NPB",
+      "candidate_title": "10월 2일 저녁 공식 경기 일정",
+      "headline": "오늘 저녁 6시, NPB 두 경기 예정",
+      "body": "10월 2일 한국시간 18시, 진구구장에서는 야쿠르트–요미우리, ZOZO마린에서는 롯데–소프트뱅크가 예정돼 있다. 우천 취소와 일정 변경은 경기 전 재확인이 필요하다.",
+      "source_ids": [
+        "S6"
+      ],
+      "content_type": "schedule",
+      "kicker": "NPB | 한국시간 기준",
+      "visual_template": "schedule",
+      "visual_title": "오늘 저녁 6시, NPB 두 경기 예정",
+      "visual_items": [
+        {
+          "label": "진구구장",
+          "value": "야쿠르트–요미우리",
+          "note": "10월 2일 18:00 한국시간 · 예정"
+        },
+        {
+          "label": "ZOZO마린",
+          "value": "롯데–소프트뱅크",
+          "note": "10월 2일 18:00 한국시간 · 예정"
+        }
+      ],
+      "visual_direction": "야구 경기 일정 보드형 구성. 원고 키커·헤드라인 아래에 ‘18:00’과 ‘한국시간 · 예정’을 한 묶음으로 강조한다. 두 경기 패널을 세로로 배치하고 구장명, 대진, 예정 시각 순으로 정렬한다. 예비일인 히로시마–주니치는 포함하지 않는다. 원고 본문은 그대로 유지하며 우천 취소·일정 변경 재확인 안내가 잘리지 않게 하단 공간을 확보한다. 출처 S6·NPB 공식 일정을 표시한다.",
+      "asset_ids": [
+        "A2"
+      ],
+      "alt_text": "한국시간 10월 2일 오후 6시 예정인 야쿠르트–요미우리와 롯데–소프트뱅크의 구장별 일정 카드."
+    },
+    {
+      "slide": 5,
+      "league": "SUMMARY",
+      "candidate_title": "",
+      "headline": "세 리그 체크포인트 한눈에",
+      "body": "KBO: 10월 1일 기준 KT·삼성 3경기 차.\nMLB: 10월 2일 10:54 확인 당시 필라델피아·애틀랜타 3차전 진행 중.\nNPB: 오늘 18시 야쿠르트–요미우리, 롯데–소프트뱅크 예정.",
+      "source_ids": [
+        "S1",
+        "S4",
+        "S6"
+      ],
+      "content_type": "summary",
+      "kicker": "TODAY’S THREE",
+      "visual_template": "summary",
+      "visual_title": "세 리그 체크포인트 한눈에",
+      "visual_items": [
+        {
+          "label": "KBO",
+          "value": "10월 1일 기준 KT·삼성 3경기 차.",
+          "note": "S1 · KBO 공식 일자별 팀 순위"
+        },
+        {
+          "label": "MLB",
+          "value": "10월 2일 10:54 확인 당시 필라델피아·애틀랜타 3차전 진행 중.",
+          "note": "한국시간 · S4 · MLB 공식 일정"
+        },
+        {
+          "label": "NPB",
+          "value": "오늘 18시 야쿠르트–요미우리, 롯데–소프트뱅크 예정.",
+          "note": "한국시간 · S6 · NPB 공식 일정"
+        }
+      ],
+      "visual_direction": "상단에 원고 키커와 헤드라인을 배치하고 원고 본문의 세 줄을 각각 label/value 요약 패널로 구성한다. 리그 라벨은 좌측 고정 폭, 내용은 우측 가변 폭으로 두고 MLB 문구의 확인 시각이 생략되지 않도록 줄바꿈한다. KBO의 ‘3경기’, MLB의 ‘확인 당시’, NPB의 ‘18시’와 ‘예정’을 강조한다. 세 이슈 외 정보는 추가하지 않으며 출처와 페이지 번호 05/05를 하단에 표시한다. MLB 재검증에 따른 원고 갱",
+      "asset_ids": [],
+      "alt_text": "앞선 세 이슈인 KBO 선두 승차, MLB 와일드카드 3차전 상태, NPB 두 경기 예정 일정을 한눈에 요약한 카드."
+    }
+  ],
+  "caption": "10월 2일 야구 브리핑. 오늘은 KBO 선두 경쟁, MLB 와일드카드 최종전, NPB 저녁 일정까지 세 리그의 체크포인트를 하나씩 골랐습니다. 순위의 집계일, 진행 중 경기의 확인 시각, 예정 경기의 시작 시각을 구분해 읽어주세요.\n\n① KBO — KT와 삼성의 격차는 3경기입니다. 10월 1일 공식 순위 기준 KT는 84승 49패 4무로 1위, 삼성은 81승 52패 3무로 2위입니다. KT는 4연승, 삼성은 5연승을 기록 중입니다. 두 팀 모두 연승을 이어가는 가운데 확인된 현재 순위를 담았습니다. 이 수치만으로 정규시즌 우승 확정이나 매직넘버를 판단하지는 않습니다.\n\n② MLB — 필라델피아와 애틀랜타의 와일드카드 3차전은 한국시간 10월 2일 오전 10시 54분 확인 당시 진행 중이었습니다. 이번 브리핑에는 실시간 점수나 승자를 넣지 않았습니다. 진행 중이라는 표시는 해당 검증 시점의 상태이며, 최종 결과를 뜻하지 않습니다.\n\n③ NPB — 오늘 한국시간 오후 6시에는 진구구장의 야쿠르트–요미우리, ZOZO마린의 롯데–소프트뱅크가 예정돼 있습니다. 관전 계획을 세운다면 경기 전 우천 취소나 일정 변경 여부를 다시 확인해주세요. 예정 시각은 실제 경기 개최를 보장하는 정보가 아닙니다.\n\n이번 편성은 제공된 KBO·MLB·NPB 공식 자료의 검증 범위 안에서 작성했습니다. 확인되지 않은 선수 활약이나 순위 영향은 더하지 않았습니다. 마지막 장에서 세 가지 이슈만 다시 모아볼 수 있습니다.",
+  "hashtags": [
+    "#야구",
+    "#KBO",
+    "#MLB",
+    "#NPB",
+    "#야구브리핑",
+    "#오늘의야구"
+  ],
+  "design_brief": "2026-10-02 야구 브리핑용 1080×1350px 인스타그램 카드 5장. 확정 원고의 헤드라인·본문·키커를 변경 없이 배치한다. 짙은 네이비 배경, 아이보리 본문, 라임색 핵심 수치로 통일하고 리그명은 텍스트로 표시한다. 순위 집계일·상태 확인 시각·예정 시각을 구분해 읽도록 정보 위계를 설계한다. cover→ranking→breaking→schedule→summary로 연속 템플릿 반복 없이 구성한다. 원본 표·로고·사진·중계 화면은 복제하지 않으며 자체 제작 텍스트와 그래픽만 사용한다. 뉴스 이미지 URL은 생성하지 않고 assets와 asset_ids는 비워 둔다. S4 게시 직전 재검증 전에는 게시 승인을 보류하며, 상태가 달라지면 편집자의 원고 갱신과 승인 후 반영한다. S1·S6은 10월 2일 17:00 재검증 기한을 준수한다.",
+  "assets": [
+    {
+      "id": "A1",
+      "asset_type": "news_image",
+      "title": "KBO 일자별 팀 순위 대표 이미지",
+      "source_url": "https://6ptotvmi5753.edge.naverncp.com/KBO_IMAGE/KBOHome/resources/images/common/open_graph_kbo_2022.png",
+      "source_fact_id": "S1",
+      "rights_status": "뉴스 이미지 사용 승인",
+      "rights_note": "프로젝트 운영 정책에 따라 검증된 뉴스·공식 원문 페이지에 포함된 대표 이미지 사용 허용",
+      "credit": "koreabaseball.com",
+      "usage_scope": [
+        "instagram_post"
+      ],
+      "license_evidence": "사용자가 뉴스 원문에 포함된 이미지를 카드뉴스에 사용할 수 있다고 승인한 운영 정책에 따라 자동 승인",
+      "approved_for_publish": true
+    },
+    {
+      "id": "A2",
+      "asset_type": "news_image",
+      "title": "NPB 2026년 10월 경기 일정·결과 상세 대표 이미지",
+      "source_url": "https://p.npb.jp/img/ogp/default.jpg",
+      "source_fact_id": "S6",
+      "rights_status": "뉴스 이미지 사용 승인",
+      "rights_note": "프로젝트 운영 정책에 따라 검증된 뉴스·공식 원문 페이지에 포함된 대표 이미지 사용 허용",
+      "credit": "npb.jp",
+      "usage_scope": [
+        "instagram_post"
+      ],
+      "license_evidence": "사용자가 뉴스 원문에 포함된 이미지를 카드뉴스에 사용할 수 있다고 승인한 운영 정책에 따라 자동 승인",
+      "approved_for_publish": true
+    }
+  ],
+  "rights_status": "뉴스 이미지 사용 승인",
+  "risk_flags": [
+    "점수는 편집 판단이며 성과 데이터 기반 예측이 아니다.",
+    "expires_at은 편집용 재검증 기한이다. null은 종료 결과로서 정기 만료를 두지 않았다는 의미이며 기록 정정 가능성까지 배제하지 않는다.",
+    "KBO 순위 후보의 game_status는 집계 대상 경기 종료를 의미하며 시즌 종료를 의미하지 않는다.",
+    "MLB 진행 중 후보는 만료 시각 이전이라도 게시 직전 다시 확인한다. 이번 조사에서는 실시간 점수와 승자를 채택하지 않았다.",
+    "MLB 검색 결과에 시작 시각이 서로 다른 일정 페이지가 나타나 해당 경기의 정확한 시작 시각은 후보 주장에 포함하지 않았다.",
+    "조회 시각은 이번 검증 세션 종료 시각으로 통일했다. 게시 시각이 원문에 없는 경우 추정하지 않았다.",
+    "리그별 2개씩 총 6개 후보를 확보했다. 선수 부상·징계·이적 및 확인되지 않은 한국 선수 출전 주장은 제외했다."
+  ],
+  "approval_checklist": {
+    "sport_editor": [
+      "리그별 가중합 최고점 후보 선정과 2~4번의 KBO·MLB·NPB 각 1회 배치를 확인한다.",
+      "KBO 순위는 10월 1일 집계이며 우승 확정·매직넘버로 해석하지 않는다.",
+      "MLB 승자·최종 점수·선수 활약은 추가 검증 없이 삽입하지 않는다.",
+      "NPB 예비일 표기를 개최 확정 경기로 포함하지 않는다."
+    ],
+    "fact_rights": [
+      "S4는 게시 직전 반드시 재조회한다. 재검증 기한은 10월 2일 10:59:10이며, 확인 전 게시 승인을 보류한다.",
+      "MLB 상태가 변경되면 3번·5번 카드와 캡션을 함께 수정하고 근거를 갱신한다.",
+      "S1·S6의 재검증 기한은 10월 2일 17:00이다. 기한 경과 시 재확인하고 NPB 일정 변경 여부도 경기 전 확인한다.",
+      "원본 순위표·일정표·로고·사진을 복제하지 않고 자체 제작 텍스트와 그래픽을 사용한다.",
+      "중계 화면은 사용하지 않으며 이미지·영상 사용 시 별도 권리를 확인한다."
+    ],
+    "editor_in_chief": [
+      "총 5장, COVER와 SUMMARY 위치, 메인 후보 제목의 원문 일치를 확인한다.",
+      "헤드라인 40자·본문 180자 이내, 캡션 500~2000자, 해시태그 5~8개 조건을 확인한다.",
+      "마지막 장에 선정한 세 이슈 외 다른 이슈가 없는지 확인한다.",
+      "MLB 게시 직전 재검증과 관련 문구의 동시 갱신이 완료된 뒤 최종 승인한다."
+    ]
+  }
+}
