@@ -1,0 +1,32 @@
+[
+  {
+    "slide": 1,
+    "league": "COVER",
+    "content_type": "summary",
+    "alt_text": "KBO 선두 경쟁, MLB 와일드카드 최종전, NPB 저녁 일정을 소개하는 표지."
+  },
+  {
+    "slide": 2,
+    "league": "KBO",
+    "content_type": "ranking",
+    "alt_text": "1위 KT의 84승 49패 4무와 2위 삼성의 81승 52패 3무를 비교한 자체 제작 순위 카드. 승차는 3경기다."
+  },
+  {
+    "slide": 3,
+    "league": "MLB",
+    "content_type": "breaking",
+    "alt_text": "필라델피아와 애틀랜타의 와일드카드 3차전이 검증 시점에 진행 중임을 알리는 카드. 최종 결과는 표시하지 않는다."
+  },
+  {
+    "slide": 4,
+    "league": "NPB",
+    "content_type": "schedule",
+    "alt_text": "한국시간 10월 2일 오후 6시 예정인 야쿠르트–요미우리와 롯데–소프트뱅크의 구장별 일정 카드."
+  },
+  {
+    "slide": 5,
+    "league": "SUMMARY",
+    "content_type": "summary",
+    "alt_text": "앞선 세 이슈인 KBO 선두 승차, MLB 와일드카드 3차전 상태, NPB 두 경기 예정 일정을 한눈에 요약한 카드."
+  }
+]
