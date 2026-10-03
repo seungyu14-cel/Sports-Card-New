@@ -1,0 +1,478 @@
+{
+  "approval_notice": "게시 전 사람 승인 필요",
+  "needs_human_approval": true,
+  "edition_date": "2026-10-03",
+  "generated_at": "2026-10-03T10:35:10+09:00",
+  "candidates": [
+    {
+      "sport": "야구",
+      "league": "KBO",
+      "title": "KIA–LG 잠실 경기 사전 점검",
+      "summary": "10월 3일 14:00 잠실에서 KIA–LG 경기가 예정돼 있다. 당일 관전 일정 후보로 확보했다. ([eng.koreabaseball.com](https://eng.koreabaseball.com/Schedule/DailySchedule.aspx))",
+      "game_status": "예정",
+      "importance": 3,
+      "korean_relevance": 5,
+      "source_reliability": 5,
+      "explainability": 3,
+      "freshness": 5,
+      "fan_interest": 4,
+      "visual_potential": 3,
+      "uniqueness": 2,
+      "source_ids": [
+        "S1"
+      ],
+      "caution": "일정만 검증했다. 순위 경쟁 의미, 선발 및 출전 명단은 추가 검증 전 사용하지 않는다."
+    },
+    {
+      "sport": "야구",
+      "league": "KBO",
+      "title": "두산–삼성 대구 경기 사전 점검",
+      "summary": "10월 3일 14:00 대구에서 두산–삼성 경기가 예정돼 있다. 당일 관전 일정 후보로 확보했다. ([eng.koreabaseball.com](https://eng.koreabaseball.com/Schedule/DailySchedule.aspx))",
+      "game_status": "예정",
+      "importance": 3,
+      "korean_relevance": 5,
+      "source_reliability": 5,
+      "explainability": 3,
+      "freshness": 5,
+      "fan_interest": 4,
+      "visual_potential": 3,
+      "uniqueness": 2,
+      "source_ids": [
+        "S2"
+      ],
+      "caution": "일정만 검증했다. 포스트시즌 진출 조건이나 맞대결 성적을 추정하지 않는다."
+    },
+    {
+      "sport": "야구",
+      "league": "MLB",
+      "title": "ATL–LAD NLDS 1차전",
+      "summary": "한국시간 10월 4일 05:00 예정. ([mlb.com](https://www.mlb.com/postseason))",
+      "game_status": "예정",
+      "importance": 5,
+      "korean_relevance": 3,
+      "source_reliability": 5,
+      "explainability": 4,
+      "freshness": 5,
+      "fan_interest": 5,
+      "visual_potential": 4,
+      "uniqueness": 3,
+      "source_ids": [
+        "S3"
+      ],
+      "caution": "다음 날 예고용 후보다. 한국 선수 출전 여부 및 선발 투수는 별도 검증해야 한다."
+    },
+    {
+      "sport": "야구",
+      "league": "MLB",
+      "title": "SD–MIL NLDS 1차전",
+      "summary": "한국시간 10월 4일 09:30 예정. ([mlb.com](https://www.mlb.com/news/2026-mlb-playoff-and-world-series-schedule))",
+      "game_status": "예정",
+      "importance": 5,
+      "korean_relevance": 2,
+      "source_reliability": 5,
+      "explainability": 4,
+      "freshness": 5,
+      "fan_interest": 4,
+      "visual_potential": 4,
+      "uniqueness": 3,
+      "source_ids": [
+        "S4"
+      ],
+      "caution": "다음 날 예고용 후보다. 중계 채널 정보는 채택하지 않았으며 국내 시청 방법은 검증하지 않았다."
+    },
+    {
+      "sport": "야구",
+      "league": "NPB",
+      "title": "히로시마–한신 낮 경기",
+      "summary": "10월 3일 14:00 마쓰다에서 히로시마–한신 경기가 예정돼 있다. 일본 현지 시각과 한국 시각은 같다. ([npb.jp](https://npb.jp/bis/2026/games/gm20261003.html))",
+      "game_status": "예정",
+      "importance": 3,
+      "korean_relevance": 2,
+      "source_reliability": 5,
+      "explainability": 3,
+      "freshness": 5,
+      "fan_interest": 3,
+      "visual_potential": 3,
+      "uniqueness": 2,
+      "source_ids": [
+        "S5"
+      ],
+      "caution": "일정 검증 후보다. 우승·클라이맥스시리즈 경쟁과의 관계는 순위표 추가 확인 전 연결하지 않는다."
+    },
+    {
+      "sport": "야구",
+      "league": "NPB",
+      "title": "요미우리–DeNA 도쿄돔 경기",
+      "summary": "10월 3일 18:00 도쿄돔에서 요미우리–DeNA 경기가 예정돼 있다. 일본 현지 시각과 한국 시각은 같다. ([npb.jp](https://npb.jp/bis/2026/games/gm20261003.html))",
+      "game_status": "예정",
+      "importance": 3,
+      "korean_relevance": 2,
+      "source_reliability": 5,
+      "explainability": 3,
+      "freshness": 5,
+      "fan_interest": 4,
+      "visual_potential": 3,
+      "uniqueness": 2,
+      "source_ids": [
+        "S6"
+      ],
+      "caution": "선발, 출전 명단, 순위상 의미는 미검증이다. 경기 결과로 표현하지 않는다."
+    }
+  ],
+  "selected_candidate_title": "ATL–LAD NLDS 1차전",
+  "selection_reason": "제시된 가중치로 합산한 리그별 최고점 후보를 선정했다. KBO는 KIA–LG와 두산–삼성이 각각 3.95점으로 공동 1위여서 입력 순서를 동점 처리 기준으로 적용해 KIA–LG를 선택했다. MLB는 ATL–LAD가 4.40점으로 SD–MIL의 4.15점보다 높다. NPB는 요미우리–DeNA가 3.50점으로 히로시마–한신의 3.40점보다 높다. 전체 최고점인 ATL–LAD를 대표 후보로 삼고, 본문 카드는 한국시간 경기 시작 순서로 배치했다. 최근 이력·성과에 따른 가감은 적용하지 않았다.",
+  "facts": [
+    {
+      "id": "S1",
+      "claim": "2026년 10월 3일 KIA–LG 경기는 잠실에서 14:00에 예정돼 있다.",
+      "title": "KBO Daily Schedule — 2026.10",
+      "url": "https://eng.koreabaseball.com/Schedule/DailySchedule.aspx",
+      "source_type": "공식",
+      "checked_at": "2026-10-03T10:35:10+09:00",
+      "expires_at": "2026-10-03T13:00:00+09:00",
+      "verification_method": "원문 직접 확인",
+      "evidence": "공식 월간 일정의 10.03 행에서 REGULAR, 14:00, KIA–LG, JAMSIL을 확인했다. 점수 칸은 비어 있다. ([eng.koreabaseball.com](https://eng.koreabaseball.com/Schedule/DailySchedule.aspx))",
+      "published_at": "미표기",
+      "local_time": "2026-10-03T14:00:00+09:00 (Asia/Seoul)",
+      "korea_time": "2026-10-03T14:00:00+09:00",
+      "status": "검증 완료",
+      "rights_note": "일정 사실을 재서술한다. 공식 화면·로고·사진의 재사용 권한은 별도 확인한다."
+    },
+    {
+      "id": "S2",
+      "claim": "2026년 10월 3일 두산–삼성 경기는 대구에서 14:00에 예정돼 있다.",
+      "title": "KBO Daily Schedule — 2026.10",
+      "url": "https://eng.koreabaseball.com/Schedule/DailySchedule.aspx",
+      "source_type": "공식",
+      "checked_at": "2026-10-03T10:35:10+09:00",
+      "expires_at": "2026-10-03T13:00:00+09:00",
+      "verification_method": "원문 직접 확인",
+      "evidence": "10.03 일정에서 14:00, DOOSAN–SAMSUNG, DAEGU를 확인했다. 점수 칸은 비어 있다. ([eng.koreabaseball.com](https://eng.koreabaseball.com/Schedule/DailySchedule.aspx))",
+      "published_at": "미표기",
+      "local_time": "2026-10-03T14:00:00+09:00 (Asia/Seoul)",
+      "korea_time": "2026-10-03T14:00:00+09:00",
+      "status": "검증 완료",
+      "rights_note": "일정 사실을 재서술한다. 방송 영상·구단 이미지 사용 권한은 포함하지 않는다."
+    },
+    {
+      "id": "S3",
+      "claim": "ATL 원정·LAD 홈 NLDS 1차전 일정.",
+      "title": "MLB 포스트시즌 일정",
+      "url": "https://www.mlb.com/postseason",
+      "source_type": "공식",
+      "checked_at": "2026-10-03T10:35:10+09:00",
+      "expires_at": "2026-10-03T22:00:00+09:00",
+      "verification_method": "원문 직접 확인",
+      "evidence": "10/3 16:00 ET 확인; KST로 환산. ([mlb.com](https://www.mlb.com/postseason))",
+      "published_at": "미표기",
+      "local_time": "2026-10-03T13:00:00-07:00 (America/Los_Angeles)",
+      "korea_time": "2026-10-04T05:00:00+09:00",
+      "status": "검증 완료",
+      "rights_note": "사실 재서술만 사용하며 사진·영상·로고는 별도 권리 확인한다."
+    },
+    {
+      "id": "S4",
+      "claim": "SD 원정·MIL 홈 NLDS 1차전 일정.",
+      "title": "MLB 일정 기사",
+      "url": "https://www.mlb.com/news/2026-mlb-playoff-and-world-series-schedule",
+      "source_type": "공식",
+      "checked_at": "2026-10-03T10:35:10+09:00",
+      "expires_at": "2026-10-03T22:00:00+09:00",
+      "verification_method": "원문 직접 확인",
+      "evidence": "10/3 20:30 ET 확인; KST로 환산. ([mlb.com](https://www.mlb.com/news/2026-mlb-playoff-and-world-series-schedule))",
+      "published_at": "2026-10-02 (시각·시간대 미표기)",
+      "local_time": "2026-10-03T19:30:00-05:00 (America/Chicago)",
+      "korea_time": "2026-10-04T09:30:00+09:00",
+      "status": "검증 완료",
+      "rights_note": "사실 재서술만 사용하며 사진·영상·로고는 별도 권리 확인한다."
+    },
+    {
+      "id": "S5",
+      "claim": "2026년 10월 3일 히로시마–한신 경기는 마쓰다에서 14:00에 예정돼 있다.",
+      "title": "2026年10月3日 公式戦【試合予定】",
+      "url": "https://npb.jp/bis/2026/games/gm20261003.html",
+      "source_type": "공식",
+      "checked_at": "2026-10-03T10:35:10+09:00",
+      "expires_at": "2026-10-03T13:00:00+09:00",
+      "verification_method": "원문 직접 확인",
+      "evidence": "NPB 당일 공식전 예정표에서 広島–阪神, マツダ, 14:00을 확인했다. JST와 KST는 모두 UTC+09:00이다. ([npb.jp](https://npb.jp/bis/2026/games/gm20261003.html))",
+      "published_at": "미표기",
+      "local_time": "2026-10-03T14:00:00+09:00 (Asia/Tokyo)",
+      "korea_time": "2026-10-03T14:00:00+09:00",
+      "status": "검증 완료",
+      "rights_note": "원문은 정보·이미지·영상의 무단 전재 및 2차 이용 금지를 고지한다. 원문 화면을 복제하지 않고 필요한 일정 사실만 재서술한다."
+    },
+    {
+      "id": "S6",
+      "claim": "2026년 10월 3일 요미우리–DeNA 경기는 도쿄돔에서 18:00에 예정돼 있다.",
+      "title": "2026年10月3日 公式戦【試合予定】",
+      "url": "https://npb.jp/bis/2026/games/gm20261003.html",
+      "source_type": "공식",
+      "checked_at": "2026-10-03T10:35:10+09:00",
+      "expires_at": "2026-10-03T17:00:00+09:00",
+      "verification_method": "원문 직접 확인",
+      "evidence": "당일 예정표에서 巨人–DeNA, 東京ドーム, 18:00을 확인했다. 한국시간으로 날짜·시각 변동이 없다. ([npb.jp](https://npb.jp/bis/2026/games/gm20261003.html))",
+      "published_at": "미표기",
+      "local_time": "2026-10-03T18:00:00+09:00 (Asia/Tokyo)",
+      "korea_time": "2026-10-03T18:00:00+09:00",
+      "status": "검증 완료",
+      "rights_note": "공식 이미지·영상·일정표 화면은 재사용하지 않는다. 일정 사실의 자체 재서술과 자체 그래픽 제작을 전제로 한다."
+    }
+  ],
+  "cards": [
+    {
+      "slide": 1,
+      "league": "COVER",
+      "candidate_title": "",
+      "headline": "오늘 오후부터 내일 새벽까지, 야구 3선",
+      "body": "10월 3일 잠실과 도쿄돔, 10월 4일 새벽 MLB까지. 세 리그에서 고른 경기 예정 일정을 한국시간으로 정리했습니다.",
+      "source_ids": [
+        "S1",
+        "S6",
+        "S3"
+      ],
+      "content_type": "schedule",
+      "kicker": "2026.10.03 | 일정 브리핑",
+      "visual_template": "cover",
+      "visual_title": "오늘 오후부터 내일 새벽까지, 야구 3선",
+      "visual_items": [
+        {
+          "label": "KBO | KIA–LG",
+          "value": "10.03 14:00",
+          "note": "잠실 · 한국시간 · 예정"
+        },
+        {
+          "label": "NPB | 요미우리–DeNA",
+          "value": "10.03 18:00",
+          "note": "도쿄돔 · 한국시간 · 예정"
+        },
+        {
+          "label": "MLB | ATL–LAD",
+          "value": "10.04 05:00",
+          "note": "NLDS 1차전 · 한국시간 · 예정"
+        }
+      ],
+      "visual_direction": "상단에 확정 키커, 중앙에 원문 헤드라인과 본문을 배치한다. 하단에는 세 경기의 날짜·시각을 시간순으로 연결한 일정 스트립을 둔다. 10.04 구간은 별도 강조색과 ‘다음 날’ 보조 표기로 구분한다. 배경의 자체 제작 야구 다이아몬드는 낮은 대비로 처리하며 팀 로고나 선수 이미지를 대체하는 가상 이미지는 넣지 않는다.",
+      "asset_ids": [],
+      "alt_text": "10월 3일 오후부터 4일 새벽까지 이어지는 세 리그의 경기 예정 일정을 소개하는 표지."
+    },
+    {
+      "slide": 2,
+      "league": "KBO",
+      "candidate_title": "KIA–LG 잠실 경기 사전 점검",
+      "headline": "KIA–LG, 오늘 14시 잠실 경기 예정",
+      "body": "10월 3일 14:00, 잠실에서 KIA–LG 경기가 예정돼 있습니다. 공식 일정으로 확인한 경기 시각과 장소를 안내합니다.",
+      "source_ids": [
+        "S1"
+      ],
+      "content_type": "match_preview",
+      "kicker": "KBO | 10.03 14:00 한국시간",
+      "visual_template": "match_preview",
+      "visual_title": "KIA–LG, 오늘 14시 잠실 경기 예정",
+      "visual_items": [
+        {
+          "label": "대진",
+          "value": "KIA–LG",
+          "note": "KBO"
+        },
+        {
+          "label": "경기 시각",
+          "value": "2026.10.03 14:00",
+          "note": "한국시간"
+        },
+        {
+          "label": "장소",
+          "value": "잠실",
+          "note": "예정"
+        }
+      ],
+      "visual_direction": "야구 대진 프리뷰 보드. 상단 키커와 원문 헤드라인 아래에 KIA와 LG를 동일한 크기의 문자 블록으로 배치하고 가운데 대시로 연결한다. 하단 정보 바에 날짜·시각·잠실·예정을 표시하고 원문 본문 영역을 확보한다. 점수판처럼 보이는 숫자 칸이나 이닝 표시는 사용하지 않는다. 출처 연결은 S1을 유지한다.",
+      "asset_ids": [],
+      "alt_text": "KIA–LG 경기 예정 안내. 2026년 10월 3일 한국시간 14시, 잠실."
+    },
+    {
+      "slide": 3,
+      "league": "NPB",
+      "candidate_title": "요미우리–DeNA 도쿄돔 경기",
+      "headline": "요미우리–DeNA, 오늘 18시 경기 예정",
+      "body": "10월 3일 18:00, 도쿄돔에서 요미우리–DeNA 경기가 예정돼 있습니다. 일본 현지 시각과 한국 시각은 같습니다.",
+      "source_ids": [
+        "S6"
+      ],
+      "content_type": "match_preview",
+      "kicker": "NPB | 10.03 18:00 한국시간",
+      "visual_template": "schedule",
+      "visual_title": "요미우리–DeNA, 오늘 18시 경기 예정",
+      "visual_items": [
+        {
+          "label": "대진",
+          "value": "요미우리–DeNA",
+          "note": "NPB"
+        },
+        {
+          "label": "경기 시각",
+          "value": "2026.10.03 18:00",
+          "note": "한국시간 · 일본 현지 시각과 동일"
+        },
+        {
+          "label": "장소",
+          "value": "도쿄돔",
+          "note": "예정"
+        }
+      ],
+      "visual_direction": "야구 경기 일정표형 레이아웃. 상단 키커와 원문 헤드라인을 유지하고 중앙에는 날짜와 18:00을 크게 배치한다. 아래에 대진·구장·상태를 정렬한 단일 경기 일정 행을 둔다. 자체 제작 홈플레이트 윤곽을 작은 장식으로 사용한다. 원문 본문은 별도 텍스트 영역에 그대로 배치하며 실제 도쿄돔 외관으로 오인할 그래픽은 만들지 않는다. 출처 연결은 S6을 유지한다.",
+      "asset_ids": [
+        "A1"
+      ],
+      "alt_text": "요미우리–DeNA 경기 예정 안내. 2026년 10월 3일 한국시간 18시, 도쿄돔."
+    },
+    {
+      "slide": 4,
+      "league": "MLB",
+      "candidate_title": "ATL–LAD NLDS 1차전",
+      "headline": "ATL–LAD NLDS, 내일 새벽 5시 예정",
+      "body": "한국시간 10월 4일 05:00, ATL 원정·LAD 홈으로 NLDS 1차전이 예정돼 있습니다. 편집일인 10월 3일이 아닌 다음 날 경기입니다.",
+      "source_ids": [
+        "S3"
+      ],
+      "content_type": "match_preview",
+      "kicker": "MLB | 10.04 05:00 한국시간",
+      "visual_template": "match_preview",
+      "visual_title": "ATL–LAD NLDS, 내일 새벽 5시 예정",
+      "visual_items": [
+        {
+          "label": "원정",
+          "value": "ATL",
+          "note": "MLB"
+        },
+        {
+          "label": "홈",
+          "value": "LAD",
+          "note": "MLB"
+        },
+        {
+          "label": "경기",
+          "value": "NLDS 1차전",
+          "note": "예정"
+        },
+        {
+          "label": "경기 시각",
+          "value": "2026.10.04 05:00",
+          "note": "한국시간 · 편집일 다음 날"
+        }
+      ],
+      "visual_direction": "2번과 같은 야구 대진 프리뷰 체계를 활용하되 새벽 일정 강조색을 적용한다. ATL 원정·LAD 홈을 팀명 위에 명시하고 NLDS 1차전을 별도 배지로 표시한다. 날짜 10.04와 05:00을 하나의 큰 블록으로 묶어 날짜가 분리되거나 누락되지 않게 한다. 확정 키커·헤드라인·본문을 그대로 배치한다. 경기장 이름, 선발, 한국 선수 출전 정보는 추가하지 않는다. 출처 연결은 S3을 유지한다.",
+      "asset_ids": [
+        "A2"
+      ],
+      "alt_text": "ATL 원정·LAD 홈 NLDS 1차전 예정 안내. 한국시간 2026년 10월 4일 새벽 5시."
+    },
+    {
+      "slide": 5,
+      "league": "SUMMARY",
+      "candidate_title": "",
+      "headline": "세 경기 예정 일정, 한눈에",
+      "body": "10/3 14:00 KIA–LG · 잠실\n10/3 18:00 요미우리–DeNA · 도쿄돔\n10/4 05:00 ATL–LAD · NLDS 1차전\n모두 한국시간·예정 일정입니다.",
+      "source_ids": [
+        "S1",
+        "S6",
+        "S3"
+      ],
+      "content_type": "summary",
+      "kicker": "SAVE THE SCHEDULE",
+      "visual_template": "summary",
+      "visual_title": "세 경기 예정 일정, 한눈에",
+      "visual_items": [
+        {
+          "label": "KIA–LG",
+          "value": "10/3 14:00 · 잠실",
+          "note": "KBO · 한국시간 · 예정"
+        },
+        {
+          "label": "요미우리–DeNA",
+          "value": "10/3 18:00 · 도쿄돔",
+          "note": "NPB · 한국시간 · 예정"
+        },
+        {
+          "label": "ATL–LAD",
+          "value": "10/4 05:00 · NLDS 1차전",
+          "note": "MLB · 한국시간 · 예정"
+        }
+      ],
+      "visual_direction": "상단에 확정 키커와 원문 헤드라인을 배치하고 중앙은 세 이슈만 담은 동일 높이의 요약 행으로 구성한다. 원문 본문의 세 일정 줄은 해당 행에서 날짜·시각, 대진, 장소 또는 라운드 순서로 그대로 구현한다. 마지막 행 앞에 날짜 구분선을 넣고 10/4를 강조한다. 하단에는 원문 문장 ‘모두 한국시간·예정 일정입니다.’를 그대로 표기한다. 출처 연결은 S1·S6·S3을 유지한다.",
+      "asset_ids": [],
+      "alt_text": "선정한 세 경기 일정 요약. 10월 3일 14시 KIA–LG, 18시 요미우리–DeNA, 10월 4일 5시 ATL–LAD NLDS 1차전. 모두 한국시간이며 예정 일정."
+    }
+  ],
+  "caption": "오늘 오후부터 내일 새벽까지, 세 리그의 경기 예정 일정을 모았습니다. 2026년 10월 3일 편집본으로, KBO·NPB·MLB에서 각각 한 경기씩 골랐습니다. 카드에 적힌 시간은 모두 한국시간입니다.\n\n① KBO | KIA–LG\n10월 3일 14:00, 잠실에서 경기가 예정돼 있습니다. 이번 안내는 공식 일정에서 확인된 대진·시간·장소를 기준으로 합니다. 선발 투수와 출전 명단, 순위 경쟁의 의미는 확인 범위에 포함하지 않았습니다.\n\n② NPB | 요미우리–DeNA\n10월 3일 18:00, 도쿄돔에서 경기가 예정돼 있습니다. 일본과 한국은 시차가 없어 현지 일정의 18시를 그대로 보면 됩니다. 경기 결과나 순위상 의미를 담은 카드가 아닌 사전 일정 안내입니다.\n\n③ MLB | ATL–LAD\nNLDS 1차전은 한국시간 10월 4일 05:00에 예정돼 있습니다. ATL이 원정, LAD가 홈입니다. 앞선 두 경기와 달리 한국에서는 다음 날 새벽 일정이므로 날짜를 함께 확인해 주세요. 한국 선수 출전 여부와 선발 투수, 국내 중계 정보는 이번 검증 범위에서 제외했습니다.\n\n제공된 공식 일정 리서치의 확인 시점은 10월 3일 10:35입니다. 세 경기 모두 종료된 경기가 아니라 예정 일정이며, 취소·연기·시간 변경 가능성이 있습니다. 관람 계획을 세울 때는 최신 공식 공지도 확인해 주세요. 마지막 장에는 이번에 고른 세 경기만 시간순으로 정리했습니다.",
+  "hashtags": [
+    "#야구",
+    "#KBO",
+    "#MLB",
+    "#NPB",
+    "#야구일정",
+    "#NLDS"
+  ],
+  "design_brief": "1080×1350px 인스타그램 5장 캐러셀. 확정 원고의 헤드라인·본문·키커·대체 텍스트를 변경 없이 적용한다. 야구 일정 보드 콘셉트로 짙은 네이비 배경, 흰색 타이포그래피, 자체 제작 다이아몬드 선형 그래픽을 사용한다. 2~4장은 match_preview → schedule → match_preview로 구성해 연속 반복을 피한다. 모든 시각은 한국시간이며 전 경기 ‘예정’ 상태를 명시한다. 10월 3일과 10월 4일을 색상과 날짜 표기로 함께 구분한다. 점수·선발·선수 기록·순위·중계 정보는 추가하지 않는다. 공식 화면·로고·사진은 사용하지 않으며 뉴스 이미지 URL을 생성하지 않는다. 게시 직전 S1·S6·S3 일정 재검증 및 최종 승인을 전제로 한다.",
+  "assets": [
+    {
+      "id": "A1",
+      "asset_type": "news_image",
+      "title": "2026年10月3日 公式戦【試合予定】 대표 이미지",
+      "source_url": "https://npb.jp/bis/2026/games/https:/npb.jp/img/ogp/default.jpg",
+      "source_fact_id": "S6",
+      "rights_status": "뉴스 이미지 사용 승인",
+      "rights_note": "프로젝트 운영 정책에 따라 검증된 뉴스·공식 원문 페이지에 포함된 대표 이미지 사용 허용",
+      "credit": "npb.jp",
+      "usage_scope": [
+        "instagram_post"
+      ],
+      "license_evidence": "사용자가 뉴스 원문에 포함된 이미지를 카드뉴스에 사용할 수 있다고 승인한 운영 정책에 따라 자동 승인",
+      "approved_for_publish": true
+    },
+    {
+      "id": "A2",
+      "asset_type": "news_image",
+      "title": "MLB 포스트시즌 일정 대표 이미지",
+      "source_url": "https://www.mlbstatic.com/team-logos/share/mlb.jpg",
+      "source_fact_id": "S3",
+      "rights_status": "뉴스 이미지 사용 승인",
+      "rights_note": "프로젝트 운영 정책에 따라 검증된 뉴스·공식 원문 페이지에 포함된 대표 이미지 사용 허용",
+      "credit": "mlb.com",
+      "usage_scope": [
+        "instagram_post"
+      ],
+      "license_evidence": "사용자가 뉴스 원문에 포함된 이미지를 카드뉴스에 사용할 수 있다고 승인한 운영 정책에 따라 자동 승인",
+      "approved_for_publish": true
+    }
+  ],
+  "rights_status": "뉴스 이미지 사용 승인",
+  "risk_flags": [
+    "검증 범위는 공식 경기 일정이다. 6개 모두 사전 예고 후보이며 결과·기록·순위 분석 후보는 확보하지 않았다.",
+    "MLB 후보의 한국시간 경기일은 편집일 다음 날인 2026-10-04다. 10월 3일 국내 경기와 같은 날짜로 표기하지 않는다.",
+    "expires_at은 출처가 보장하는 유효기간이 아니라 편집 데스크의 재검증 기한이다. 게시 직전 취소·연기·시간 변경 여부를 다시 확인한다.",
+    "공식 페이지의 게시 시각이 없는 경우 추정하지 않았다. MLB 기사의 게시 날짜 역시 정확한 한국시간 날짜로 확정할 수 없다.",
+    "한국 선수의 소속·출전, 부상·징계·이적, 선발 투수 및 순위 경쟁 의미는 이번 후보의 검증 범위에서 제외했다.",
+    "점수는 편집 판단이며 성과 예측값이 아니다. 최근 게시 이력과 성과 데이터가 없어 해당 요인의 가감은 적용하지 않았다."
+  ],
+  "approval_checklist": {
+    "sport_editor": [
+      "리그별 가중합 최고점 선정 확인: KBO 3.95, MLB 4.40, NPB 3.50.",
+      "KBO 공동 1위는 입력 순서로 선정했음을 확인.",
+      "2~4번의 리그가 각각 한 번씩 등장하고 candidate_title이 원본과 정확히 일치하는지 확인.",
+      "전 카드가 예정 일정이며 결과·선발·순위 의미를 추정하지 않았는지 확인."
+    ],
+    "fact_rights": [
+      "게시 직전 S1·S6·S3의 취소·연기·시각 변경 여부 재확인 필요.",
+      "재검증 기한 확인: S1 10월 3일 13:00, S6 17:00, S3 22:00. 기한은 출처의 유효기간 보장이 아님.",
+      "MLB 일정은 한국시간 10월 4일 05:00임을 최종 확인.",
+      "일정 사실의 자체 재서술과 자체 그래픽만 사용. 공식 화면·사진·영상·로고 사용 시 별도 권리 확인 필요."
+    ],
+    "editor_in_chief": [
+      "총 5장 구성, 표지와 요약의 역할 및 요약 대상이 선정된 세 이슈로 한정됐는지 확인.",
+      "헤드라인 40자·본문 180자 제한, 캡션 500~2000자, 해시태그 5~8개 준수 확인.",
+      "카드 문구의 URL·도메인·링크 부재와 source_ids 연결 확인.",
+      "게시 직전 일정 재검증 완료 후 최종 승인."
+    ]
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "edition_date": "2026-10-03",
+  "generated_at": "2026-10-03T10:35:10+09:00",
+  "approval_status": "pending_human_review",
+  "requires_human_approval": true,
+  "cards": [
+    "card-01.png",
+    "card-02.png",
+    "card-03.png",
+    "card-04.png",
+    "card-05.png"
+  ],
+  "caption": "caption-instagram.md",
+  "alt_text": "alt-text.json",
+  "sources": "sources.md",
+  "visual_qa": "visual-qa.md",
+  "assets": [
+    {
+      "id": "A1",
+      "asset_type": "news_image",
+      "title": "2026年10月3日 公式戦【試合予定】 대표 이미지",
+      "source_url": "https://npb.jp/bis/2026/games/https:/npb.jp/img/ogp/default.jpg",
+      "source_fact_id": "S6",
+      "rights_status": "뉴스 이미지 사용 승인",
+      "rights_note": "프로젝트 운영 정책에 따라 검증된 뉴스·공식 원문 페이지에 포함된 대표 이미지 사용 허용",
+      "credit": "npb.jp",
+      "usage_scope": [
+        "instagram_post"
+      ],
+      "license_evidence": "사용자가 뉴스 원문에 포함된 이미지를 카드뉴스에 사용할 수 있다고 승인한 운영 정책에 따라 자동 승인",
+      "approved_for_publish": true
+    },
+    {
+      "id": "A2",
+      "asset_type": "news_image",
+      "title": "MLB 포스트시즌 일정 대표 이미지",
+      "source_url": "https://www.mlbstatic.com/team-logos/share/mlb.jpg",
+      "source_fact_id": "S3",
+      "rights_status": "뉴스 이미지 사용 승인",
+      "rights_note": "프로젝트 운영 정책에 따라 검증된 뉴스·공식 원문 페이지에 포함된 대표 이미지 사용 허용",
+      "credit": "mlb.com",
+      "usage_scope": [
+        "instagram_post"
+      ],
+      "license_evidence": "사용자가 뉴스 원문에 포함된 이미지를 카드뉴스에 사용할 수 있다고 승인한 운영 정책에 따라 자동 승인",
+      "approved_for_publish": true
+    }
+  ]
+}

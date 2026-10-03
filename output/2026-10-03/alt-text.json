@@ -1,0 +1,32 @@
+[
+  {
+    "slide": 1,
+    "league": "COVER",
+    "content_type": "schedule",
+    "alt_text": "10월 3일 오후부터 4일 새벽까지 이어지는 세 리그의 경기 예정 일정을 소개하는 표지."
+  },
+  {
+    "slide": 2,
+    "league": "KBO",
+    "content_type": "match_preview",
+    "alt_text": "KIA–LG 경기 예정 안내. 2026년 10월 3일 한국시간 14시, 잠실."
+  },
+  {
+    "slide": 3,
+    "league": "NPB",
+    "content_type": "match_preview",
+    "alt_text": "요미우리–DeNA 경기 예정 안내. 2026년 10월 3일 한국시간 18시, 도쿄돔."
+  },
+  {
+    "slide": 4,
+    "league": "MLB",
+    "content_type": "match_preview",
+    "alt_text": "ATL 원정·LAD 홈 NLDS 1차전 예정 안내. 한국시간 2026년 10월 4일 새벽 5시."
+  },
+  {
+    "slide": 5,
+    "league": "SUMMARY",
+    "content_type": "summary",
+    "alt_text": "선정한 세 경기 일정 요약. 10월 3일 14시 KIA–LG, 18시 요미우리–DeNA, 10월 4일 5시 ATL–LAD NLDS 1차전. 모두 한국시간이며 예정 일정."
+  }
+]
