@@ -1,0 +1,32 @@
+[
+  {
+    "slide": 1,
+    "league": "COVER",
+    "content_type": "summary",
+    "alt_text": "NC, 다저스, DeNA의 경기 결과 세 건을 소개하는 야구 브리핑 표지."
+  },
+  {
+    "slide": 2,
+    "league": "KBO",
+    "content_type": "match_result",
+    "alt_text": "10월 3일 창원 경기의 최종 점수 NC 13, SSG 1을 표시한 자체 제작 결과 그래픽."
+  },
+  {
+    "slide": 3,
+    "league": "MLB",
+    "content_type": "match_result",
+    "alt_text": "다저스 5, 애틀랜타 3의 최종 점수를 표시한 자체 제작 결과 그래픽."
+  },
+  {
+    "slide": 4,
+    "league": "NPB",
+    "content_type": "match_result",
+    "alt_text": "DeNA가 6회 종료 때 0-2로 뒤지다 7회 4득점으로 역전하고 최종 5-2로 승리한 흐름을 나타낸 자체 그래픽."
+  },
+  {
+    "slide": 5,
+    "league": "SUMMARY",
+    "content_type": "summary",
+    "alt_text": "NC의 13-1 승리, 다저스의 5-3 승리, DeNA의 5-2 역전승을 세 줄로 요약한 카드."
+  }
+]
