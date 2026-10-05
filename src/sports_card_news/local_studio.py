@@ -10,6 +10,7 @@ from typing import Any, Callable, Literal
 from pydantic import Field, field_validator
 
 from .feedback_memory import FeedbackMemory
+from .employee_training import training_payload
 from .models import StrictModel
 from .ollama_client import OllamaClient
 from .studio import AgentFeedback, CardCopy, SocialDraft, StudioPackage, VerifiedFact, AgentContribution, active_agents, ThemeProfile
@@ -65,7 +66,8 @@ def local_category_info(category: str) -> dict[str, Any]:
     theme = THEMES[theme_id]
     active = {a.id for a in active_agents(sport, category)}
     from .studio import AGENTS
-    return {'category': category, 'sport': sport, 'theme': theme.model_dump(mode='json'), 'agents': [{**a.model_dump(mode='json'), 'working': a.id in active} for a in AGENTS]}
+    training = {item['agent_id']: item for item in training_payload([a.id for a in AGENTS])}
+    return {'category': category, 'sport': sport, 'theme': theme.model_dump(mode='json'), 'agents': [{**a.model_dump(mode='json'), 'working': a.id in active, 'training': training[a.id]} for a in AGENTS]}
 
 def run_local_studio(request: LocalStudioRequest, *, output_root: str | Path, memory_path: str | Path, client: OllamaClient | None = None, progress: ProgressCallback | None = None) -> tuple[Path, StudioPackage]:
     notify = progress or (lambda _s,_p,_m: None)
@@ -83,6 +85,7 @@ def run_local_studio(request: LocalStudioRequest, *, output_root: str | Path, me
         'markdown_source': request.markdown_text[:120000],
         'editorial_instruction': request.editorial_instruction,
         'active_agents': [{'id':a.id,'name':a.name,'title':a.title,'responsibility':a.responsibility} for a in agents],
+        'employee_training': training_payload([a.id for a in agents]),
         'past_learning_rules': rules,
         'required_pages': ['1 표지','2 결과 요약','3 이슈1','4 이슈2','5 이슈3','6 이슈4','7 이슈5','8 이슈6/배경','9 데이터','10 요약/CTA'],
     }
@@ -92,6 +95,7 @@ def run_local_studio(request: LocalStudioRequest, *, output_root: str | Path, me
     feedback_payload = {
         'category': request.category,
         'active_agents': payload['active_agents'],
+        'employee_training': payload['employee_training'],
         'cards': [c.model_dump(mode='json') for c in editorial.cards],
         'previous_learning_rules': rules,
     }
@@ -138,7 +142,8 @@ def _complete_feedback(items: list[AgentFeedback], agents: list[Any]) -> list[Ag
 def _editorial_prompt() -> str:
     return '''너는 스포츠 데일리 카드 뉴스 제작소의 합동 편집국이다.
 유일한 사실 소스는 markdown_source다. 외부지식, 기억, 인터넷 정보로 사실을 추가하지 않는다.
-past_learning_rules는 글쓰기/편집 방법 개선에만 사용하고 과거 사실은 재사용하지 않는다.
+employee_training은 현재 근무 직원들의 고정 교육과정이다. 각 직원의 core_rule, decision_rules, checklist, forbidden을 실제 편집 판단에 적용한다.
+past_learning_rules는 글쓰기/편집 방법 개선에만 사용하고 과거 사실은 재사용하지 않는다. 고정 교육과 충돌하면 고정 교육을 우선한다.
 반드시 정확히 10장의 cards를 만들고 slide는 1~10이다. 한 카드 한 메시지를 지킨다.
 정보가 부족하면 억지 사건을 만들지 말고 MD에 존재하는 배경, 기록, 요약으로 채운다.
 facts에는 MD에서 직접 확인 가능한 사실을 최소 3개 넣고 claim과 confidence를 포함한다.
@@ -147,6 +152,7 @@ JSON만 출력한다.
 
 def _feedback_prompt() -> str:
     return '''너는 스포츠 미디어 사후 편집회의다. active_agents 각각을 평가한다.
-learning_rule은 다음 실행 프롬프트에 재사용할 수 있는 구체적 개선 규칙이다. 과거 사실은 저장하지 않는다.
+employee_training의 직원별 checklist와 forbidden을 기준으로 실제 결과를 검수한다. 모든 근무 직원은 자신의 전문 분야만 평가한다.
+learning_rule은 다음 실행 프롬프트에 재사용할 수 있는 구체적 개선 규칙이다. 과거 경기 사실이나 특정 선수 당일 기록은 저장하지 않는다.
 100점은 쓰지 않는다. JSON만 출력한다.
 스키마: {"feedback":[{"agent_id":"","agent_name":"","score":90,"what_worked":"","improve_next":"","learning_rule":""}],"overall_score":90,"final_editor_note":""}'''
