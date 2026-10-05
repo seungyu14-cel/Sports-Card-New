@@ -115,7 +115,7 @@ def _render_card(package: "StudioPackage", card, path: Path) -> None:
     draw.line((70, 1212, 1010, 1212), fill=theme.secondary, width=2)
     draw.text(
         (70, 1250),
-        f"PAGE {card.slide:02d} / 07",
+        f"PAGE {card.slide:02d} / {len(package.cards):02d}",
         font=ImageFont.truetype(bold, 20),
         fill=theme.secondary,
     )
