@@ -116,3 +116,67 @@ def test_openai_key_check_lists_models(monkeypatch) -> None:
     assert captured["api_key"] == "sk-proj-test-secret"
     assert captured["listed"] is True
 
+
+
+def test_studio_metadata_exposes_agents_and_sport_themes(tmp_path: Path) -> None:
+    project = make_project(tmp_path)
+    with TestClient(create_app(project)) as client:
+        agents = client.get("/api/studio/agents")
+        themes = client.get("/api/studio/themes")
+
+    assert agents.status_code == 200
+    assert any(item["name"] == "김도윤" for item in agents.json()["items"])
+    assert any(item["name"] == "윤서아" for item in agents.json()["items"])
+    theme_map = {item["sport"]: item["primary"] for item in themes.json()["items"]}
+    assert theme_map["야구"] == "#123F2F"
+    assert theme_map["농구"] == "#8F3B12"
+    assert theme_map["축구"] == "#6F1717"
+    assert theme_map["배구"] == "#133E7C"
+
+
+def test_studio_demo_job_generates_seven_cards_and_feedback(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    project = make_project(tmp_path)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("SUPABASE_URL", raising=False)
+    monkeypatch.delenv("SUPABASE_SERVICE_ROLE_KEY", raising=False)
+
+    with TestClient(create_app(project)) as client:
+        created = client.post(
+            "/api/studio/jobs",
+            json={
+                "edition_date": "2026-10-05",
+                "sport": "야구",
+                "league": "KBO",
+                "topic": "LG와 한화 경기 핵심 이슈",
+                "source_notes": "",
+                "theme_id": "baseball-green",
+                "archive_to_db": True,
+                "demo": True,
+            },
+        )
+        assert created.status_code == 202
+        job_id = created.json()["id"]
+        job = created.json()
+        for _ in range(100):
+            job = client.get(f"/api/studio/jobs/{job_id}").json()
+            if job["status"] in {"completed", "failed"}:
+                break
+            time.sleep(0.05)
+
+        assert job["status"] == "completed", job
+        result = job["result"]
+        assert result["theme"]["id"] == "baseball-green"
+        assert len(result["cards"]) == 7
+        assert len(result["feedback"]) >= 8
+        assert result["needs_human_approval"] is True
+
+        session_id = result["session_id"]
+        detail = client.get(f"/api/studio/sessions/{session_id}")
+        assert detail.status_code == 200
+        assert len(detail.json()["cards"]) == 7
+
+        image = client.get(f"/output/studio/{session_id}/card-07.png")
+        assert image.status_code == 200
