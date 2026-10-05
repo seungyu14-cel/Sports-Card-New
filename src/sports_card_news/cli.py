@@ -142,7 +142,7 @@ def main(argv: list[str] | None = None) -> int:
             output_dir = args.output or settings.structured_data_dir
             reports = newsroom.generate_for_date(
                 edition_date,
-                leagues=args.leagues or list(settings.leagues),
+                leagues=args.leagues or None,
                 game_id=args.game_id,
                 output_dir=output_dir,
             )
