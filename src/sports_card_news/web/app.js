@@ -1,226 +1,31 @@
-const state = {
-  health: null,
-  activeJob: null,
-  pollTimer: null,
+const state={health:null,themes:[],agents:[],themeId:null,jobId:null,timer:null};
+const $=(s)=>document.querySelector(s);
+const els={
+  health:$("#health-card"),healthText:$("#health-text"),healthSub:$("#health-sub"),
+  form:$("#studio-form"),date:$("#edition-date"),sport:$("#sport"),league:$("#league"),topic:$("#topic"),notes:$("#source-notes"),
+  themeGrid:$("#theme-grid"),archive:$("#archive-db"),runLive:$("#run-live"),runDemo:$("#run-demo"),
+  staff:$("#staff-grid"),job:$("#job-state"),jobLabel:$("#job-label"),jobPercent:$("#job-percent"),jobBar:$("#job-bar"),jobMessage:$("#job-message"),
+  result:$("#result-section"),score:$("#overall-score"),title:$("#result-title"),angle:$("#result-angle"),themeSwatch:$("#result-theme-swatch"),themeName:$("#result-theme-name"),
+  gallery:$("#card-gallery"),socialTitle:$("#social-title"),socialCaption:$("#social-caption"),socialTags:$("#social-hashtags"),hook:$("#shortform-hook"),
+  feedback:$("#feedback-grid"),editorNote:$("#editor-note"),sessions:$("#session-grid"),refresh:$("#refresh-sessions"),
+  settingsForm:$("#settings-form"),apiKey:$("#api-key"),model:$("#model-name"),saveSettings:$("#save-settings"),settingsStatus:$("#settings-status"),
+  dialog:$("#session-dialog"),dialogContent:$("#dialog-content"),dialogClose:$("#dialog-close"),toast:$("#toast")
 };
-
-const elements = {
-  systemStatus: document.querySelector("#system-status"),
-  editionDate: document.querySelector("#edition-date"),
-  runLive: document.querySelector("#run-live"),
-  runDemo: document.querySelector("#run-demo"),
-  jobBox: document.querySelector("#job-box"),
-  jobState: document.querySelector("#job-state"),
-  jobPercent: document.querySelector("#job-percent"),
-  jobMessage: document.querySelector("#job-message"),
-  progressBar: document.querySelector("#progress-bar"),
-  settingsForm: document.querySelector("#settings-form"),
-  apiKey: document.querySelector("#api-key"),
-  modelName: document.querySelector("#model-name"),
-  saveSettings: document.querySelector("#save-settings"),
-  formStatus: document.querySelector("#form-status"),
-  editionGrid: document.querySelector("#edition-grid"),
-  refreshEditions: document.querySelector("#refresh-editions"),
-  dialog: document.querySelector("#edition-dialog"),
-  dialogContent: document.querySelector("#dialog-content"),
-  dialogClose: document.querySelector("#dialog-close"),
-  toast: document.querySelector("#toast"),
-};
-
-async function api(path, options = {}) {
-  const response = await fetch(path, {
-    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
-    ...options,
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.detail || `요청 실패 (${response.status})`);
-  return data;
-}
-
-function seoulToday() {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit",
-  }).formatToParts(new Date());
-  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
-  return `${values.year}-${values.month}-${values.day}`;
-}
-
-async function loadHealth() {
-  try {
-    const health = await api("/api/health");
-    state.health = health;
-    elements.modelName.value = health.model;
-    elements.systemStatus.classList.add("ready");
-    elements.systemStatus.querySelector("strong").textContent = health.api_key_verified
-      ? "API 연결 완료"
-      : (health.api_key_configured ? "API 확인 필요" : "데모 실행 가능");
-    elements.runLive.disabled = !health.api_key_verified || health.job_running;
-    elements.runDemo.disabled = health.job_running;
-    if (health.api_key_configured) {
-      elements.apiKey.placeholder = "저장된 키 사용 중 · 새 키 입력 시 교체";
-      if (health.api_key_verified) {
-        setFormStatus("OpenAI 키가 로컬에 저장되었고 연결 확인을 통과했습니다.", "success");
-      } else {
-        setFormStatus("저장된 OpenAI 키의 연결 확인이 필요합니다. 새 키를 입력해 확인하세요.");
-      }
-    }
-  } catch (error) {
-    elements.systemStatus.querySelector("strong").textContent = "연결 오류";
-    showToast(error.message);
-  }
-}
-
-async function saveSettings(event) {
-  event.preventDefault();
-  elements.saveSettings.disabled = true;
-  setFormStatus("키를 저장하고 연결을 확인하고 있습니다.");
-  let saved = false;
-  try {
-    await api("/api/settings", {
-      method: "POST",
-      body: JSON.stringify({ api_key: elements.apiKey.value, model: elements.modelName.value }),
-    });
-    saved = true;
-    elements.apiKey.value = "";
-    const result = await api("/api/settings/test", { method: "POST" });
-    setFormStatus(result.message, "success");
-    showToast("OpenAI 연결이 완료되었습니다.");
-    await loadHealth();
-  } catch (error) {
-    const prefix = saved ? "키는 저장했지만 연결 확인에 실패했습니다" : "저장하지 못했습니다";
-    setFormStatus(`${prefix}: ${error.message}`, "error");
-  } finally {
-    elements.saveSettings.disabled = false;
-  }
-}
-
-async function startJob(demo) {
-  clearInterval(state.pollTimer);
-  elements.runLive.disabled = true;
-  elements.runDemo.disabled = true;
-  updateJobUI({ status: "queued", message: "생성 작업을 등록하고 있습니다." });
-  try {
-    const job = await api("/api/jobs", {
-      method: "POST",
-      body: JSON.stringify({ edition_date: elements.editionDate.value, demo }),
-    });
-    state.activeJob = job.id;
-    updateJobUI(job);
-    state.pollTimer = setInterval(pollJob, 1500);
-  } catch (error) {
-    updateJobUI({ status: "failed", message: error.message, error: error.message });
-    await loadHealth();
-  }
-}
-
-async function pollJob() {
-  if (!state.activeJob) return;
-  try {
-    const job = await api(`/api/jobs/${state.activeJob}`);
-    updateJobUI(job);
-    if (job.status === "completed" || job.status === "failed") {
-      clearInterval(state.pollTimer);
-      state.pollTimer = null;
-      state.activeJob = null;
-      await Promise.all([loadHealth(), loadEditions()]);
-      if (job.status === "completed") {
-        showToast(job.message);
-        await openEdition(job.edition_date);
-      }
-    }
-  } catch (error) {
-    clearInterval(state.pollTimer);
-    updateJobUI({ status: "failed", message: error.message, error: error.message });
-  }
-}
-
-function updateJobUI(job) {
-  const progress = { queued: 12, running: 58, completed: 100, failed: 100 }[job.status] || 0;
-  const labels = { queued: "대기", running: "제작 중", completed: "완료", failed: "실패" };
-  elements.jobBox.hidden = false;
-  elements.jobState.textContent = labels[job.status] || "준비";
-  elements.jobPercent.textContent = `${progress}%`;
-  elements.progressBar.style.width = `${progress}%`;
-  elements.progressBar.style.background = job.status === "failed" ? "var(--danger)" : "var(--acid)";
-  elements.jobMessage.textContent = job.error || job.message;
-}
-
-async function loadEditions() {
-  try {
-    const data = await api("/api/editions");
-    if (!data.items.length) {
-      elements.editionGrid.innerHTML = '<p class="empty-state">아직 생성 기록이 없습니다. 데모 실행으로 전체 흐름을 확인해 보세요.</p>';
-      return;
-    }
-    elements.editionGrid.innerHTML = data.items.map((item) => `
-      <button class="edition-card" type="button" data-edition="${escapeHtml(item.edition_date)}">
-        <img src="${escapeHtml(item.cover_url)}" alt="${escapeHtml(item.title)} 표지" loading="lazy" />
-        <span class="edition-meta">
-          <span class="edition-kicker"><span>${escapeHtml(item.sport)} · ${escapeHtml(item.league)}</span><span>${item.card_count} CARDS</span></span>
-          <h3>${escapeHtml(item.title)}</h3>
-          <p>${escapeHtml(item.edition_date)} · 사람 승인 대기</p>
-        </span>
-      </button>
-    `).join("");
-    elements.editionGrid.querySelectorAll("[data-edition]").forEach((button) => {
-      button.addEventListener("click", () => openEdition(button.dataset.edition));
-    });
-  } catch (error) {
-    elements.editionGrid.innerHTML = `<p class="empty-state">${escapeHtml(error.message)}</p>`;
-  }
-}
-
-async function openEdition(editionDate) {
-  try {
-    const item = await api(`/api/editions/${encodeURIComponent(editionDate)}`);
-    const gallery = item.cards.map((card) => `
-      <img src="${escapeHtml(card.image_url)}" alt="${escapeHtml(card.alt_text)}" loading="lazy" />
-    `).join("");
-    const facts = item.facts.map((fact) => `
-      <a href="${escapeHtml(fact.url)}" target="_blank" rel="noreferrer"><span>${escapeHtml(fact.id)}</span>${escapeHtml(fact.claim)}</a>
-    `).join("");
-    elements.dialogContent.innerHTML = `
-      <div class="dialog-body">
-        <p class="section-number">${escapeHtml(item.edition_date)} · ${escapeHtml(item.sport)} · ${escapeHtml(item.league)}</p>
-        <h2>${escapeHtml(item.title)}</h2>
-        <p>${escapeHtml(item.selection_reason)}</p>
-        <div class="card-gallery">${gallery}</div>
-        <h3>게시 캡션</h3>
-        <div class="caption-box">${escapeHtml(item.caption)}\n\n${item.hashtags.map(escapeHtml).join(" ")}</div>
-        <h3>연결된 원문</h3>
-        <div class="fact-list">${facts}</div>
-      </div>`;
-    elements.dialog.showModal();
-  } catch (error) {
-    showToast(error.message);
-  }
-}
-
-function setFormStatus(message, type = "") {
-  elements.formStatus.textContent = message;
-  elements.formStatus.className = `form-status ${type}`.trim();
-}
-
-function showToast(message) {
-  elements.toast.textContent = message;
-  elements.toast.hidden = false;
-  window.setTimeout(() => { elements.toast.hidden = true; }, 3600);
-}
-
-function escapeHtml(value) {
-  return String(value ?? "").replace(/[&<>'"]/g, (char) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;",
-  })[char]);
-}
-
-elements.settingsForm.addEventListener("submit", saveSettings);
-elements.runLive.addEventListener("click", () => startJob(false));
-elements.runDemo.addEventListener("click", () => startJob(true));
-elements.refreshEditions.addEventListener("click", loadEditions);
-elements.dialogClose.addEventListener("click", () => elements.dialog.close());
-elements.dialog.addEventListener("click", (event) => {
-  if (event.target === elements.dialog) elements.dialog.close();
-});
-
-elements.editionDate.value = seoulToday();
-Promise.all([loadHealth(), loadEditions()]);
+async function api(path,opts={}){const r=await fetch(path,{headers:{"Content-Type":"application/json",...(opts.headers||{})},...opts});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.detail||`요청 실패 (${r.status})`);return d}
+function today(){const p=new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date());const v=Object.fromEntries(p.map(x=>[x.type,x.value]));return `${v.year}-${v.month}-${v.day}`}
+function esc(v){return String(v??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]))}
+function toast(m){els.toast.textContent=m;els.toast.hidden=false;setTimeout(()=>els.toast.hidden=true,3500)}
+async function loadHealth(){try{const h=await api("/api/health");state.health=h;els.model.value=h.model;els.health.classList.add("ready");els.healthText.textContent=h.api_key_verified?"AI 편집국 준비 완료":h.api_key_configured?"API 확인 필요":"데모 사용 가능";els.healthSub.textContent=`Supabase ${h.supabase_configured?"연결":"미연결"} · Studio ${h.studio_session_count}건`;els.runLive.disabled=!h.api_key_verified||h.job_running;els.runDemo.disabled=h.job_running;if(h.api_key_configured)els.apiKey.placeholder="저장된 키 사용 중 · 교체 시 새 키 입력"}catch(e){els.healthText.textContent="연결 오류";toast(e.message)}}
+async function loadThemes(){const d=await api("/api/studio/themes");state.themes=d.items;renderThemes()}
+function renderThemes(){const sport=els.sport.value;const visible=state.themes.filter(t=>t.sport===sport||t.sport==="기타");const recommended=state.themes.find(t=>t.sport===sport)||state.themes[0];if(!visible.some(t=>t.id===state.themeId))state.themeId=recommended?.id;els.themeGrid.innerHTML=visible.map(t=>`<button type="button" class="theme-card ${t.id===state.themeId?"active":""}" data-theme="${esc(t.id)}"><span class="swatches"><i style="background:${esc(t.primary)}"></i><i style="background:${esc(t.secondary)}"></i><i style="background:${esc(t.accent)}"></i></span><strong>${esc(t.name)}</strong><small>${esc(t.sport)}</small></button>`).join("");els.themeGrid.querySelectorAll("[data-theme]").forEach(b=>b.onclick=()=>{state.themeId=b.dataset.theme;renderThemes()})}
+async function loadAgents(){try{const sport=encodeURIComponent(els.sport.value),league=encodeURIComponent(els.league.value||"-");const d=await api(`/api/studio/active-agents?sport=${sport}&league=${league}`);state.agents=d.items;els.staff.innerHTML=d.items.map(a=>`<article class="staff-card"><span class="team">${esc(a.team)} · ${esc(a.stage.toUpperCase())}</span><h3>${esc(a.name)}<span>${esc(a.title)}</span></h3><p>${esc(a.responsibility)}</p></article>`).join("")}catch(e){els.staff.innerHTML=`<p class="empty">${esc(e.message)}</p>`}}
+function stageProgress(stage){const order=["research","editorial","creative","feedback","archive","complete"],idx=order.indexOf(stage);document.querySelectorAll(".pipe").forEach((p,i)=>{p.classList.toggle("done",i<idx);p.classList.toggle("active",p.dataset.stage===stage||(stage==="complete"&&i===4))})}
+function jobUI(j){els.job.hidden=false;els.jobLabel.textContent=j.status==="failed"?"실패":j.status==="completed"?"완료":"제작 중";els.jobPercent.textContent=`${j.percent||0}%`;els.jobBar.style.width=`${j.percent||0}%`;els.jobBar.style.background=j.status==="failed"?"var(--danger)":"var(--acid)";els.jobMessage.textContent=j.error||j.message;stageProgress(j.stage)}
+async function startStudio(demo){clearInterval(state.timer);els.runLive.disabled=true;els.runDemo.disabled=true;jobUI({status:"running",stage:"research",percent:5,message:"편집국 작업을 등록하고 있습니다."});try{const body={edition_date:els.date.value,sport:els.sport.value,league:els.league.value,topic:els.topic.value,source_notes:els.notes.value,theme_id:state.themeId,archive_to_db:els.archive.checked,demo};const j=await api("/api/studio/jobs",{method:"POST",body:JSON.stringify(body)});state.jobId=j.id;jobUI(j);state.timer=setInterval(pollJob,1200)}catch(e){jobUI({status:"failed",stage:"failed",percent:100,error:e.message});await loadHealth()}}
+async function pollJob(){if(!state.jobId)return;try{const j=await api(`/api/studio/jobs/${state.jobId}`);jobUI(j);if(["completed","failed"].includes(j.status)){clearInterval(state.timer);state.timer=null;state.jobId=null;await loadHealth();if(j.status==="completed"){renderResult(j.result);await loadSessions();toast("카드뉴스 패키지가 완성되었습니다.")}}}catch(e){clearInterval(state.timer);jobUI({status:"failed",stage:"failed",percent:100,error:e.message})}}
+function renderResult(p){els.result.hidden=false;els.score.textContent=p.overall_score;els.title.textContent=p.master_headline;els.angle.textContent=p.editorial_angle;els.themeName.textContent=p.theme.name;els.themeSwatch.style.background=p.theme.primary;els.gallery.innerHTML=p.cards.map(c=>`<img src="${esc(c.image_url)}" alt="${esc(c.headline)}" loading="lazy">`).join("");els.socialTitle.textContent=p.social.post_title;els.socialCaption.textContent=p.social.caption;els.socialTags.innerHTML=p.social.hashtags.map(t=>`<span>${esc(t)}</span>`).join("");els.hook.textContent=p.shortform_hook;els.editorNote.textContent=p.final_editor_note;els.feedback.innerHTML=p.feedback.map(f=>`<article class="feedback-card"><div class="feedback-top"><h4>${esc(f.agent_name)}</h4><span class="score">${f.score}</span></div><dl><dt>잘한 점</dt><dd>${esc(f.what_worked)}</dd><dt>다음 개선</dt><dd>${esc(f.improve_next)}</dd><dt>학습 규칙</dt><dd>${esc(f.learning_rule)}</dd></dl></article>`).join("");els.result.scrollIntoView({behavior:"smooth",block:"start"})}
+async function loadSessions(){try{const d=await api("/api/studio/sessions");if(!d.items.length){els.sessions.innerHTML='<p class="empty">아직 제작 기록이 없습니다. 데모 제작으로 흐름을 먼저 확인해보세요.</p>';return}els.sessions.innerHTML=d.items.map(s=>`<button class="session-card" data-session="${esc(s.session_id)}"><img src="${esc(s.cover_url)}" alt="${esc(s.title)} 표지" loading="lazy"><span class="meta"><small>${esc(s.edition_date)} · ${esc(s.sport)} · ${esc(s.league)}</small><h3>${esc(s.title)}</h3><p>${esc(s.theme.name)} · 만족도 ${s.score}/100</p></span></button>`).join("");els.sessions.querySelectorAll("[data-session]").forEach(b=>b.onclick=()=>openSession(b.dataset.session))}catch(e){els.sessions.innerHTML=`<p class="empty">${esc(e.message)}</p>`}}
+async function openSession(id){try{const p=await api(`/api/studio/sessions/${encodeURIComponent(id)}`);const imgs=p.cards.map(c=>`<img src="${esc(c.image_url)}" alt="${esc(c.headline)}">`).join("");const f=p.feedback.slice(0,8).map(x=>`<div class="feedback-card"><div class="feedback-top"><h4>${esc(x.agent_name)}</h4><span class="score">${x.score}</span></div><dl><dt>다음 개선</dt><dd>${esc(x.improve_next)}</dd><dt>학습 규칙</dt><dd>${esc(x.learning_rule)}</dd></dl></div>`).join("");els.dialogContent.innerHTML=`<div class="dialog-body"><p class="section-no">${esc(p.edition_date)} · ${esc(p.sport)} · ${esc(p.league)}</p><h2>${esc(p.master_headline)}</h2><p class="muted">${esc(p.editorial_angle)}</p><div class="card-gallery">${imgs}</div><div class="output-grid"><article class="output-card"><p class="section-no">SNS COPY</p><h3>${esc(p.social.post_title)}</h3><div class="copy-box">${esc(p.social.caption)}</div><div class="hashtags">${p.social.hashtags.map(t=>`<span>${esc(t)}</span>`).join("")}</div></article><article class="output-card"><p class="section-no">EDITOR SCORE</p><div class="hook">${p.overall_score}/100</div><p class="muted">${esc(p.final_editor_note)}</p></article></div><h2 style="margin-top:38px">직원별 피드백</h2><div class="feedback-grid">${f}</div></div>`;els.dialog.showModal()}catch(e){toast(e.message)}}
+async function saveSettings(e){e.preventDefault();els.saveSettings.disabled=true;els.settingsStatus.textContent="키 저장 및 연결 확인 중...";try{await api("/api/settings",{method:"POST",body:JSON.stringify({api_key:els.apiKey.value,model:els.model.value})});els.apiKey.value="";const r=await api("/api/settings/test",{method:"POST"});els.settingsStatus.textContent=r.message;await loadHealth();toast("OpenAI 연결 완료")}catch(err){els.settingsStatus.textContent=err.message}finally{els.saveSettings.disabled=false}}
+els.date.value=today();els.form.addEventListener("submit",e=>{e.preventDefault();startStudio(false)});els.runDemo.onclick=()=>startStudio(true);els.sport.onchange=()=>{renderThemes();loadAgents()};els.league.oninput=()=>{clearTimeout(state.agentDebounce);state.agentDebounce=setTimeout(loadAgents,250)};els.refresh.onclick=loadSessions;els.settingsForm.onsubmit=saveSettings;els.dialogClose.onclick=()=>els.dialog.close();els.dialog.onclick=e=>{if(e.target===els.dialog)els.dialog.close()};
+Promise.all([loadHealth(),loadThemes(),loadAgents(),loadSessions()]);
