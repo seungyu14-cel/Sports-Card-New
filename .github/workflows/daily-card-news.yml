@@ -26,9 +26,12 @@ concurrency:
 jobs:
   create-draft:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_NEWS_MODEL: gpt-6.1-sol
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       GH_TOKEN: ${{ github.token }}
       TZ: Asia/Seoul
 
@@ -66,6 +69,18 @@ jobs:
             edition_date="$(date +%F)"
           fi
           echo "date=$edition_date" >> "$GITHUB_OUTPUT"
+
+      - name: Build Supabase game newsroom context
+        if: inputs.use_demo != true
+        shell: bash
+        run: |
+          edition_date="${{ steps.edition.outputs.date }}"
+          if [[ -n "$SUPABASE_URL" && -n "$SUPABASE_SERVICE_ROLE_KEY" ]]; then
+            sports-card-news newsroom-status
+            sports-card-news game-news --date "$edition_date"
+          else
+            echo "Supabase secrets are not configured; continuing with legacy research flow."
+          fi
 
       - name: Generate cards
         shell: bash
@@ -123,17 +138,10 @@ jobs:
           title="[검토 필요] ${edition_date} 스포츠 카드뉴스"
           existing_pr="$(gh pr list --state open --head "$branch" --json number --jq '.[0].number // empty')"
           if [[ -n "$existing_pr" ]]; then
-            gh pr edit "$existing_pr" \
-              --title "$title" \
-              --body-file "output/$edition_date/editorial-review.md"
+            gh pr edit "$existing_pr"               --title "$title"               --body-file "output/$edition_date/editorial-review.md"
             echo "같은 날짜의 Draft PR #${existing_pr}을 새 결과로 갱신했습니다." >> "$GITHUB_STEP_SUMMARY"
           else
-            gh pr create \
-              --draft \
-              --base "${{ github.event.repository.default_branch }}" \
-              --head "$branch" \
-              --title "$title" \
-              --body-file "output/$edition_date/editorial-review.md"
+            gh pr create               --draft               --base "${{ github.event.repository.default_branch }}"               --head "$branch"               --title "$title"               --body-file "output/$edition_date/editorial-review.md"
           fi
 
       - name: Upload review artifact
