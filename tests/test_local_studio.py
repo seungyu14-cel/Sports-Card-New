@@ -93,3 +93,35 @@ def test_category_info_exposes_training_and_only_relevant_specialists() -> None:
     assert agents["jung-minwoo"]["working"] is False
     assert agents["kim-doyoon"]["training"]["focus"] == "뉴스 가치"
     assert agents["park-jihoon"]["training"]["focus"] == "숫자 검증"
+
+
+def test_local_seven_pages_passes_md_to_feedback_and_creates_work_bundle(tmp_path: Path) -> None:
+    class SevenOllama(FakeOllama):
+        def json_chat(self, system: str, payload: dict) -> dict:
+            if self.calls == 0:
+                assert payload['page_count'] == 7
+                assert len(payload['required_pages']) == 7
+                assert 'measured_performance' in payload
+                result = super().json_chat(system, payload)
+                result['cards'] = result['cards'][:7]
+                return result
+            assert '김도영' in payload['markdown_source']
+            assert payload['extracted_facts']
+            return super().json_chat(system, payload)
+
+    request = LocalStudioRequest(edition_date=date(2026,10,6), category='KBO',
+        topic='7페이지 검증', page_count=7,
+        markdown_text='KIA가 LG에 6-4로 승리했다. 김도영이 9회 시즌 42호 역전 3점 홈런을 기록했다.')
+    destination, package = run_local_studio(request, output_root=tmp_path/'output', memory_path=tmp_path/'memory.sqlite3', client=SevenOllama())
+    assert len(package.cards) == 7
+    assert (destination/'card-07.png').exists()
+    assert not (destination/'card-08.png').exists()
+    assert (destination/'work-bundle.zip').exists()
+
+
+def test_local_rejects_wrong_requested_count(tmp_path: Path) -> None:
+    import pytest
+    request = LocalStudioRequest(edition_date=date(2026,10,6), category='KBO', topic='페이지 수 불일치', page_count=7,
+        markdown_text='KIA가 LG에 6-4로 승리했다. 김도영이 역전 홈런을 기록했다.')
+    with pytest.raises(ValueError, match='요청한 7페이지'):
+        run_local_studio(request, output_root=tmp_path/'output', memory_path=tmp_path/'memory.sqlite3', client=FakeOllama())

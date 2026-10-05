@@ -94,3 +94,11 @@ sports-card-news-web --open-browser
 브라우저에서 `http://127.0.0.1:8787/local`로 접속하세요.
 
 로컬 모드는 `MD → Ollama → 직원별 Agent → SQLite Feedback Memory → 10P PNG` 순서로 동작합니다. 직원별 학습 규칙과 운영 방법은 `docs/LOCAL_LLM_FEEDBACK_GUIDE.md`를 참고하세요.
+
+## ChatGPT Work 운영 허브
+
+`http://127.0.0.1:8787/work`에서 API 키 없이 Work JSON 원고를 가져오고,
+Canva 템플릿 전달 ZIP·최종 검수·Metricool 예약 결과·실측 성과를 관리합니다.
+기존 `/local`은 기본 10페이지를 유지하며 7페이지도 선택할 수 있습니다.
+Canva/Metricool의 실제 외부 작업은 Work 플러그인에서 수행합니다.
+자세한 실행 순서는 [Work 운영 가이드](docs/WORK_OPERATIONS_GUIDE.md)를 참고하세요.

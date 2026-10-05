@@ -10,3 +10,6 @@ build/
 *.egg-info/
 output/*
 !output/.gitkeep
+# Local editorial feedback and operational records
+data/*.sqlite3
+data/*.sqlite3-*

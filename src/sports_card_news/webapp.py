@@ -60,6 +60,7 @@ class CreateLocalStudioJobRequest(BaseModel):
     source_name: str = Field(default="uploaded.md", max_length=180)
     editorial_instruction: str = Field(default="", max_length=8000)
     save_feedback_memory: bool = True
+    page_count: Literal[7, 10] = 10
 
 
 class CreateStudioJobRequest(BaseModel):
@@ -350,6 +351,8 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
             raise HTTPException(status_code=422, detail="세션 ID 형식이 올바르지 않습니다.")
         return _studio_detail(output_root, session_id)
 
+    from .work_hub import work_router
+    app.include_router(work_router(output_root, root / 'data' / 'work_operations.sqlite3', WEB_ROOT))
     return app
 
 
@@ -378,6 +381,7 @@ async def _run_local_studio_job(
                 source_name=payload.source_name,
                 editorial_instruction=payload.editorial_instruction,
                 save_feedback_memory=payload.save_feedback_memory,
+                page_count=payload.page_count,
             )
             destination, package = await asyncio.to_thread(
                 run_local_studio,
@@ -390,7 +394,7 @@ async def _run_local_studio_job(
             record.status = "completed"
             record.stage = "complete"
             record.percent = 100
-            record.message = "MD 기반 10페이지 카드뉴스와 직원별 학습 규칙 생성 완료"
+            record.message = f"MD 기반 {payload.page_count}페이지 카드뉴스와 Work 전달 파일 생성 완료"
         except Exception as error:
             record.status = "failed"
             record.stage = "failed"
