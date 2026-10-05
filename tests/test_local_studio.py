@@ -3,7 +3,8 @@ from __future__ import annotations
 from datetime import date
 from pathlib import Path
 
-from sports_card_news.local_studio import LocalStudioRequest, run_local_studio
+from sports_card_news.employee_training import EMPLOYEE_TRAINING, training_profile
+from sports_card_news.local_studio import LocalStudioRequest, local_category_info, run_local_studio
 
 
 class FakeOllama:
@@ -76,3 +77,19 @@ def test_local_studio_uses_markdown_and_generates_ten_cards(tmp_path: Path) -> N
     assert (destination/'source.md').exists()
     assert len(package.feedback) >= 8
     assert (tmp_path/'memory.sqlite3').exists()
+
+def test_employee_training_has_all_23_profiles() -> None:
+    assert len(EMPLOYEE_TRAINING) == 23
+    assert training_profile("kim-doyoon")["core_rule"].startswith("가장 결정적인 사건")
+    assert "MD 원문" in training_profile("park-jihoon")["core_rule"]
+    assert "MD에 없는" in training_profile("han-yerin")["core_rule"]
+
+
+def test_category_info_exposes_training_and_only_relevant_specialists() -> None:
+    info = local_category_info("KBO")
+    agents = {item["id"]: item for item in info["agents"]}
+    assert agents["kim-doyoon"]["working"] is True
+    assert agents["kim-taehoon"]["working"] is True
+    assert agents["jung-minwoo"]["working"] is False
+    assert agents["kim-doyoon"]["training"]["focus"] == "뉴스 가치"
+    assert agents["park-jihoon"]["training"]["focus"] == "숫자 검증"
