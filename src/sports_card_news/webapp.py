@@ -22,11 +22,22 @@ from pydantic import BaseModel, Field, SecretStr
 
 from .config import Settings, load_settings
 from .pipeline import load_package, run_daily
+from .studio import (
+    StudioPackage,
+    StudioRequest,
+    active_agents,
+    load_studio_package,
+    public_agents,
+    public_themes,
+    run_studio,
+)
+from .supabase_store import SupabaseStore
 
 
 PACKAGE_ROOT = Path(__file__).resolve().parent
 WEB_ROOT = PACKAGE_ROOT / "web"
 EDITION_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+SESSION_PATTERN = re.compile(r"^[A-Za-z0-9_-]{6,40}$")
 
 
 class SaveSettingsRequest(BaseModel):
@@ -39,6 +50,17 @@ class CreateJobRequest(BaseModel):
     demo: bool = False
 
 
+class CreateStudioJobRequest(BaseModel):
+    edition_date: date
+    sport: Literal["야구", "농구", "축구", "배구", "기타"]
+    league: str = Field(min_length=1, max_length=40)
+    topic: str = Field(min_length=2, max_length=200)
+    source_notes: str = Field(default="", max_length=12000)
+    theme_id: str = Field(min_length=2, max_length=60)
+    archive_to_db: bool = True
+    demo: bool = False
+
+
 @dataclass
 class JobRecord:
     id: str
@@ -46,6 +68,21 @@ class JobRecord:
     mode: Literal["live", "demo"]
     status: Literal["queued", "running", "completed", "failed"] = "queued"
     message: str = "생성 대기 중"
+    created_at: str = ""
+    finished_at: str | None = None
+    result: dict[str, object] | None = None
+    error: str | None = None
+
+
+@dataclass
+class StudioJobRecord:
+    id: str
+    edition_date: str
+    mode: Literal["live", "demo"]
+    status: Literal["queued", "running", "completed", "failed"] = "queued"
+    stage: str = "queued"
+    percent: int = 0
+    message: str = "편집국 작업 대기 중"
     created_at: str = ""
     finished_at: str | None = None
     result: dict[str, object] | None = None
@@ -67,8 +104,8 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
     output_root.mkdir(parents=True, exist_ok=True)
 
     app = FastAPI(
-        title="Sports Card News Studio",
-        version="1.3.0",
+        title="스포츠 데일리 카드 뉴스 제작소",
+        version="2.0.0",
         docs_url=None,
         redoc_url=None,
         openapi_url=None,
@@ -81,7 +118,9 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
     app.state.settings = settings
     app.state.api_verified = False
     app.state.jobs: dict[str, JobRecord] = {}
+    app.state.studio_jobs: dict[str, StudioJobRecord] = {}
     app.state.job_lock = asyncio.Lock()
+    app.state.studio_lock = asyncio.Lock()
     app.state.tasks: set[asyncio.Task[None]] = set()
 
     app.mount("/assets", StaticFiles(directory=WEB_ROOT), name="assets")
@@ -95,7 +134,7 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
         response.headers["Referrer-Policy"] = "no-referrer"
         response.headers["Cache-Control"] = "no-store" if request.url.path.startswith("/api/") else "no-cache"
         response.headers["Content-Security-Policy"] = (
-            "default-src 'self'; img-src 'self' data:; style-src 'self'; "
+            "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; "
             "script-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'"
         )
         return response
@@ -116,9 +155,12 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
             "api_key_configured": bool(os.getenv("OPENAI_API_KEY")),
             "api_key_verified": app.state.api_verified,
             "model": current.model,
+            "studio_model": os.getenv("OPENAI_STUDIO_MODEL", "gpt-6.1-sol"),
             "timezone": current.timezone,
+            "supabase_configured": SupabaseStore.is_configured(),
             "edition_count": len(_list_editions(output_root)),
-            "job_running": app.state.job_lock.locked(),
+            "studio_session_count": len(_list_studio_sessions(output_root)),
+            "job_running": app.state.job_lock.locked() or app.state.studio_lock.locked(),
         }
 
     @app.post("/api/settings")
@@ -127,10 +169,7 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
         if len(api_key) < 20 or any(char.isspace() for char in api_key):
             raise HTTPException(status_code=422, detail="API 키 형식이 올바르지 않습니다.")
         model = payload.model.strip()
-        _save_local_env(
-            env_path,
-            {"OPENAI_API_KEY": api_key, "OPENAI_MODEL": model},
-        )
+        _save_local_env(env_path, {"OPENAI_API_KEY": api_key, "OPENAI_MODEL": model})
         os.environ["OPENAI_API_KEY"] = api_key
         os.environ["OPENAI_MODEL"] = model
         current = _refresh_settings(app)
@@ -150,6 +189,7 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
         app.state.api_verified = True
         return {"valid": True, "message": "OpenAI API 연결을 확인했습니다."}
 
+    # Legacy 5-card flow remains available.
     @app.post("/api/jobs", status_code=202)
     async def create_job(payload: CreateJobRequest) -> dict[str, object]:
         if app.state.job_lock.locked():
@@ -160,7 +200,6 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
             raise HTTPException(status_code=409, detail="라이브 생성 전에 API 연결 확인을 완료하세요.")
         if payload.demo and not fixture_path.exists():
             raise HTTPException(status_code=500, detail="데모 입력 파일을 찾을 수 없습니다.")
-
         job_id = uuid.uuid4().hex[:12]
         record = JobRecord(
             id=job_id,
@@ -191,7 +230,108 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
             raise HTTPException(status_code=422, detail="편집일 형식이 올바르지 않습니다.")
         return _edition_detail(output_root, edition_date)
 
+    # New editorial newsroom studio.
+    @app.get("/api/studio/agents")
+    async def studio_agents() -> dict[str, object]:
+        return {"items": public_agents()}
+
+    @app.get("/api/studio/themes")
+    async def studio_themes() -> dict[str, object]:
+        return {"items": public_themes()}
+
+    @app.get("/api/studio/active-agents")
+    async def studio_active_agents(sport: str, league: str) -> dict[str, object]:
+        return {"items": [item.model_dump(mode="json") for item in active_agents(sport, league)]}
+
+    @app.post("/api/studio/jobs", status_code=202)
+    async def create_studio_job(payload: CreateStudioJobRequest) -> dict[str, object]:
+        if app.state.studio_lock.locked():
+            raise HTTPException(status_code=409, detail="편집국 제작 작업이 이미 진행 중입니다.")
+        if not payload.demo and not os.getenv("OPENAI_API_KEY"):
+            raise HTTPException(status_code=409, detail="라이브 제작 전에 OpenAI API 키를 저장하세요.")
+        if not payload.demo and not app.state.api_verified:
+            raise HTTPException(status_code=409, detail="라이브 제작 전에 API 연결 확인을 완료하세요.")
+        job_id = uuid.uuid4().hex[:12]
+        record = StudioJobRecord(
+            id=job_id,
+            edition_date=payload.edition_date.isoformat(),
+            mode="demo" if payload.demo else "live",
+            created_at=datetime.now().astimezone().isoformat(timespec="seconds"),
+        )
+        app.state.studio_jobs[job_id] = record
+        task = asyncio.create_task(_run_studio_job(app, record, payload))
+        app.state.tasks.add(task)
+        task.add_done_callback(app.state.tasks.discard)
+        return asdict(record)
+
+    @app.get("/api/studio/jobs/{job_id}")
+    async def get_studio_job(job_id: str) -> dict[str, object]:
+        record = app.state.studio_jobs.get(job_id)
+        if record is None:
+            raise HTTPException(status_code=404, detail="편집국 작업을 찾을 수 없습니다.")
+        return asdict(record)
+
+    @app.get("/api/studio/sessions")
+    async def studio_sessions() -> dict[str, object]:
+        return {"items": _list_studio_sessions(output_root)}
+
+    @app.get("/api/studio/sessions/{session_id}")
+    async def studio_session(session_id: str) -> dict[str, object]:
+        if not SESSION_PATTERN.fullmatch(session_id):
+            raise HTTPException(status_code=422, detail="세션 ID 형식이 올바르지 않습니다.")
+        return _studio_detail(output_root, session_id)
+
     return app
+
+
+async def _run_studio_job(
+    app: FastAPI,
+    record: StudioJobRecord,
+    payload: CreateStudioJobRequest,
+) -> None:
+    async with app.state.studio_lock:
+        record.status = "running"
+        record.stage = "research"
+        record.percent = 8
+        record.message = "AI 편집국이 제작 브리프를 확인하고 있습니다."
+
+        def progress(stage: str, percent: int, message: str) -> None:
+            record.stage = stage
+            record.percent = percent
+            record.message = message
+
+        try:
+            settings = _refresh_settings(app)
+            request = StudioRequest(
+                edition_date=payload.edition_date,
+                sport=payload.sport,
+                league=payload.league,
+                topic=payload.topic,
+                source_notes=payload.source_notes,
+                theme_id=payload.theme_id,
+                archive_to_db=payload.archive_to_db,
+            )
+            destination, package = await asyncio.to_thread(
+                run_studio,
+                request,
+                output_root=app.state.output_root,
+                settings=settings,
+                demo=payload.demo,
+                progress=progress,
+            )
+            record.result = _studio_package_payload(package, destination)
+            record.status = "completed"
+            record.stage = "complete"
+            record.percent = 100
+            record.message = "카드뉴스 원고·디자인·SNS·직원별 피드백 생성 완료"
+        except Exception as error:
+            record.status = "failed"
+            record.stage = "failed"
+            record.percent = 100
+            record.message = "편집국 제작 작업에 실패했습니다."
+            record.error = _safe_error(error)
+        finally:
+            record.finished_at = datetime.now().astimezone().isoformat(timespec="seconds")
 
 
 async def _run_generation_job(app: FastAPI, record: JobRecord) -> None:
@@ -227,25 +367,71 @@ def _refresh_settings(app: FastAPI) -> Settings:
     return settings
 
 
+def _list_studio_sessions(output_root: Path) -> list[dict[str, object]]:
+    root = output_root / "studio"
+    items: list[dict[str, object]] = []
+    if not root.exists():
+        return items
+    for package_path in sorted(root.glob("*/studio-package.json"), reverse=True):
+        try:
+            package = load_studio_package(package_path)
+        except (OSError, ValueError):
+            continue
+        items.append(
+            {
+                "session_id": package.session_id,
+                "edition_date": package.edition_date,
+                "sport": package.sport,
+                "league": package.league,
+                "topic": package.topic,
+                "title": package.master_headline,
+                "theme": package.theme.model_dump(mode="json"),
+                "score": package.overall_score,
+                "cover_url": f"/output/studio/{package.session_id}/card-01.png",
+                "needs_human_approval": package.needs_human_approval,
+            }
+        )
+    return items
+
+
+def _studio_detail(output_root: Path, session_id: str) -> dict[str, object]:
+    package_path = output_root / "studio" / session_id / "studio-package.json"
+    if not package_path.exists():
+        raise HTTPException(status_code=404, detail="해당 제작 세션을 찾을 수 없습니다.")
+    package = load_studio_package(package_path)
+    return _studio_package_payload(package, package_path.parent)
+
+
+def _studio_package_payload(package: StudioPackage, destination: Path) -> dict[str, object]:
+    return {
+        **package.model_dump(mode="json"),
+        "cards": [
+            {
+                **card.model_dump(mode="json"),
+                "image_url": f"/output/studio/{package.session_id}/card-{card.slide:02d}.png",
+            }
+            for card in package.cards
+        ],
+        "caption_file": f"/output/studio/{package.session_id}/caption-instagram.md",
+    }
+
+
 def _list_editions(output_root: Path) -> list[dict[str, object]]:
     items: list[dict[str, object]] = []
     for package_path in sorted(output_root.glob("*/package.json"), reverse=True):
         try:
             package = load_package(package_path)
-            selected = next(
-                item for item in package.candidates if item.title == package.selected_candidate_title
-            )
+            selected = next(item for item in package.candidates if item.title == package.selected_candidate_title)
         except (OSError, ValueError, StopIteration):
             continue
-        edition_date = package.edition_date
         items.append(
             {
-                "edition_date": edition_date,
+                "edition_date": package.edition_date,
                 "title": package.selected_candidate_title,
                 "sport": selected.sport,
                 "league": selected.league,
                 "card_count": len(package.cards),
-                "cover_url": f"/output/{edition_date}/card-01.png",
+                "cover_url": f"/output/{package.edition_date}/card-01.png",
                 "needs_human_approval": package.needs_human_approval,
             }
         )
@@ -305,21 +491,27 @@ def _job_payload(record: JobRecord) -> dict[str, object]:
 def _load_local_env(path: Path) -> None:
     if not path.exists():
         return
+    allowed = {
+        "OPENAI_API_KEY",
+        "OPENAI_MODEL",
+        "OPENAI_STUDIO_MODEL",
+        "OPENAI_NEWS_MODEL",
+        "OPENAI_EMBEDDING_MODEL",
+        "SUPABASE_URL",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "CARD_NEWS_FONT",
+        "CARD_NEWS_BOLD_FONT",
+    }
     for raw_line in path.read_text(encoding="utf-8").splitlines():
         line = raw_line.strip()
         if not line or line.startswith("#") or "=" not in line:
             continue
         key, value = line.split("=", 1)
-        if key.strip() in {"OPENAI_API_KEY", "OPENAI_MODEL", "CARD_NEWS_FONT"}:
+        if key.strip() in allowed:
             os.environ[key.strip()] = value.strip().strip('"').strip("'")
 
 
-def _save_local_env(
-    path: Path,
-    updates: dict[str, str],
-    *,
-    remove: set[str] | None = None,
-) -> None:
+def _save_local_env(path: Path, updates: dict[str, str], *, remove: set[str] | None = None) -> None:
     values: dict[str, str] = {}
     if path.exists():
         for raw_line in path.read_text(encoding="utf-8").splitlines():
@@ -350,15 +542,16 @@ def _safe_error(error: Exception) -> str:
     lowered = message.lower()
     if any(token in lowered for token in ("invalid_api_key", "incorrect api key", "unauthorized")):
         return "API 키가 유효하지 않습니다. OpenAI에서 발급한 새 키를 입력하세요."
-    configured_key = os.getenv("OPENAI_API_KEY")
-    if configured_key:
-        message = message.replace(configured_key, "[REDACTED]")
+    for key_name in ("OPENAI_API_KEY", "SUPABASE_SERVICE_ROLE_KEY"):
+        configured = os.getenv(key_name)
+        if configured:
+            message = message.replace(configured, "[REDACTED]")
     message = re.sub(r"sk-[A-Za-z0-9_*\-\s]{8,}", "[REDACTED]", message)
     return message[:500] or error.__class__.__name__
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="스포츠 카드뉴스 로컬 웹 앱")
+    parser = argparse.ArgumentParser(description="스포츠 데일리 카드 뉴스 제작소")
     parser.add_argument("--port", type=int, default=8787)
     parser.add_argument("--open-browser", action="store_true")
     args = parser.parse_args(argv)
@@ -372,4 +565,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
