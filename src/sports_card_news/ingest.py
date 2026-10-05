@@ -145,11 +145,32 @@ class SportsIngestor:
         checksum = hashlib.sha256(content.encode("utf-8")).hexdigest()
         source_key = str(source.get("source_key") or f"{url}#{checksum[:16]}")
         verified = bool(source.get("verified", False))
+        raw_fields = {
+            "source_key",
+            "source_type",
+            "league",
+            "game_id",
+            "publisher",
+            "url",
+            "title",
+            "content",
+            "published_at",
+            "scraped_at",
+            "expires_at",
+            "checksum",
+            "verified",
+            "source_priority",
+            "metadata",
+        }
         row = {
-            **source,
-            "source_key": source_key,
-            "checksum": checksum,
-            "verified": verified,
+            key: value
+            for key, value in {
+                **source,
+                "source_key": source_key,
+                "checksum": checksum,
+                "verified": verified,
+            }.items()
+            if key in raw_fields
         }
         stored = self.store.upsert("raw_sources", row, on_conflict="source_key")
 
