@@ -290,3 +290,44 @@ on conflict (template_id) do update set
   structure = excluded.structure,
   writing_rules = excluded.writing_rules,
   updated_at = now();
+
+
+-- Sports Daily Card News Studio production memory
+create table if not exists production_sessions (
+  session_id text primary key,
+  edition_date date not null,
+  sport text not null,
+  league text not null,
+  topic text not null,
+  theme_id text not null,
+  input_payload jsonb not null default '{}'::jsonb,
+  final_payload jsonb not null default '{}'::jsonb,
+  status text not null default 'pending_human_review',
+  notion_page_url text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists production_sessions_date_idx
+  on production_sessions(edition_date desc, sport, league);
+
+create table if not exists agent_feedback (
+  feedback_id uuid primary key default gen_random_uuid(),
+  feedback_key text not null unique,
+  session_id text not null references production_sessions(session_id) on delete cascade,
+  agent_id text not null,
+  agent_name text not null,
+  sport text not null,
+  score integer not null check (score between 1 and 100),
+  what_worked text not null,
+  improve_next text not null,
+  learning_rule text not null,
+  applied_count integer not null default 0,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists agent_feedback_learning_idx
+  on agent_feedback(sport, agent_id, created_at desc);
+
+alter table production_sessions enable row level security;
+alter table agent_feedback enable row level security;
