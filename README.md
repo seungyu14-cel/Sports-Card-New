@@ -79,3 +79,18 @@ sports-card-news daily --date 2026-10-05 --fixture fixtures/demo_package.json
 ```
 
 GitHub Actions는 테스트 → (Supabase가 연결된 경우 경기별 TOP3 생성) → 카드 생성 → 검증 → Visual QA → Draft PR 순서로 동작하며 게시 여부는 사람이 최종 결정합니다.
+
+
+## OpenAI 없이 로컬 LLM 모드
+
+MD 파일만으로 10페이지 카드뉴스를 만들 수 있습니다.
+
+```powershell
+ollama serve
+ollama pull qwen3:8b
+sports-card-news-web --open-browser
+```
+
+브라우저에서 `http://127.0.0.1:8787/local`로 접속하세요.
+
+로컬 모드는 `MD → Ollama → 직원별 Agent → SQLite Feedback Memory → 10P PNG` 순서로 동작합니다. 직원별 학습 규칙과 운영 방법은 `docs/LOCAL_LLM_FEEDBACK_GUIDE.md`를 참고하세요.
