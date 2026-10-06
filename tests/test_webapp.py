@@ -225,3 +225,24 @@ def test_md_job_without_topic_produces_downloadable_ten_pages(tmp_path: Path, mo
         assert client.get(f'/api/work/sessions/{session}/bundle').status_code == 200
         assert client.get(result['cards'][-1]['image_url']).status_code == 200
         assert client.get('/api/local/health').json()['memory']['run_count'] == 1
+
+
+def test_local_failure_keeps_progress_and_server_reason(tmp_path, monkeypatch):
+    from sports_card_news.ollama_client import OllamaError
+    class Ready:
+        def health(self): return {'model_installed':True}
+    def fail(request, *, progress, **kwargs):
+        progress('editorial',49,'카드 작성 5/10')
+        raise OllamaError('card: Ollama HTTP 500: runner test failure')
+    monkeypatch.setattr('sports_card_news.webapp.OllamaClient',Ready)
+    monkeypatch.setattr('sports_card_news.webapp.run_local_studio',fail)
+    with TestClient(create_app(make_project(tmp_path))) as client:
+        r=client.post('/api/local/jobs',json={'edition_date':'2026-10-06','category':'KBO','markdown_text':'실패 처리 테스트를 위한 충분한 길이의 원문입니다.'})
+        assert r.status_code==202
+        for _ in range(50):
+            job=client.get('/api/studio/jobs/'+r.json()['id']).json()
+            if job['status']=='failed': break
+            time.sleep(.02)
+        assert job['status']=='failed'
+        assert job['percent']==49
+        assert 'runner test failure' in job['error']

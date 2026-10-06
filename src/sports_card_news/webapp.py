@@ -401,8 +401,7 @@ async def _run_local_studio_job(
         except Exception as error:
             record.status = "failed"
             record.stage = "failed"
-            record.percent = 100
-            record.message = "로컬 편집국 제작에 실패했습니다."
+            record.message = "로컬 편집국 제작에 실패했습니다. 마지막 진행 단계에서 중단됐습니다."
             record.error = _safe_error(error)
         finally:
             record.finished_at = datetime.now().astimezone().isoformat(timespec="seconds")

@@ -12,6 +12,26 @@ class FakeOllama:
         self.calls = 0
 
     def json_chat(self, system: str, payload: dict) -> dict:
+        if payload.get('stage'):
+            from sports_card_news.ollama_client import OllamaClient
+            OllamaClient().check_budget(system, payload)
+            stage = payload['stage']
+            self.calls += 1
+            if stage == 'extract':
+                text = payload['source_chunk']
+                pieces = [x.strip() for x in text.replace('\n', '.').split('.') if len(x.strip()) >= 5]
+                if len(pieces) < 3:
+                    pieces = [text[:20], text[10:35], text[-25:]]
+                return {'facts':[{'quote':x[:160], 'importance':90-i} for i,x in enumerate(pieces[:4])]}
+            if stage == 'card':
+                return {'slide':payload['slide'],'role':payload['role'],'headline':'KIA 경기 핵심 내용',
+                        'body':'원문 근거를 기반으로 경기의 주요 내용을 정리합니다.', 'key_stat':'', 'kicker':'경기 브리핑','visual_direction':''}
+            if stage == 'social':
+                return {'master_headline':'김도영의 경기 핵심 브리핑', 'editorial_angle':'원문에 있는 경기 기록을 중심으로 편집했습니다.',
+                        'social':{'post_title':'경기 핵심 브리핑','caption':'원문에 있는 경기 결과와 선수 기록을 중심으로 오늘의 주요 내용을 정리했습니다. 중요한 장면과 경기 흐름을 카드뉴스에서 확인하세요. 최종 게시 전에 원문과 숫자를 다시 확인합니다.', 'hashtags':['#KBO','#야구','#뉴스','#경기','#카드뉴스']},'shortform_hook':'오늘 경기 핵심 장면을 확인하세요.'}
+            if stage == 'review':
+                return {'agent_id':payload['agent_id'],'agent_name':payload['agent_name'],'score':85,
+                        'what_worked':'제공된 원문 근거를 확인했습니다.','improve_next':'중요 기록을 원문과 다시 확인하세요.','learning_rule':'숫자와 선수명은 원문과 대조한다.'}
         self.calls += 1
         if self.calls == 1:
             cards = []
@@ -96,23 +116,10 @@ def test_category_info_exposes_training_and_only_relevant_specialists() -> None:
 
 
 def test_local_seven_pages_passes_md_to_feedback_and_creates_work_bundle(tmp_path: Path) -> None:
-    class SevenOllama(FakeOllama):
-        def json_chat(self, system: str, payload: dict) -> dict:
-            if self.calls == 0:
-                assert payload['page_count'] == 7
-                assert len(payload['required_pages']) == 7
-                assert 'measured_performance' in payload
-                result = super().json_chat(system, payload)
-                result['cards'] = result['cards'][:7]
-                return result
-            assert '김도영' in payload['markdown_source']
-            assert payload['extracted_facts']
-            return super().json_chat(system, payload)
-
     request = LocalStudioRequest(edition_date=date(2026,10,6), category='KBO',
         topic='7페이지 검증', page_count=7,
         markdown_text='KIA가 LG에 6-4로 승리했다. 김도영이 9회 시즌 42호 역전 3점 홈런을 기록했다.')
-    destination, package = run_local_studio(request, output_root=tmp_path/'output', memory_path=tmp_path/'memory.sqlite3', client=SevenOllama())
+    destination, package = run_local_studio(request, output_root=tmp_path/'output', memory_path=tmp_path/'memory.sqlite3', client=FakeOllama())
     assert len(package.cards) == 7
     assert (destination/'card-07.png').exists()
     assert not (destination/'card-08.png').exists()
@@ -123,5 +130,49 @@ def test_local_rejects_wrong_requested_count(tmp_path: Path) -> None:
     import pytest
     request = LocalStudioRequest(edition_date=date(2026,10,6), category='KBO', topic='페이지 수 불일치', page_count=7,
         markdown_text='KIA가 LG에 6-4로 승리했다. 김도영이 역전 홈런을 기록했다.')
-    with pytest.raises(ValueError, match='요청한 7페이지'):
-        run_local_studio(request, output_root=tmp_path/'output', memory_path=tmp_path/'memory.sqlite3', client=FakeOllama())
+    class WrongNumber(FakeOllama):
+        def json_chat(self, system, payload):
+            result = super().json_chat(system,payload)
+            if payload.get('stage') == 'card': result['slide'] = 10
+            return result
+    with pytest.raises(ValueError, match='페이지 번호'):
+        run_local_studio(request, output_root=tmp_path/'output', memory_path=tmp_path/'memory.sqlite3', client=WrongNumber())
+
+
+def test_split_source_is_lossless_and_byte_bounded():
+    from sports_card_news.staged_editorial import split_source
+    text = ('# 한글 경기 ⚾\n가나다라 123 기록\n' * 2000) + '마지막 근거'
+    chunks = split_source(text)
+    assert ''.join(chunks) == text
+    assert all(len(c.encode('utf-8')) <= 2400 for c in chunks)
+    assert len(chunks) > 10
+
+
+def test_long_md_all_chunks_reach_model_and_memory_reused(tmp_path):
+    from sports_card_news.feedback_memory import FeedbackMemory
+    class Recording(FakeOllama):
+        def __init__(self):
+            super().__init__(); self.sources=[]; self.memories=[]
+        def json_chat(self,system,payload):
+            if payload['stage']=='extract': self.sources.append(payload['source_chunk'])
+            if payload['stage']=='review': self.memories.extend(payload['previous_learning_rules'])
+            return super().json_chat(system,payload)
+    text = ('KIA가 LG에 6-4로 승리했다. 김도영이 역전 홈런을 기록했다. 정해영이 세이브를 기록했다.\n'*100)
+    client=Recording()
+    request=LocalStudioRequest(edition_date=date(2026,10,6),category='KBO',markdown_text=text)
+    dest,pkg=run_local_studio(request,output_root=tmp_path/'output',memory_path=tmp_path/'memory.sqlite3',client=client)
+    assert ''.join(client.sources)==text
+    assert len(client.sources)>=5
+    next_client=Recording()
+    run_local_studio(request,output_root=tmp_path/'output',memory_path=tmp_path/'memory.sqlite3',client=next_client)
+    assert next_client.memories
+
+
+def test_extracted_quote_must_exist_in_source(tmp_path):
+    import pytest
+    class Invented(FakeOllama):
+        def json_chat(self,system,payload):
+            return {'facts':[{'quote':'원문에 없는 선수의 100호 홈런','importance':100}]}
+    request=LocalStudioRequest(edition_date=date(2026,10,6),category='KBO',markdown_text='KIA가 LG에 6-4로 승리했다. 김도영이 역전 홈런을 기록했다.')
+    with pytest.raises(ValueError,match='원문에 없는 근거'):
+        run_local_studio(request,output_root=tmp_path/'output',memory_path=tmp_path/'m.sqlite3',client=Invented())
