@@ -102,3 +102,10 @@ Canva 템플릿 전달 ZIP·최종 검수·Metricool 예약 결과·실측 성�
 기존 `/local`은 기본 10페이지를 유지하며 7페이지도 선택할 수 있습니다.
 Canva/Metricool의 실제 외부 작업은 Work 플러그인에서 수행합니다.
 자세한 실행 순서는 [Work 운영 가이드](docs/WORK_OPERATIONS_GUIDE.md)를 참고하세요.
+
+### Canva → Instagram 직접 자동 실행
+
+`/work`의 자동 예약 폼에서 원고와 템플릿을 확인하고 실행하면 Canva 생성·PNG 내보내기·Metricool 미디어 보관·Instagram 예약이 이어집니다.
+로컬 `.env`의 Canva/Metricool API 인증 및 Instagram 계정 연결이 필요합니다.
+중복 요청 방지와 외부 응답 불명확 시 확인 대기 상태를 제공합니다.
+[설정 및 실패 처리](docs/WORK_OPERATIONS_GUIDE.md#직접-api-자동-실행-추가-기능)를 먼저 확인하세요.

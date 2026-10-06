@@ -48,7 +48,7 @@ sports-card-news-web --open-browser
 | 성과 | 임현우 | Metricool 실측값 | 게시 후 24/48/168시간. 도달·노출·좋아요·댓글·저장·공유 기록 |
 | 다음 편집 | Work / Ollama | 같은 리그·관측 기간 집계 | 다음 생성 전. 성과 기준선을 참고하되 사실 검증 규칙은 유지 |
 
-**외부 앱 호출 경계:** 로컬 프로그램은 ChatGPT의 플러그인 세션을 사용할 수 없습니다.
+**ZIP 전달 모드의 외부 앱 호출 경계:** 로컬 프로그램은 ChatGPT의 플러그인 세션을 사용할 수 없습니다. 아래 설명은 ZIP 전달 모드에 해당하며, 별도 API 인증으로 직접 실행하는 신규 모드는 문서 끝의 직접 API 자동 실행 절을 참고하세요.
 따라서 Canva 디자인 생성·Metricool 예약은 연결된 Work 플러그인에서 실행합니다.
 프로그램은 전달 ZIP을 만들고 사용자가 입력한 검수·외부 처리 결과·성과를 보관합니다.
 `external_actions_executed: false`는 이 프로그램이 외부 동작을 수행하지 않았다는 뜻입니다.
@@ -99,3 +99,51 @@ MASTER_TEMPLATE ID가 없으면 임의 생성·덮어쓰기하지 않고 Work에
 자동 검사는 페이지 수·순서·인용 존재·숫자 후보·제목 중복을 확인합니다.
 같은 숫자가 다른 의미로 쓰였는지, 선수가 맞는지, URL 출처가 사실을 뒷받침하는지까지 자동 보장하지 않습니다.
 Work 가져오기/Canva 전달 파일/검수·예약·성과 API는 테스트하며, 실제 Canva 템플릿과 Metricool 실계정 예약은 별도 연결 실행 단계입니다.
+
+## 직접 API 자동 실행 (추가 기능)
+
+기존 ZIP 전달 및 수동 기록 기능과 별도로 `/work`의 **Canva 제작 → Instagram 자동 예약**에서 실제 외부 API 실행을 지원합니다.
+원고·고정 템플릿·이미지 권한 확인 후 템플릿 ID와 미래 게시 시각을 입력하면 다음 순서로 실행합니다.
+
+1. Canva 자동 채우기 필드와 Metricool Instagram 자동 게시 권한 확인
+2. Canva 브랜드 템플릿으로 새 디자인 생성 (원본 유지)
+3. 페이지 수 확인 후 페이지별 PNG 내보내기
+4. 만료되는 Canva URL을 Metricool 영구 미디어 URL로 변환
+5. Instagram 캐러셀 예약 생성 및 예약 내용을 재조회
+6. 실제 post ID·작업 상태·검수 출처를 SQLite에 저장
+
+### 최초 연결
+
+로컬 `.env`에 다음 값을 직접 설정하고 서버를 재시작합니다. ChatGPT 플러그인 연결 정보와 별개이며 비밀 값을 채팅이나 GitHub에 올리지 마세요.
+
+```
+CANVA_ACCESS_TOKEN=
+METRICOOL_API_TOKEN=
+METRICOOL_USER_ID=
+METRICOOL_BLOG_ID=
+```
+
+Canva 토큰은 브랜드 템플릿 데이터 읽기, 디자인 생성·메타데이터 읽기·내보내기 권한이 필요합니다. 토큰 만료 시 갱신한 값을 설정해야 하며 현재 구현은 OAuth 초기 로그인·자동 토큰 갱신을 포함하지 않습니다.
+Metricool에서 대상 브랜드에 Instagram을 연결하고 자동 게시가 허용돼야 합니다. 직접 API 접근 가능한 요금제와 API 토큰이 필요합니다.
+Canva 템플릿에는 각 페이지마다 `p01_headline`, `p01_body`, `p01_kicker`, `p01_key_stat` 형식의 텍스트 필드를 지정하세요. 원고가 7페이지면 7페이지 템플릿, 10페이지면 10페이지 템플릿을 사용합니다. 이미지 교체는 현재 고정 템플릿의 승인된 이미지로 처리하며 자동 선수 사진 검색은 포함하지 않습니다.
+
+### 실행과 실패 처리
+
+- 실행 버튼 1회로 디자인 생성부터 예약까지 진행됩니다. 매일 정시 뉴스 수집/원고 생성까지 자동 시작하는 기능은 아닙니다.
+- 로컬 서버는 예약 완료까지 켜 두세요. 예약 성공 후에는 Metricool이 정해진 시각에 게시합니다.
+- 완료는 **예약 성공**입니다. 실제 Instagram 게시 결과는 해당 시각 이후 Metricool에서 확인하세요.
+- 원고 확인과 승인된 템플릿 사용을 기록하지만 최종 Canva 화면을 사람이 검수했다고 기록하지 않습니다. 자동 검사는 사실 정확성·오탈자·레이아웃을 완전히 보장하지 않습니다.
+- 동일 세션의 중복 클릭·재요청은 다시 전송하지 않습니다.
+- `blocked`: 외부 생성 이전 연결/입력 문제. 원인을 수정하고 새 세션으로 다시 시작합니다.
+- `needs_reconciliation`: 외부 생성 또는 예약 요청 이후 결과 불명확. `jobs`, `design_id`, `post_id`를 기준으로 Canva/Metricool 결과를 먼저 확인하세요. 자동 재전송하지 않습니다.
+- 서버 중단으로 `queued/running`에 남아도 자동 재시작하지 않습니다. 외부 결과를 확인하기 전 새 세션으로 중복 실행하지 마세요.
+- Metricool 미디어 응답이 확인된 영구 URL 형식과 다르면 예약을 중단합니다. 공급자 응답 변경 시 어댑터 수정이 필요합니다.
+
+### 공식 API 기준
+
+- Canva Autofill: https://www.canva.dev/docs/apps/rest-apis/reference/autofills/create-design-autofill-job/
+- Canva Export: https://www.canva.dev/docs/apps/rest-apis/reference/exports/create-design-export-job/
+- Metricool 인증/예약: https://help.metricool.com/basic-guide-for-api-integration-r97af
+- Metricool 스키마: https://app.metricool.com/api/swagger.json
+
+Metricool 도움말의 `media` 예시와 Swagger 표현이 달라 이 구현은 실제 v2 스케줄러의 Swagger `media: string[]`를 기준으로 합니다. 실계정 종단 테스트 전에는 모의 API 테스트 결과를 실계정 성공으로 해석하지 마세요.

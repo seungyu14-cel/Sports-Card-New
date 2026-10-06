@@ -353,6 +353,8 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
 
     from .work_hub import work_router
     app.include_router(work_router(output_root, root / 'data' / 'work_operations.sqlite3', WEB_ROOT))
+    from .autopublish import auto_router
+    app.include_router(auto_router(output_root, root / 'data' / 'work_operations.sqlite3'))
     return app
 
 
@@ -613,6 +615,7 @@ def _load_local_env(path: Path) -> None:
     if not path.exists():
         return
     allowed = {
+        "CANVA_ACCESS_TOKEN", "METRICOOL_API_TOKEN", "METRICOOL_USER_ID", "METRICOOL_BLOG_ID",
         "OPENAI_API_KEY",
         "OPENAI_MODEL",
         "OPENAI_STUDIO_MODEL",
