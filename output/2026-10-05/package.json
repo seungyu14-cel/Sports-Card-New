@@ -1,0 +1,497 @@
+{
+  "approval_notice": "게시 전 사람 승인 필요",
+  "needs_human_approval": true,
+  "edition_date": "2026-10-05",
+  "generated_at": "2026-10-05T10:25:58+09:00",
+  "candidates": [
+    {
+      "sport": "야구",
+      "league": "KBO",
+      "title": "1,200만 관중 도달 경기 수의 전년 비교",
+      "summary": "10월 1일 기준 684경기 만에 누적 1,206만 9,596명을 기록했다. 지난해 703경기보다 19경기 빠른 1,200만 관중 달성이다. ([koreabaseball.com](https://koreabaseball.com/MediaNews/Notice/View.aspx?bdSe=12175))",
+      "game_status": "종료",
+      "importance": 4,
+      "korean_relevance": 5,
+      "source_reliability": 5,
+      "explainability": 5,
+      "freshness": 3,
+      "fan_interest": 4,
+      "visual_potential": 5,
+      "uniqueness": 4,
+      "source_ids": [
+        "S1"
+      ],
+      "caution": "종료는 해당 관중 집계 기준일을 뜻한다. 수치를 10월 5일 현재 누적으로 표현하지 않는다."
+    },
+    {
+      "sport": "야구",
+      "league": "KBO",
+      "title": "2차 잔여 경기 편성과 포스트시즌 전 이동일",
+      "summary": "9월 30일 발표에서 우천 취소 후 미편성된 11경기를 10월 12일까지 배치했다. 와일드카드 진출 구단에는 정규시즌 마지막 경기와 와일드카드 사이 최소 하루의 이동일을 둔다. ([koreabaseball.com](https://www.koreabaseball.com/MediaNews/Notice/View.aspx?bdSe=12172))",
+      "game_status": "예정",
+      "importance": 5,
+      "korean_relevance": 5,
+      "source_reliability": 5,
+      "explainability": 5,
+      "freshness": 3,
+      "fan_interest": 5,
+      "visual_potential": 4,
+      "uniqueness": 3,
+      "source_ids": [
+        "S2"
+      ],
+      "caution": "발표 당시 편성 원칙을 다루는 후보다. 10월 12일을 확정 종료일로 단정하거나 와일드카드 개막일을 역산하지 않는다."
+    },
+    {
+      "sport": "야구",
+      "league": "MLB",
+      "title": "밀워키 NLDS 2연승",
+      "summary": "밀워키가 샌디에이고에 4-3 승리, 시리즈 2-0. ([mlb.com](https://www.mlb.com/news/2026-mlb-playoff-and-world-series-schedule))",
+      "game_status": "종료",
+      "importance": 5,
+      "korean_relevance": 2,
+      "source_reliability": 5,
+      "explainability": 4,
+      "freshness": 5,
+      "fan_interest": 4,
+      "visual_potential": 4,
+      "uniqueness": 3,
+      "source_ids": [
+        "S3"
+      ],
+      "caution": "개별 선수 활약은 별도 검증 후 추가."
+    },
+    {
+      "sport": "야구",
+      "league": "MLB",
+      "title": "ALDS 다음 경기 시각",
+      "summary": "한국 10월 6일 CWS-CLE 06시, NYY-TB 09시 예정. ([mlb.com](https://www.mlb.com/schedule/2026-10-05))",
+      "game_status": "예정",
+      "importance": 4,
+      "korean_relevance": 3,
+      "source_reliability": 5,
+      "explainability": 4,
+      "freshness": 5,
+      "fan_interest": 4,
+      "visual_potential": 4,
+      "uniqueness": 2,
+      "source_ids": [
+        "S4"
+      ],
+      "caution": "편성 직전 변경 여부 재조회."
+    },
+    {
+      "sport": "야구",
+      "league": "NPB",
+      "title": "클라이맥스시리즈 파이널의 조건부 2승 어드밴티지",
+      "summary": "2026년에는 정규시즌 1위와 퍼스트스테이지 승자의 격차가 10경기 이상이거나 승자의 승률이 5할 미만이면, 파이널에 2승 어드밴티지와 최대 7경기·5승 선승제를 적용한다. ([npb.jp](https://npb.jp/games/2026/info_cs.html))",
+      "game_status": "예정",
+      "importance": 5,
+      "korean_relevance": 2,
+      "source_reliability": 5,
+      "explainability": 5,
+      "freshness": 3,
+      "fan_interest": 4,
+      "visual_potential": 5,
+      "uniqueness": 5,
+      "source_ids": [
+        "S5"
+      ],
+      "caution": "규정 설명 후보이며 특정 구단에 적용이 확정됐다는 의미가 아니다. 최종 순위·게임 차·퍼스트스테이지 승자를 별도 확인해야 한다."
+    },
+    {
+      "sport": "야구",
+      "league": "NPB",
+      "title": "클라이맥스시리즈 개막 전 일정 안내",
+      "summary": "퍼스트스테이지는 10월 10일, 파이널은 10월 14일 시작 예정이다. 퍼스트는 2위 구단, 파이널은 1위 구단의 전용 구장에서 열린다. 일본과 한국의 날짜는 동일하다. ([npb.jp](https://npb.jp/games/2026/info_cs.html))",
+      "game_status": "예정",
+      "importance": 4,
+      "korean_relevance": 2,
+      "source_reliability": 5,
+      "explainability": 4,
+      "freshness": 4,
+      "fan_interest": 4,
+      "visual_potential": 5,
+      "uniqueness": 2,
+      "source_ids": [
+        "S6"
+      ],
+      "caution": "대진과 경기 시작 시각은 포함하지 않았다. 규정 설명 후보와 동시 선정할 경우 하나로 병합하는 편이 적절하다."
+    }
+  ],
+  "selected_candidate_title": "2차 잔여 경기 편성과 포스트시즌 전 이동일",
+  "selection_reason": "제공된 검증 후보에 가중합을 적용해 각 리그 최고점 후보를 선정했다. KBO는 잔여 경기·이동일 4.50점(관중 비교 4.35점), MLB는 밀워키 NLDS 2연승 4.15점(ALDS 시각 4.05점), NPB는 조건부 2승 어드밴티지 4.15점(개막 일정 3.85점)이다. 전체 최고점인 KBO 이슈를 대표 후보로 삼고, 일정 원칙·종료 결과·조건부 규정을 구분해 편성한다.",
+  "facts": [
+    {
+      "id": "S1",
+      "claim": "2026년 10월 1일 KBO는 684경기 만에 1,200만 관중을 넘겼으며 지난해보다 19경기 빨랐다.",
+      "title": "2026 KBO 리그 2년 연속 1,200만 관중 달성",
+      "url": "https://koreabaseball.com/MediaNews/Notice/View.aspx?bdSe=12175",
+      "source_type": "공식",
+      "checked_at": "2026-10-05T10:25:58+09:00",
+      "expires_at": null,
+      "verification_method": "원문 직접 확인",
+      "evidence": "본문에서 10월 1일 누적 12,069,596명, 올해 684경기와 지난해 703경기를 확인했다. 과거 기준일에 고정된 기록이다. ([koreabaseball.com](https://koreabaseball.com/MediaNews/Notice/View.aspx?bdSe=12175))",
+      "published_at": "2026-10-01; 시각 미표기",
+      "local_time": "2026-10-01 집계, Asia/Seoul",
+      "korea_time": "2026-10-01 집계, Asia/Seoul",
+      "status": "검증 완료",
+      "rights_note": "기사·사진 무단 전재 금지 고지. 수치의 독자적 요약·도표화를 검토하고 원문 및 이미지 복제는 피한다."
+    },
+    {
+      "id": "S2",
+      "claim": "KBO는 2차 잔여 11경기를 10월 12일까지 편성하고 와일드카드 진출 구단의 최소 하루 이동일 원칙을 발표했다.",
+      "title": "2026 신한 SOL KBO 리그 정규시즌 2차 잔여 경기 일정 확정",
+      "url": "https://www.koreabaseball.com/MediaNews/Notice/View.aspx?bdSe=12172",
+      "source_type": "공식",
+      "checked_at": "2026-10-05T10:25:58+09:00",
+      "expires_at": "2026-10-06T10:00:00+09:00",
+      "verification_method": "원문 직접 확인",
+      "evidence": "본문에서 11경기의 편성 종료일과 와일드카드 전 최소 하루 이동일을 확인했다. 우천 취소 시 재편성 가능성도 명시한다. ([koreabaseball.com](https://www.koreabaseball.com/MediaNews/Notice/View.aspx?bdSe=12172))",
+      "published_at": "2026-09-30; 시각 미표기",
+      "local_time": "편성 범위 2026-10-12까지, Asia/Seoul",
+      "korea_time": "편성 범위 2026-10-12까지, Asia/Seoul",
+      "status": "검증 완료",
+      "rights_note": "보도자료 문구·첨부 일정표의 통째 전재를 피하고 사실만 재구성한다."
+    },
+    {
+      "id": "S3",
+      "claim": "MIL 4-3 SD, 2-0.",
+      "title": "2026 postseason schedule, results and how to watch",
+      "url": "https://www.mlb.com/news/2026-mlb-playoff-and-world-series-schedule",
+      "source_type": "공식",
+      "checked_at": "2026-10-05T10:25:58+09:00",
+      "expires_at": "2026-10-06T10:00:00+09:00",
+      "verification_method": "원문 직접 확인",
+      "evidence": "종료 결과 확인. ([mlb.com](https://www.mlb.com/news/2026-mlb-playoff-and-world-series-schedule))",
+      "published_at": "2026-10-04; 시각 미표기",
+      "local_time": "2026-10-04, 미국",
+      "korea_time": "2026-10-05, Asia/Seoul",
+      "status": "검증 완료",
+      "rights_note": "경기 영상·사진 이용권은 별도 확보."
+    },
+    {
+      "id": "S4",
+      "claim": "ALDS 예정 시각의 한국시간 환산.",
+      "title": "MLB Schedule",
+      "url": "https://www.mlb.com/schedule/2026-10-05",
+      "source_type": "공식",
+      "checked_at": "2026-10-05T10:25:58+09:00",
+      "expires_at": "2026-10-06T05:00:00+09:00",
+      "verification_method": "원문 직접 확인",
+      "evidence": "공식 일정 직접 대조. ([mlb.com](https://www.mlb.com/schedule/2026-10-05))",
+      "published_at": "미표기",
+      "local_time": "10/5 17:00·20:00 EDT",
+      "korea_time": "10/6 06:00·09:00 KST",
+      "status": "검증 완료",
+      "rights_note": "로고·중계 화면 사용권 별도."
+    },
+    {
+      "id": "S5",
+      "claim": "2026 NPB 클라이맥스시리즈 파이널은 두 조건 중 하나를 충족하면 1위 구단에 2승 어드밴티지를 준다.",
+      "title": "2026年 セ・パ クライマックスシリーズについてのお知らせ",
+      "url": "https://npb.jp/games/2026/info_cs.html",
+      "source_type": "공식",
+      "checked_at": "2026-10-05T10:25:58+09:00",
+      "expires_at": "2026-10-10T00:00:00+09:00",
+      "verification_method": "원문 직접 확인",
+      "evidence": "파이널 규정은 10경기 이상 격차 또는 퍼스트 승자의 승률 5할 미만을 조건으로 명시하며, 해당 시 최대 7경기·어드밴티지 포함 5승 선승제를 적용한다. ([npb.jp](https://npb.jp/games/2026/info_cs.html))",
+      "published_at": "2026-08-24; 시각 미표기",
+      "local_time": "2026년 대회 적용, Asia/Tokyo",
+      "korea_time": "2026년 대회 적용, 일본과 한국 모두 UTC+09:00",
+      "status": "검증 완료",
+      "rights_note": "규정을 자체 표현으로 요약하고 공식 페이지 캡처·이미지 전재는 별도 허락을 확인한다."
+    },
+    {
+      "id": "S6",
+      "claim": "NPB 클라이맥스시리즈는 10월 10일 퍼스트스테이지, 10월 14일 파이널스테이지 개막 예정이다.",
+      "title": "2026年 セ・パ クライマックスシリーズについてのお知らせ",
+      "url": "https://npb.jp/games/2026/info_cs.html",
+      "source_type": "공식",
+      "checked_at": "2026-10-05T10:25:58+09:00",
+      "expires_at": "2026-10-06T10:00:00+09:00",
+      "verification_method": "원문 직접 확인",
+      "evidence": "단계별 일정 및 개최지 원칙을 직접 확인했다. 퍼스트는 2위 구단, 파이널은 1위 구단의 전용 구장으로 명시한다. ([npb.jp](https://npb.jp/games/2026/info_cs.html))",
+      "published_at": "2026-08-24; 시각 미표기",
+      "local_time": "2026-10-10·2026-10-14, Asia/Tokyo; 시작 시각 미확인",
+      "korea_time": "2026-10-10·2026-10-14, Asia/Seoul; 날짜 이동 없음",
+      "status": "검증 완료",
+      "rights_note": "일정 사실을 자체 도표로 재구성하고 공식 표·로고의 복제를 피한다."
+    }
+  ],
+  "cards": [
+    {
+      "slide": 1,
+      "league": "COVER",
+      "candidate_title": "",
+      "headline": "가을야구, 세 리그의 핵심만",
+      "body": "KBO의 잔여 일정, MLB의 시리즈 결과, NPB의 파이널 규정. 오늘 확인할 세 가지를 모았습니다.",
+      "source_ids": [
+        "S2",
+        "S3",
+        "S5"
+      ],
+      "content_type": "summary",
+      "kicker": "2026.10.05 | 야구 브리핑",
+      "visual_template": "cover",
+      "visual_title": "가을야구, 세 리그의 핵심만",
+      "visual_items": [
+        {
+          "label": "KBO",
+          "value": "잔여 일정",
+          "note": "발표된 편성 원칙"
+        },
+        {
+          "label": "MLB",
+          "value": "시리즈 결과",
+          "note": "종료 결과"
+        },
+        {
+          "label": "NPB",
+          "value": "파이널 규정",
+          "note": "2026년 조건부 규정"
+        }
+      ],
+      "visual_direction": "상단에 원고 kicker, 중앙에 headline을 크게 배치하고 body를 그대로 이어 붙인다. 하단은 세 리그의 텍스트 패널을 나란히 구성한다. 자체 제작 다이아몬드 선형 그래픽을 배경에 낮은 대비로 배치한다. 리그 로고나 특정 구단 이미지는 사용하지 않는다. 출처 S2·S3·S5.",
+      "asset_ids": [],
+      "alt_text": "KBO 일정, MLB 결과, NPB 규정을 소개하는 세 리그 야구 브리핑 표지."
+    },
+    {
+      "slide": 2,
+      "league": "KBO",
+      "candidate_title": "2차 잔여 경기 편성과 포스트시즌 전 이동일",
+      "headline": "와일드카드 전 최소 하루 이동일",
+      "body": "KBO는 9월 30일 잔여 11경기를 10월 12일까지 편성하며, 와일드카드 진출 구단에 정규시즌 마지막 경기 후 최소 하루 이동일을 두기로 했다. 우천 시 재편성될 수 있다.",
+      "source_ids": [
+        "S2"
+      ],
+      "content_type": "schedule",
+      "kicker": "KBO | 발표된 편성 원칙",
+      "visual_template": "schedule",
+      "visual_title": "와일드카드 전 최소 하루 이동일",
+      "visual_items": [
+        {
+          "label": "2차 잔여 경기",
+          "value": "11경기",
+          "note": "9월 30일 발표"
+        },
+        {
+          "label": "편성 범위",
+          "value": "10월 12일까지",
+          "note": "우천 시 재편성 가능"
+        },
+        {
+          "label": "와일드카드 진출 구단",
+          "value": "최소 하루 이동일",
+          "note": "정규시즌 마지막 경기와 와일드카드 사이"
+        }
+      ],
+      "visual_direction": "야구 일정 전용 도식으로 정규시즌 마지막 경기 → 최소 하루 이동일 → 와일드카드를 연결한다. 중앙 이동일 구간을 청록색으로 강조하고 실제 날짜 간격을 암시하는 비례 축은 사용하지 않는다. 잔여 11경기와 10월 12일까지의 편성 범위는 별도 정보 박스로 분리한다. 원고 kicker·headline·body를 그대로 배치한다. 우천 시 재편성 가능 문구를 읽기 쉬운 크기로 유지하며 확정 종료일 또는 와일드카드 개막일은 표시하지",
+      "asset_ids": [
+        "A1"
+      ],
+      "alt_text": "정규시즌 마지막 경기와 와일드카드 사이 최소 하루 이동일 원칙을 보여주는 자체 제작 도식. 우천 시 재편성 가능 표시."
+    },
+    {
+      "slide": 3,
+      "league": "MLB",
+      "candidate_title": "밀워키 NLDS 2연승",
+      "headline": "밀워키, NLDS 2연승",
+      "body": "밀워키가 샌디에이고를 4-3으로 꺾었다. 종료 결과 기준 내셔널리그 디비전시리즈 전적은 밀워키의 2승 0패다.",
+      "source_ids": [
+        "S3"
+      ],
+      "content_type": "match_result",
+      "kicker": "MLB | 종료 결과",
+      "visual_template": "match_result",
+      "visual_title": "밀워키, NLDS 2연승",
+      "visual_items": [
+        {
+          "label": "밀워키",
+          "value": "4",
+          "note": "승리"
+        },
+        {
+          "label": "샌디에이고",
+          "value": "3",
+          "note": "패배"
+        },
+        {
+          "label": "밀워키 NLDS 전적",
+          "value": "2승 0패",
+          "note": "종료 결과 기준"
+        }
+      ],
+      "visual_direction": "야구 경기 결과 스코어보드에 밀워키 4–3 샌디에이고를 가장 크게 표시한다. 팀명을 점수에 직접 붙이고 승리 팀 점수만 주황색으로 강조한다. 하단의 독립된 시리즈 전적 띠에 2승 0패를 표시해 경기 점수와 구분한다. 원고 kicker·headline·body를 그대로 배치한다. 이닝별 점수, 선수 활약, 홈·원정 정보는 추가하지 않는다. 출처 S3.",
+      "asset_ids": [
+        "A2"
+      ],
+      "alt_text": "밀워키 4점, 샌디에이고 3점의 경기 결과와 밀워키의 시리즈 2승 0패를 표시한 점수 그래픽."
+    },
+    {
+      "slide": 4,
+      "league": "NPB",
+      "candidate_title": "클라이맥스시리즈 파이널의 조건부 2승 어드밴티지",
+      "headline": "NPB 파이널, 조건 맞으면 2승 먼저",
+      "body": "정규시즌 1위와 퍼스트스테이지 승자의 격차가 10경기 이상이거나 승자의 정규시즌 승률이 5할 미만이면, 1위에 2승 어드밴티지를 준다. 최대 7경기·어드밴티지 포함 5승 선승제다. 특정 구단 적용 확정은 아니다.",
+      "source_ids": [
+        "S5"
+      ],
+      "content_type": "explainer",
+      "kicker": "NPB | 2026년 조건부 규정",
+      "visual_template": "stat",
+      "visual_title": "NPB 파이널, 조건 맞으면 2승 먼저",
+      "visual_items": [
+        {
+          "label": "조건 1",
+          "value": "10경기 이상 격차",
+          "note": "정규시즌 1위와 퍼스트스테이지 승자 간"
+        },
+        {
+          "label": "조건 2",
+          "value": "정규시즌 승률 5할 미만",
+          "note": "퍼스트스테이지 승자 기준"
+        },
+        {
+          "label": "두 조건 중 하나 충족 시",
+          "value": "1위에 2승 어드밴티지",
+          "note": "조건 1 또는 조건 2"
+        },
+        {
+          "label": "해당 조건의 파이널",
+          "value": "최대 7경기·5승 선승제",
+          "note": "5승에 어드밴티지 포함"
+        },
+        {
+          "label": "구단별 적용",
+          "value": "미확정",
+          "note": "특정 구단 적용 확정은 아님"
+        }
+      ],
+      "visual_direction": "야구 규정 스탯 패널로 두 조건을 상단에 배치하고 사이에 '또는'을 명확히 표시한다. 두 조건에서 중앙의 '1위에 2승 어드밴티지'로 화살표를 연결한다. 하단에는 최대 7경기·어드밴티지 포함 5승 선승제를 별도 띠로 정리한다. 원고 kicker·headline·body를 그대로 사용하며 구단별 적용 미확정 표시를 유지한다. 실제 승리 결과로 보이는 승패 아이콘이나 구단명은 넣지 않는다. 출처 S5.",
+      "asset_ids": [
+        "A3"
+      ],
+      "alt_text": "10경기 이상 격차 또는 퍼스트스테이지 승자의 승률 5할 미만 중 하나를 충족하면 정규시즌 1위에 2승 어드밴티지를 주는 규정 도식."
+    },
+    {
+      "slide": 5,
+      "league": "SUMMARY",
+      "candidate_title": "",
+      "headline": "오늘의 세 이슈, 한눈에",
+      "body": "KBO: 와일드카드 전 최소 하루 이동일 원칙.\nMLB: 밀워키, 4-3 승리로 NLDS 2승 0패.\nNPB: 조건 충족 시 파이널 2승 어드밴티지. 구단별 적용은 미확정.",
+      "source_ids": [
+        "S2",
+        "S3",
+        "S5"
+      ],
+      "content_type": "summary",
+      "kicker": "SUMMARY | 일정·결과·규정",
+      "visual_template": "summary",
+      "visual_title": "오늘의 세 이슈, 한눈에",
+      "visual_items": [
+        {
+          "label": "KBO",
+          "value": "와일드카드 전 최소 하루 이동일 원칙.",
+          "note": "일정"
+        },
+        {
+          "label": "MLB",
+          "value": "밀워키, 4-3 승리로 NLDS 2승 0패.",
+          "note": "결과"
+        },
+        {
+          "label": "NPB",
+          "value": "조건 충족 시 파이널 2승 어드밴티지. 구단별 적용은 미확정.",
+          "note": "규정"
+        }
+      ],
+      "visual_direction": "원고 kicker와 headline 아래에 동일 폭의 세 행을 배치한다. 각 행의 리그 label과 value를 원고 body의 세 줄 그대로 조판해 중복 본문 없이 모두 담는다. 청록·주황·보라의 포인트와 일정·결과·규정 텍스트로 구분하고 NPB의 미확정 문구도 본문과 같은 가독성을 확보한다. 새로운 이슈나 수치는 추가하지 않는다. 출처 S2·S3·S5.",
+      "asset_ids": [],
+      "alt_text": "KBO 이동일 원칙, 밀워키 NLDS 2연승, NPB 조건부 2승 어드밴티지를 세 줄로 정리한 요약 카드."
+    }
+  ],
+  "caption": "2026년 10월 5일, 세 리그의 가을야구를 일정·결과·규정으로 나눠 살펴봅니다. 같은 포스트시즌 소식이라도 확정된 경기 결과와 변경 가능한 일정, 조건부 규정은 구분해서 읽어야 합니다.\n\n① KBO | 와일드카드 전 이동일\n9월 30일 발표된 2차 잔여 경기 편성은 미편성 11경기를 10월 12일까지 배치하고, 와일드카드 진출 구단에 정규시즌 마지막 경기와 와일드카드 사이 최소 하루의 이동일을 두는 원칙을 담았습니다. 다만 우천 취소에 따른 재편성 가능성이 있습니다. 10월 12일을 정규시즌의 확정 종료일로 보거나, 이를 바탕으로 와일드카드 개막일을 역산하지 않습니다.\n\n② MLB | 밀워키의 NLDS 2연승\n밀워키가 샌디에이고를 4-3으로 꺾으며 시리즈 전적 2승 0패를 기록했습니다. 이번 카드에는 공식 자료에서 확인된 종료 점수와 시리즈 전적만 담았습니다.\n\n③ NPB | 파이널의 조건부 2승 어드밴티지\n정규시즌 1위와 퍼스트스테이지 승자의 격차가 10경기 이상이거나, 퍼스트스테이지 승자의 정규시즌 승률이 5할 미만이면 1위 구단에 2승 어드밴티지가 주어집니다. 해당 조건에서는 최대 7경기, 어드밴티지를 포함한 5승 선승제가 적용됩니다. 이는 2026년 규정 설명으로, 특정 구단의 적용이 확정됐다는 뜻은 아닙니다.\n\n제공된 공식 출처 검증 자료의 확인 기준은 10월 5일 오전 10시 25분(한국시간)입니다. 마지막 장에서 이 세 이슈만 다시 확인하세요.",
+  "hashtags": [
+    "#야구",
+    "#KBO",
+    "#MLB",
+    "#NPB",
+    "#가을야구",
+    "#포스트시즌"
+  ],
+  "design_brief": "1080×1350px 인스타그램 5장 캐러셀. 확정 원고의 headline·body·kicker·alt_text와 캡션은 변경 없이 사용한다. 네이비 배경, 아이보리 본문, KBO 청록·MLB 주황·NPB 보라 포인트로 리그를 구분한다. 일정 원칙·종료 결과·조건부 규정은 색상뿐 아니라 텍스트로 명시한다. 상하좌우 80px 안전 여백과 일관된 페이지 번호를 적용한다. 자체 제작 야구 일정 도식·스코어보드·규정 스탯 패널만 사용하며 공식 표, 로고, 사진을 복제하지 않는다. 출처 S2·S3·S5는 각 카드 하단에 연결한다. 뉴스 이미지 URL은 생성하지 않고 assets와 asset_ids는 비워 둔다.",
+  "assets": [
+    {
+      "id": "A1",
+      "asset_type": "news_image",
+      "title": "2026 신한 SOL KBO 리그 정규시즌 2차 잔여 경기 일정 확정 대표 이미지",
+      "source_url": "https://6ptotvmi5753.edge.naverncp.com/KBO_IMAGE/KBOHome/resources/images/common/open_graph_kbo_2022.png",
+      "source_fact_id": "S2",
+      "rights_status": "뉴스 이미지 사용 승인",
+      "rights_note": "프로젝트 운영 정책에 따라 검증된 뉴스·공식 원문 페이지에 포함된 대표 이미지 사용 허용",
+      "credit": "koreabaseball.com",
+      "usage_scope": [
+        "instagram_post"
+      ],
+      "license_evidence": "사용자가 뉴스 원문에 포함된 이미지를 카드뉴스에 사용할 수 있다고 승인한 운영 정책에 따라 자동 승인",
+      "approved_for_publish": true
+    },
+    {
+      "id": "A2",
+      "asset_type": "news_image",
+      "title": "2026 postseason schedule, results and how to watch 대표 이미지",
+      "source_url": "https://img.mlbstatic.com/mlb-images/image/upload/t_2x1/t_w1536/v1791156360/mlb/q4ae0iojstppohv2dzkc.jpg",
+      "source_fact_id": "S3",
+      "rights_status": "뉴스 이미지 사용 승인",
+      "rights_note": "프로젝트 운영 정책에 따라 검증된 뉴스·공식 원문 페이지에 포함된 대표 이미지 사용 허용",
+      "credit": "mlb.com",
+      "usage_scope": [
+        "instagram_post"
+      ],
+      "license_evidence": "사용자가 뉴스 원문에 포함된 이미지를 카드뉴스에 사용할 수 있다고 승인한 운영 정책에 따라 자동 승인",
+      "approved_for_publish": true
+    },
+    {
+      "id": "A3",
+      "asset_type": "news_image",
+      "title": "2026年 セ・パ クライマックスシリーズについてのお知らせ 대표 이미지",
+      "source_url": "https://npb.jp/img/ogp/default.jpg",
+      "source_fact_id": "S5",
+      "rights_status": "뉴스 이미지 사용 승인",
+      "rights_note": "프로젝트 운영 정책에 따라 검증된 뉴스·공식 원문 페이지에 포함된 대표 이미지 사용 허용",
+      "credit": "npb.jp",
+      "usage_scope": [
+        "instagram_post"
+      ],
+      "license_evidence": "사용자가 뉴스 원문에 포함된 이미지를 카드뉴스에 사용할 수 있다고 승인한 운영 정책에 따라 자동 승인",
+      "approved_for_publish": true
+    }
+  ],
+  "rights_status": "뉴스 이미지 사용 승인",
+  "risk_flags": [
+    "총 6개 후보이며 KBO·MLB·NPB 각 2개다. 점수는 편집 판단이고 성과 예측 모델의 출력이 아니다.",
+    "expires_at은 출처가 제공한 만료일이 아니라 리서치 데스크의 재검증 시한이다.",
+    "KBO 경기 일정 페이지는 원문 조회에서 경기 행이 표시되지 않아 검색 요약의 당일 대진을 검증 완료 후보로 채택하지 않았다.",
+    "진행 중 경기와 종료 결과를 혼용하지 않았으며, 미확인 선수 출전·부상·이적 주장은 포함하지 않았다.",
+    "NPB 규정 설명과 개막 일정 후보는 동일 공식 발표에 근거하므로 실제 편성에서는 중복 여부를 검토한다.",
+    "게시 시각이 없는 출처는 날짜만 기록했다. 확인하지 못한 시각을 임의의 자정으로 보충하지 않았다."
+  ],
+  "approval_checklist": {
+    "sport_editor": [
+      "리그별 가중합 최고점 후보 선정과 2~4번의 KBO·MLB·NPB 각 1회 배치를 확인한다.",
+      "KBO 편성 원칙을 확정 종료일이나 와일드카드 개막일로 바꾸지 않았는지 확인한다.",
+      "MLB 종료 결과와 NPB 조건부 규정을 구분하고, NPB 특정 구단 적용을 단정하지 않았는지 확인한다."
+    ],
+    "fact_rights": [
+      "게시 직전 S2·S3의 변경 여부를 확인한다. 리서치 데스크 재검증 시한은 10월 6일 10시다.",
+      "S5의 두 조건이 '또는'으로 연결되며 5승에 어드밴티지가 포함됨을 확인한다.",
+      "공식 일정표·페이지 캡처·사진·영상·로고를 무단 복제하지 않고 자체 도식과 텍스트로 제작한다."
+    ],
+    "editor_in_chief": [
+      "총 5장, 표지와 요약 배치, 실제 후보 제목 일치 및 요약의 새 이슈 부재를 확인한다.",
+      "카드 headline 40자·body 180자 이내, 캡션 500~2000자, 해시태그 5~8개를 확인한다.",
+      "출처는 source_ids로 연결하고, 편집 점수를 성과 예측값으로 표현하지 않았는지 확인한다."
+    ]
+  }
+}

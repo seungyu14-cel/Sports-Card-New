@@ -1,0 +1,32 @@
+[
+  {
+    "slide": 1,
+    "league": "COVER",
+    "content_type": "summary",
+    "alt_text": "KBO 일정, MLB 결과, NPB 규정을 소개하는 세 리그 야구 브리핑 표지."
+  },
+  {
+    "slide": 2,
+    "league": "KBO",
+    "content_type": "schedule",
+    "alt_text": "정규시즌 마지막 경기와 와일드카드 사이 최소 하루 이동일 원칙을 보여주는 자체 제작 도식. 우천 시 재편성 가능 표시."
+  },
+  {
+    "slide": 3,
+    "league": "MLB",
+    "content_type": "match_result",
+    "alt_text": "밀워키 4점, 샌디에이고 3점의 경기 결과와 밀워키의 시리즈 2승 0패를 표시한 점수 그래픽."
+  },
+  {
+    "slide": 4,
+    "league": "NPB",
+    "content_type": "explainer",
+    "alt_text": "10경기 이상 격차 또는 퍼스트스테이지 승자의 승률 5할 미만 중 하나를 충족하면 정규시즌 1위에 2승 어드밴티지를 주는 규정 도식."
+  },
+  {
+    "slide": 5,
+    "league": "SUMMARY",
+    "content_type": "summary",
+    "alt_text": "KBO 이동일 원칙, 밀워키 NLDS 2연승, NPB 조건부 2승 어드밴티지를 세 줄로 정리한 요약 카드."
+  }
+]
