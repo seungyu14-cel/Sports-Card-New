@@ -2,6 +2,8 @@ name: Validate card news
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
   pull_request:
     paths:
       - "src/**"
@@ -11,6 +13,8 @@ on:
       - "output/**"
       - ".github/workflows/**"
       - "pyproject.toml"
+      - "scripts/**"
+      - "start.bat"
 
 permissions:
   contents: read

@@ -15,7 +15,7 @@ from typing import Literal
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from openai import OpenAI
 from pydantic import BaseModel, Field, SecretStr
@@ -159,8 +159,8 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
         return JSONResponse(status_code=500, content={"detail": _safe_error(error)})
 
     @app.get("/legacy")
-    async def index() -> FileResponse:
-        return FileResponse(WEB_ROOT / "index.html")
+    async def retired_studio() -> RedirectResponse:
+        return RedirectResponse(url="/", status_code=307)
 
     @app.get("/")
     @app.get("/local")

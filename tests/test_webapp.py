@@ -188,7 +188,12 @@ def test_default_md_screen_and_legacy_routes(tmp_path: Path):
         assert client.get('/').text == client.get('/local').text
         assert 'local-file' in client.get('/').text
         assert 'local-topic' not in client.get('/').text
-        assert 'SPORTS CARD' in client.get('/legacy').text
+        redirect = client.get('/legacy', follow_redirects=False)
+        assert redirect.status_code == 307
+        assert redirect.headers['location'] == '/'
+        assert 'local-file' in client.get('/legacy').text
+        assert client.get('/assets/index.html').status_code == 404
+        assert client.get('/assets/app.js').status_code == 404
         assert client.get('/work').status_code == 200
 
 
