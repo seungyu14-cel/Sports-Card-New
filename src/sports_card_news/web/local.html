@@ -13,7 +13,7 @@
 <main class='local-shell'>
   <header class='local-top'>
     <div><p class='eyebrow'>LOCAL LLM · MD ONLY NEWSROOM</p><h1>스포츠 데일리<br><em>로컬 제작소</em></h1><p class='hero-copy'>OpenAI Key 없이 MD 파일과 Ollama, 직원별 Feedback Memory만으로 7·10페이지 카드뉴스를 제작합니다.</p></div>
-    <div class='local-status' id='ollama-status'><small>OLLAMA</small><strong id='ollama-title'>확인 중</strong><p id='ollama-sub'>로컬 모델 상태를 확인합니다.</p><div class='memory-stat'><span id='memory-runs'>RUN 0</span><span id='memory-feedback'>RULE 0</span></div></div>
+    <div class='local-status' id='ollama-status'><small>OLLAMA</small><strong id='ollama-title'>확인 중</strong><p id='ollama-sub'>로컬 모델 상태를 확인합니다.</p><button type='button' id='local-health-refresh' class='secondary'>연결 다시 확인</button><div class='memory-stat'><span id='memory-runs'>RUN 0</span><span id='memory-feedback'>RULE 0</span></div></div>
   </header>
 
   <section class='local-grid'>
@@ -21,11 +21,11 @@
       <p class='section-no'>01 / INPUT</p><h2>MD 기반 제작 브리프</h2>
       <form id='local-form' class='local-form'>
         <div class='local-row'><label><span>편집일</span><input id='local-date' type='date' required></label><label><span>카테고리</span><select id='local-category'><option>KBO</option><option>NPB</option><option>MLB</option><option>KBL</option><option>NBA</option><option>EPL</option><option>V-LEAGUE</option></select></label></div>
-        <label><span>페이지 수</span><select id='local-page-count'><option value='10'>10페이지 (기본)</option><option value='7'>7페이지 (핵심 이슈 5개)</option></select></label><label><span>제작 주제</span><input id='local-topic' value='오늘의 KBO 주요 경기와 핵심 뉴스' required></label>
-        <div class='local-upload'><label><span>Markdown 파일</span><input id='local-file' type='file' accept='.md,.markdown,text/markdown,text/plain' required></label><div id='local-file-name' class='muted'>MD 파일을 선택하세요.</div><div id='local-md-preview' class='local-preview'>업로드한 MD 원문 미리보기</div></div>
+        <label><span>페이지 수</span><select id='local-page-count'><option value='10'>10페이지 (기본)</option><option value='7'>7페이지 (핵심 이슈 5개)</option></select></label><p class="muted">주제는 MD 제목에서 자동으로 가져옵니다. 원문에 있는 사실만 편집합니다.</p>
+        <div class='local-upload'><label><span>Markdown 파일</span><input id='local-file' type='file' accept='.md,.markdown,text/markdown,text/plain'></label><div id='local-file-name' class='muted'>MD 파일을 선택하세요.</div><label><span>MD 원문 · 붙여넣기 / 수정</span><textarea id='local-markdown' rows='10' minlength='20' maxlength='120000' required placeholder='MD 파일을 선택하거나 여기에 원문을 붙여넣으세요.'></textarea></label><div id='local-md-preview' class='muted' aria-live='polite'>원문 0자</div></div>
         <label><span>추가 편집지시</span><textarea id='local-instruction' rows='5'>MD에 있는 사실만 사용한다. 가장 중요한 사건부터 배치하고, 같은 내용을 여러 페이지에서 반복하지 않는다. 숫자와 선수명은 원문과 반드시 일치시킨다.</textarea></label>
         <label class='check'><input id='save-memory' type='checkbox' checked><span>이번 직원별 피드백을 다음 제작의 학습 규칙으로 저장</span></label>
-        <div class='local-actions'><a class='secondary' href='/work'>Work 운영 허브</a><a class='secondary' href='/'>기존 스튜디오</a><button class='primary' id='local-run' type='submit'>로컬 AI 편집국 제작 시작 →</button></div>
+        <div class='local-actions'><a class='secondary' href='/work'>Work 운영 허브</a><a class='secondary' href='/legacy'>기존 스튜디오</a><button class='primary' id='local-run' type='submit' disabled>로컬 AI 편집국 제작 시작 →</button></div>
       </form>
     </article>
 
@@ -38,7 +38,7 @@
 
   <section class='newsroom-section'><div class='section-head'><div><p class='section-no'>03 / ORGANIZATION & TRAINING</p><h2>직원 학습 현황</h2></div><p class='section-description'>23명 전원의 고정 교육 규칙을 보관하고, 선택한 리그에 필요한 직원만 근무합니다. 근무 직원의 규칙은 매 제작 프롬프트에 자동 주입됩니다.</p></div><div id='local-agents' class='agent-board'></div></section>
 
-  <section id='local-result' class='result-section' hidden><div class='section-head'><div><p class='section-no'>04 / CARD OUTPUT</p><h2 id='local-result-title'>완성된 카드뉴스</h2></div><div class='score-ring'><strong id='local-score'>--</strong><span>/100</span></div></div><p id='local-result-angle' class='section-description'></p><div id='local-cards' class='local-cards'></div><div class='output-grid'><article class='output-card'><p class='section-no'>SNS COPY</p><h3 id='local-social-title'></h3><div id='local-social-caption' class='copy-box'></div><div id='local-tags' class='hashtags'></div></article><article class='output-card'><p class='section-no'>SHORTFORM HOOK</p><div id='local-hook' class='hook'></div></article></div><div class='feedback-block'><div class='section-head'><div><p class='section-no'>FEEDBACK MEMORY</p><h2>직원별 학습 규칙</h2></div></div><div id='local-feedback' class='local-feedback'></div></div></section>
+  <section id='local-result' class='result-section' hidden><div class='section-head'><div><p class='section-no'>04 / CARD OUTPUT</p><h2 id='local-result-title'>완성된 카드뉴스</h2></div><div class='score-ring'><strong id='local-score'>--</strong><span>/100</span></div></div><p id='local-result-angle' class='section-description'></p><p><a id='local-download' class='secondary'>전달 파일 ZIP 다운로드</a> <a class='secondary' href='/work'>Canva · Instagram 운영 허브 →</a></p><div id='local-cards' class='local-cards'></div><div class='output-grid'><article class='output-card'><p class='section-no'>SNS COPY</p><h3 id='local-social-title'></h3><div id='local-social-caption' class='copy-box'></div><div id='local-tags' class='hashtags'></div></article><article class='output-card'><p class='section-no'>SHORTFORM HOOK</p><div id='local-hook' class='hook'></div></article></div><div class='feedback-block'><div class='section-head'><div><p class='section-no'>FEEDBACK MEMORY</p><h2>직원별 학습 규칙</h2></div></div><div id='local-feedback' class='local-feedback'></div></div></section>
 </main>
 <div id='toast' class='toast' hidden></div>
 <script src='/assets/local.js' defer></script>

@@ -55,7 +55,7 @@ class CreateJobRequest(BaseModel):
 class CreateLocalStudioJobRequest(BaseModel):
     edition_date: date
     category: Literal["KBO", "NPB", "MLB", "KBL", "NBA", "EPL", "V-LEAGUE"]
-    topic: str = Field(min_length=2, max_length=200)
+    topic: str = Field(default="", max_length=200)
     markdown_text: str = Field(min_length=20, max_length=120000)
     source_name: str = Field(default="uploaded.md", max_length=180)
     editorial_instruction: str = Field(default="", max_length=8000)
@@ -158,10 +158,11 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
     async def unhandled_error(_request: Request, error: Exception) -> JSONResponse:
         return JSONResponse(status_code=500, content={"detail": _safe_error(error)})
 
-    @app.get("/")
+    @app.get("/legacy")
     async def index() -> FileResponse:
         return FileResponse(WEB_ROOT / "index.html")
 
+    @app.get("/")
     @app.get("/local")
     async def local_index() -> FileResponse:
         return FileResponse(WEB_ROOT / "local.html")

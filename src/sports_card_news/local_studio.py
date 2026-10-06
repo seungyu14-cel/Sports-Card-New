@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import hashlib
 import os
+import re
 import uuid
 from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Literal
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 
 from .feedback_memory import FeedbackMemory
 from .employee_training import training_payload
@@ -34,12 +35,21 @@ THEMES = {
 class LocalStudioRequest(StrictModel):
     edition_date: date
     category: Literal['KBO','NPB','MLB','KBL','NBA','EPL','V-LEAGUE']
-    topic: str = Field(min_length=2, max_length=200)
+    topic: str = Field(default="", max_length=200)
     markdown_text: str = Field(min_length=20, max_length=120000)
     source_name: str = Field(default='uploaded.md', max_length=180)
     editorial_instruction: str = Field(default='', max_length=8000)
     save_feedback_memory: bool = True
     page_count: Literal[7, 10] = 10
+
+    @model_validator(mode='after')
+    def topic_from_source(self):
+        if not self.markdown_text.strip() or len(self.markdown_text.strip()) < 20:
+            raise ValueError('MD 원문을 20자 이상 입력하세요.')
+        if not self.topic.strip():
+            headings = re.findall(r'^[ \t]{0,3}#{1,6}[ \t]+(.+)', self.markdown_text.lstrip('\ufeff'), re.M)
+            self.topic = (headings[0].strip()[:200] if headings else f'{self.edition_date} {self.category} MD 브리핑')
+        return self
 
 class LocalEditorial(StrictModel):
     master_headline: str = Field(min_length=4, max_length=70)

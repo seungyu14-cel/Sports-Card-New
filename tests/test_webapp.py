@@ -74,7 +74,8 @@ def test_frontend_is_served(tmp_path: Path) -> None:
     with TestClient(create_app(project)) as client:
         response = client.get("/")
     assert response.status_code == 200
-    assert "SPORTS CARD" in response.text
+    assert "local-markdown" in response.text
+    assert "local-topic" not in response.text
 
 
 def test_live_job_requires_verified_key(tmp_path: Path, monkeypatch) -> None:
@@ -180,3 +181,42 @@ def test_studio_demo_job_generates_seven_cards_and_feedback(
 
         image = client.get(f"/output/studio/{session_id}/card-07.png")
         assert image.status_code == 200
+
+
+def test_default_md_screen_and_legacy_routes(tmp_path: Path):
+    with TestClient(create_app(make_project(tmp_path))) as client:
+        assert client.get('/').text == client.get('/local').text
+        assert 'local-file' in client.get('/').text
+        assert 'local-topic' not in client.get('/').text
+        assert 'SPORTS CARD' in client.get('/legacy').text
+        assert client.get('/work').status_code == 200
+
+
+def test_md_job_without_topic_produces_downloadable_ten_pages(tmp_path: Path, monkeypatch):
+    from test_local_studio import FakeOllama
+    import sports_card_news.local_studio as local
+    class ReadyOllama(FakeOllama):
+        def health(self):
+            return {'reachable': True, 'model_installed': True, 'model': 'test'}
+    monkeypatch.setattr('sports_card_news.webapp.OllamaClient', ReadyOllama)
+    monkeypatch.setattr(local, 'OllamaClient', ReadyOllama)
+    monkeypatch.delenv('OPENAI_API_KEY', raising=False)
+    source = '# KIA-LG 경기 브리핑\nKIA가 LG에 6-4로 승리했다. 김도영이 9회 시즌 42호 역전 3점 홈런을 기록했다.'
+    with TestClient(create_app(make_project(tmp_path))) as client:
+        response = client.post('/api/local/jobs', json={
+            'edition_date': '2026-10-06', 'category': 'KBO', 'markdown_text': source})
+        assert response.status_code == 202, response.text
+        job_id = response.json()['id']
+        for _ in range(200):
+            job = client.get(f'/api/studio/jobs/{job_id}').json()
+            if job['status'] in {'completed', 'failed'}:
+                break
+            time.sleep(.05)
+        assert job['status'] == 'completed', job
+        result = job['result']
+        assert result['topic'] == 'KIA-LG 경기 브리핑'
+        assert len(result['cards']) == 10
+        session = result['session_id']
+        assert client.get(f'/api/work/sessions/{session}/bundle').status_code == 200
+        assert client.get(result['cards'][-1]['image_url']).status_code == 200
+        assert client.get('/api/local/health').json()['memory']['run_count'] == 1
