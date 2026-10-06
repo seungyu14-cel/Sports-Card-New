@@ -75,7 +75,7 @@ class ResearchStage(StrictModel):
 
 
 class CardCopy(StrictModel):
-    slide: int = Field(ge=1, le=7)
+    slide: int = Field(ge=1, le=10)
     role: str = Field(min_length=2, max_length=40)
     kicker: str = Field(default="", max_length=32)
     headline: str = Field(min_length=2, max_length=48)

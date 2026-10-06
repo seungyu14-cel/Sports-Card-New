@@ -22,6 +22,8 @@ from pydantic import BaseModel, Field, SecretStr
 
 from .config import Settings, load_settings
 from .pipeline import load_package, run_daily
+from .feedback_memory import FeedbackMemory
+from .local_studio import LocalStudioRequest, OllamaClient, local_category_info, run_local_studio
 from .studio import (
     StudioPackage,
     StudioRequest,
@@ -48,6 +50,17 @@ class SaveSettingsRequest(BaseModel):
 class CreateJobRequest(BaseModel):
     edition_date: date
     demo: bool = False
+
+
+class CreateLocalStudioJobRequest(BaseModel):
+    edition_date: date
+    category: Literal["KBO", "NPB", "MLB", "KBL", "NBA", "EPL", "V-LEAGUE"]
+    topic: str = Field(min_length=2, max_length=200)
+    markdown_text: str = Field(min_length=20, max_length=120000)
+    source_name: str = Field(default="uploaded.md", max_length=180)
+    editorial_instruction: str = Field(default="", max_length=8000)
+    save_feedback_memory: bool = True
+    page_count: Literal[7, 10] = 10
 
 
 class CreateStudioJobRequest(BaseModel):
@@ -78,7 +91,7 @@ class JobRecord:
 class StudioJobRecord:
     id: str
     edition_date: str
-    mode: Literal["live", "demo"]
+    mode: Literal["live", "demo", "local"]
     status: Literal["queued", "running", "completed", "failed"] = "queued"
     stage: str = "queued"
     percent: int = 0
@@ -95,6 +108,7 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
     output_root = root / "output"
     fixture_path = root / "fixtures" / "demo_package.json"
     env_path = root / ".env"
+    memory_path = root / "data" / "feedback_memory.sqlite3"
 
     if not config_path.exists():
         raise RuntimeError(f"프로젝트 설정 파일을 찾을 수 없습니다: {config_path}")
@@ -115,6 +129,7 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
     app.state.output_root = output_root
     app.state.fixture_path = fixture_path
     app.state.env_path = env_path
+    app.state.memory_path = memory_path
     app.state.settings = settings
     app.state.api_verified = False
     app.state.jobs: dict[str, JobRecord] = {}
@@ -146,6 +161,10 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
     @app.get("/")
     async def index() -> FileResponse:
         return FileResponse(WEB_ROOT / "index.html")
+
+    @app.get("/local")
+    async def local_index() -> FileResponse:
+        return FileResponse(WEB_ROOT / "local.html")
 
     @app.get("/api/health")
     async def health() -> dict[str, object]:
@@ -231,6 +250,57 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
         return _edition_detail(output_root, edition_date)
 
     # New editorial newsroom studio.
+    @app.get("/api/local/health")
+    async def local_health() -> dict[str, object]:
+        memory = FeedbackMemory(app.state.memory_path)
+        try:
+            ollama = await asyncio.to_thread(OllamaClient().health)
+        except Exception as error:
+            ollama = {
+                "reachable": False,
+                "model": os.getenv("OLLAMA_MODEL", "qwen3:8b"),
+                "model_installed": False,
+                "models": [],
+                "error": _safe_error(error),
+            }
+        return {"ollama": ollama, "memory": memory.stats()}
+
+    @app.get("/api/local/category/{category}")
+    async def local_category(category: str) -> dict[str, object]:
+        try:
+            return local_category_info(category)
+        except (KeyError, ValueError) as error:
+            raise HTTPException(status_code=404, detail=str(error)) from error
+
+    @app.post("/api/local/jobs", status_code=202)
+    async def create_local_job(payload: CreateLocalStudioJobRequest) -> dict[str, object]:
+        if app.state.studio_lock.locked():
+            raise HTTPException(status_code=409, detail="편집국 제작 작업이 이미 진행 중입니다.")
+        try:
+            health = await asyncio.to_thread(OllamaClient().health)
+        except Exception as error:
+            raise HTTPException(
+                status_code=503,
+                detail="Ollama에 연결할 수 없습니다. ollama serve 실행 상태를 확인하세요.",
+            ) from error
+        if not health.get("model_installed"):
+            raise HTTPException(
+                status_code=409,
+                detail=f"Ollama 모델 {health.get('model')}이 설치되지 않았습니다. ollama pull 명령으로 설치하세요.",
+            )
+        job_id = uuid.uuid4().hex[:12]
+        record = StudioJobRecord(
+            id=job_id,
+            edition_date=payload.edition_date.isoformat(),
+            mode="local",
+            created_at=datetime.now().astimezone().isoformat(timespec="seconds"),
+        )
+        app.state.studio_jobs[job_id] = record
+        task = asyncio.create_task(_run_local_studio_job(app, record, payload))
+        app.state.tasks.add(task)
+        task.add_done_callback(app.state.tasks.discard)
+        return asdict(record)
+
     @app.get("/api/studio/agents")
     async def studio_agents() -> dict[str, object]:
         return {"items": public_agents()}
@@ -281,7 +351,60 @@ def create_app(project_root: str | Path | None = None) -> FastAPI:
             raise HTTPException(status_code=422, detail="세션 ID 형식이 올바르지 않습니다.")
         return _studio_detail(output_root, session_id)
 
+    from .work_hub import work_router
+    app.include_router(work_router(output_root, root / 'data' / 'work_operations.sqlite3', WEB_ROOT))
+    from .autopublish import auto_router
+    app.include_router(auto_router(output_root, root / 'data' / 'work_operations.sqlite3'))
     return app
+
+
+async def _run_local_studio_job(
+    app: FastAPI,
+    record: StudioJobRecord,
+    payload: CreateLocalStudioJobRequest,
+) -> None:
+    async with app.state.studio_lock:
+        record.status = "running"
+        record.stage = "research"
+        record.percent = 8
+        record.message = "MD 원문과 Feedback Memory를 불러오고 있습니다."
+
+        def progress(stage: str, percent: int, message: str) -> None:
+            record.stage = stage
+            record.percent = percent
+            record.message = message
+
+        try:
+            request = LocalStudioRequest(
+                edition_date=payload.edition_date,
+                category=payload.category,
+                topic=payload.topic,
+                markdown_text=payload.markdown_text,
+                source_name=payload.source_name,
+                editorial_instruction=payload.editorial_instruction,
+                save_feedback_memory=payload.save_feedback_memory,
+                page_count=payload.page_count,
+            )
+            destination, package = await asyncio.to_thread(
+                run_local_studio,
+                request,
+                output_root=app.state.output_root,
+                memory_path=app.state.memory_path,
+                progress=progress,
+            )
+            record.result = _studio_package_payload(package, destination)
+            record.status = "completed"
+            record.stage = "complete"
+            record.percent = 100
+            record.message = f"MD 기반 {payload.page_count}페이지 카드뉴스와 Work 전달 파일 생성 완료"
+        except Exception as error:
+            record.status = "failed"
+            record.stage = "failed"
+            record.percent = 100
+            record.message = "로컬 편집국 제작에 실패했습니다."
+            record.error = _safe_error(error)
+        finally:
+            record.finished_at = datetime.now().astimezone().isoformat(timespec="seconds")
 
 
 async def _run_studio_job(
@@ -492,6 +615,7 @@ def _load_local_env(path: Path) -> None:
     if not path.exists():
         return
     allowed = {
+        "CANVA_ACCESS_TOKEN", "METRICOOL_API_TOKEN", "METRICOOL_USER_ID", "METRICOOL_BLOG_ID",
         "OPENAI_API_KEY",
         "OPENAI_MODEL",
         "OPENAI_STUDIO_MODEL",

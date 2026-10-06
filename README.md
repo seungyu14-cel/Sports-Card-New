@@ -79,3 +79,33 @@ sports-card-news daily --date 2026-10-05 --fixture fixtures/demo_package.json
 ```
 
 GitHub Actions는 테스트 → (Supabase가 연결된 경우 경기별 TOP3 생성) → 카드 생성 → 검증 → Visual QA → Draft PR 순서로 동작하며 게시 여부는 사람이 최종 결정합니다.
+
+
+## OpenAI 없이 로컬 LLM 모드
+
+MD 파일만으로 10페이지 카드뉴스를 만들 수 있습니다.
+
+```powershell
+ollama serve
+ollama pull qwen3:8b
+sports-card-news-web --open-browser
+```
+
+브라우저에서 `http://127.0.0.1:8787/local`로 접속하세요.
+
+로컬 모드는 `MD → Ollama → 직원별 Agent → SQLite Feedback Memory → 10P PNG` 순서로 동작합니다. 직원별 학습 규칙과 운영 방법은 `docs/LOCAL_LLM_FEEDBACK_GUIDE.md`를 참고하세요.
+
+## ChatGPT Work 운영 허브
+
+`http://127.0.0.1:8787/work`에서 API 키 없이 Work JSON 원고를 가져오고,
+Canva 템플릿 전달 ZIP·최종 검수·Metricool 예약 결과·실측 성과를 관리합니다.
+기존 `/local`은 기본 10페이지를 유지하며 7페이지도 선택할 수 있습니다.
+Canva/Metricool의 실제 외부 작업은 Work 플러그인에서 수행합니다.
+자세한 실행 순서는 [Work 운영 가이드](docs/WORK_OPERATIONS_GUIDE.md)를 참고하세요.
+
+### Canva → Instagram 직접 자동 실행
+
+`/work`의 자동 예약 폼에서 원고와 템플릿을 확인하고 실행하면 Canva 생성·PNG 내보내기·Metricool 미디어 보관·Instagram 예약이 이어집니다.
+로컬 `.env`의 Canva/Metricool API 인증 및 Instagram 계정 연결이 필요합니다.
+중복 요청 방지와 외부 응답 불명확 시 확인 대기 상태를 제공합니다.
+[설정 및 실패 처리](docs/WORK_OPERATIONS_GUIDE.md#직접-api-자동-실행-추가-기능)를 먼저 확인하세요.

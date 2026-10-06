@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang='ko'>
+<head>
+  <meta charset='utf-8'>
+  <meta name='viewport' content='width=device-width,initial-scale=1'>
+  <title>로컬 LLM 스포츠 카드 뉴스 제작소</title>
+  <link rel='stylesheet' href='/assets/styles.css'>
+  <style>
+    .local-shell{max-width:1500px;margin:0 auto;padding:44px 28px 80px}.local-top{display:flex;justify-content:space-between;gap:24px;align-items:flex-start}.local-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(320px,.75fr);gap:16px;margin-top:30px}.local-panel{border:1px solid var(--line);border-radius:20px;padding:28px;background:linear-gradient(145deg,var(--panel),var(--panel2))}.local-form{display:grid;gap:14px;margin-top:24px}.local-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.local-upload{border:1px dashed var(--line);border-radius:14px;padding:18px;background:rgba(0,0,0,.14)}.local-preview{margin-top:10px;max-height:220px;overflow:auto;white-space:pre-wrap;font-size:10px;line-height:1.6;color:var(--muted);background:rgba(0,0,0,.2);padding:12px;border-radius:10px}.local-status{border:1px solid var(--line);border-radius:14px;padding:15px}.local-status.good{border-color:rgba(184,255,91,.45)}.agent-board{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px}.agent-card{border:1px solid var(--line);border-radius:12px;padding:12px;opacity:.38}.agent-card.working{opacity:1;border-color:rgba(184,255,91,.42);background:rgba(184,255,91,.045)}.agent-card strong{font-size:12px}.agent-card small{display:block;color:var(--muted);font-size:8px;margin-top:4px}.agent-card .training-focus{display:inline-block;margin-top:8px;padding:4px 7px;border:1px solid var(--line);border-radius:999px;font-size:8px}.agent-card .training-rule{margin-top:7px;font-size:8px;line-height:1.45;color:var(--text)}.local-actions{display:flex;justify-content:flex-end;gap:8px}.local-progress{margin-top:20px}.local-progress .track{height:5px}.local-progress .track span{display:block;height:100%;width:0;background:var(--acid)}.local-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:18px}.local-cards img{width:100%;border-radius:12px;border:1px solid var(--line)}.local-feedback{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}.memory-stat{display:flex;gap:10px;margin-top:12px}.memory-stat span{padding:7px 9px;border:1px solid var(--line);border-radius:20px;font-size:9px;color:var(--muted)}@media(max-width:900px){.local-grid{grid-template-columns:1fr}.agent-board{grid-template-columns:repeat(2,1fr)}.local-cards{grid-template-columns:repeat(2,1fr)}.local-feedback{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<main class='local-shell'>
+  <header class='local-top'>
+    <div><p class='eyebrow'>LOCAL LLM · MD ONLY NEWSROOM</p><h1>스포츠 데일리<br><em>로컬 제작소</em></h1><p class='hero-copy'>OpenAI Key 없이 MD 파일과 Ollama, 직원별 Feedback Memory만으로 7·10페이지 카드뉴스를 제작합니다.</p></div>
+    <div class='local-status' id='ollama-status'><small>OLLAMA</small><strong id='ollama-title'>확인 중</strong><p id='ollama-sub'>로컬 모델 상태를 확인합니다.</p><div class='memory-stat'><span id='memory-runs'>RUN 0</span><span id='memory-feedback'>RULE 0</span></div></div>
+  </header>
+
+  <section class='local-grid'>
+    <article class='local-panel'>
+      <p class='section-no'>01 / INPUT</p><h2>MD 기반 제작 브리프</h2>
+      <form id='local-form' class='local-form'>
+        <div class='local-row'><label><span>편집일</span><input id='local-date' type='date' required></label><label><span>카테고리</span><select id='local-category'><option>KBO</option><option>NPB</option><option>MLB</option><option>KBL</option><option>NBA</option><option>EPL</option><option>V-LEAGUE</option></select></label></div>
+        <label><span>페이지 수</span><select id='local-page-count'><option value='10'>10페이지 (기본)</option><option value='7'>7페이지 (핵심 이슈 5개)</option></select></label><label><span>제작 주제</span><input id='local-topic' value='오늘의 KBO 주요 경기와 핵심 뉴스' required></label>
+        <div class='local-upload'><label><span>Markdown 파일</span><input id='local-file' type='file' accept='.md,.markdown,text/markdown,text/plain' required></label><div id='local-file-name' class='muted'>MD 파일을 선택하세요.</div><div id='local-md-preview' class='local-preview'>업로드한 MD 원문 미리보기</div></div>
+        <label><span>추가 편집지시</span><textarea id='local-instruction' rows='5'>MD에 있는 사실만 사용한다. 가장 중요한 사건부터 배치하고, 같은 내용을 여러 페이지에서 반복하지 않는다. 숫자와 선수명은 원문과 반드시 일치시킨다.</textarea></label>
+        <label class='check'><input id='save-memory' type='checkbox' checked><span>이번 직원별 피드백을 다음 제작의 학습 규칙으로 저장</span></label>
+        <div class='local-actions'><a class='secondary' href='/work'>Work 운영 허브</a><a class='secondary' href='/'>기존 스튜디오</a><button class='primary' id='local-run' type='submit'>로컬 AI 편집국 제작 시작 →</button></div>
+      </form>
+    </article>
+
+    <article class='local-panel'>
+      <p class='section-no'>02 / PIPELINE</p><h2>로컬 제작 진행</h2>
+      <div class='pipeline'><div class='pipe' data-stage='research'><span>01</span><div><strong>MD 분석</strong><small>사실·기록·이슈 추출</small></div></div><div class='pipe' data-stage='editorial'><span>02</span><div><strong>7·10P 편집</strong><small>김도윤·서유진·강지우</small></div></div><div class='pipe' data-stage='feedback'><span>03</span><div><strong>사후 편집회의</strong><small>직원별 개선 규칙</small></div></div><div class='pipe' data-stage='render'><span>04</span><div><strong>렌더링</strong><small>종목 자동 테마 PNG</small></div></div></div>
+      <div class='local-progress'><div class='job-row'><strong id='local-job-label'>대기</strong><span id='local-job-percent'>0%</span></div><div class='track'><span id='local-job-bar'></span></div><p id='local-job-message' class='muted'>Ollama와 MD를 준비하세요.</p></div>
+    </article>
+  </section>
+
+  <section class='newsroom-section'><div class='section-head'><div><p class='section-no'>03 / ORGANIZATION & TRAINING</p><h2>직원 학습 현황</h2></div><p class='section-description'>23명 전원의 고정 교육 규칙을 보관하고, 선택한 리그에 필요한 직원만 근무합니다. 근무 직원의 규칙은 매 제작 프롬프트에 자동 주입됩니다.</p></div><div id='local-agents' class='agent-board'></div></section>
+
+  <section id='local-result' class='result-section' hidden><div class='section-head'><div><p class='section-no'>04 / CARD OUTPUT</p><h2 id='local-result-title'>완성된 카드뉴스</h2></div><div class='score-ring'><strong id='local-score'>--</strong><span>/100</span></div></div><p id='local-result-angle' class='section-description'></p><div id='local-cards' class='local-cards'></div><div class='output-grid'><article class='output-card'><p class='section-no'>SNS COPY</p><h3 id='local-social-title'></h3><div id='local-social-caption' class='copy-box'></div><div id='local-tags' class='hashtags'></div></article><article class='output-card'><p class='section-no'>SHORTFORM HOOK</p><div id='local-hook' class='hook'></div></article></div><div class='feedback-block'><div class='section-head'><div><p class='section-no'>FEEDBACK MEMORY</p><h2>직원별 학습 규칙</h2></div></div><div id='local-feedback' class='local-feedback'></div></div></section>
+</main>
+<div id='toast' class='toast' hidden></div>
+<script src='/assets/local.js' defer></script>
+</body></html>
