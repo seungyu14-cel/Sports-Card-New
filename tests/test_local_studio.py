@@ -20,11 +20,8 @@ class FakeOllama:
             if stage == 'grounding_review':
                 return {'supported': True, 'issues': []}
             if stage == 'extract':
-                text = payload['source_chunk']
-                pieces = [x.strip() for x in text.replace('\n', '.').split('.') if len(x.strip()) >= 5]
-                if len(pieces) < 3:
-                    pieces = [text[:20], text[10:35], text[-25:]]
-                return {'facts':[{'quote':x[:160], 'importance':90-i} for i,x in enumerate(pieces[:4])]}
+                return {'facts':[{'source_id':key, 'importance':90-i}
+                                 for i,key in enumerate(list(payload['source_units'])[:4])]}
             if stage == 'card':
                 return {'slide':payload['slide'],'role':payload['role'],'headline':'KIA 경기 핵심 내용',
                         'body':'원문 근거를 기반으로 경기의 주요 내용을 정리합니다.', 'key_stat':'', 'kicker':'경기 브리핑','visual_direction':''}
@@ -120,7 +117,7 @@ def test_category_info_exposes_training_and_only_relevant_specialists() -> None:
 def test_local_seven_pages_passes_md_to_feedback_and_creates_work_bundle(tmp_path: Path) -> None:
     request = LocalStudioRequest(edition_date=date(2026,10,6), category='KBO',
         topic='7페이지 검증', page_count=7,
-        markdown_text='KIA가 LG에 6-4로 승리했다. 김도영이 9회 시즌 42호 역전 3점 홈런을 기록했다.')
+        markdown_text='KIA가 LG에 6-4로 승리했다. 김도영이 9회 시즌 42호 역전 3점 홈런을 기록했다. 정해영이 세이브를 기록했다.')
     destination, package = run_local_studio(request, output_root=tmp_path/'output', memory_path=tmp_path/'memory.sqlite3', client=FakeOllama())
     assert len(package.cards) == 7
     assert (destination/'card-07.png').exists()
@@ -131,7 +128,7 @@ def test_local_seven_pages_passes_md_to_feedback_and_creates_work_bundle(tmp_pat
 def test_local_rejects_wrong_requested_count(tmp_path: Path) -> None:
     import pytest
     request = LocalStudioRequest(edition_date=date(2026,10,6), category='KBO', topic='페이지 수 불일치', page_count=7,
-        markdown_text='KIA가 LG에 6-4로 승리했다. 김도영이 역전 홈런을 기록했다.')
+        markdown_text='KIA가 LG에 6-4로 승리했다. 김도영이 역전 홈런을 기록했다. 정해영이 세이브를 기록했다.')
     class WrongNumber(FakeOllama):
         def json_chat(self, system, payload):
             result = super().json_chat(system,payload)
@@ -156,14 +153,15 @@ def test_long_md_all_chunks_reach_model_and_memory_reused(tmp_path):
         def __init__(self):
             super().__init__(); self.sources=[]; self.memories=[]
         def json_chat(self,system,payload):
-            if payload['stage']=='extract': self.sources.append(payload['source_chunk'])
+            if payload['stage']=='extract': self.sources.extend(payload['source_units'].values())
             if payload['stage']=='review': self.memories.extend(payload['previous_learning_rules'])
             return super().json_chat(system,payload)
     text = ('KIA가 LG에 6-4로 승리했다. 김도영이 역전 홈런을 기록했다. 정해영이 세이브를 기록했다.\n'*100)
     client=Recording()
     request=LocalStudioRequest(edition_date=date(2026,10,6),category='KBO',markdown_text=text)
     dest,pkg=run_local_studio(request,output_root=tmp_path/'output',memory_path=tmp_path/'memory.sqlite3',client=client)
-    assert ''.join(client.sources)==text
+    from sports_card_news.staged_editorial import normalize_quote
+    assert normalize_quote(' '.join(client.sources)) == normalize_quote(text)
     assert len(client.sources)>=5
     next_client=Recording()
     run_local_studio(request,output_root=tmp_path/'output',memory_path=tmp_path/'memory.sqlite3',client=next_client)
@@ -174,7 +172,7 @@ def test_extracted_quote_must_exist_in_source(tmp_path):
     import pytest
     class Invented(FakeOllama):
         def json_chat(self,system,payload):
-            return {'facts':[{'quote':'원문에 없는 선수의 100호 홈런','importance':100}]}
+            return {'facts':[{'source_id':'C999-S999','importance':100}]}
     request=LocalStudioRequest(edition_date=date(2026,10,6),category='KBO',markdown_text='KIA가 LG에 6-4로 승리했다. 김도영이 역전 홈런을 기록했다.')
-    with pytest.raises(ValueError,match='원문에 없는 근거'):
+    with pytest.raises(ValueError,match='원문 번호 선택'):
         run_local_studio(request,output_root=tmp_path/'output',memory_path=tmp_path/'m.sqlite3',client=Invented())

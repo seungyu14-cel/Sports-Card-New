@@ -4,6 +4,7 @@ import shutil
 import time
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 
 from sports_card_news.webapp import _safe_error, _test_openai_connection, create_app
@@ -206,7 +207,7 @@ def test_md_job_without_topic_produces_downloadable_ten_pages(tmp_path: Path, mo
     monkeypatch.setattr('sports_card_news.webapp.OllamaClient', ReadyOllama)
     monkeypatch.setattr(local, 'OllamaClient', ReadyOllama)
     monkeypatch.delenv('OPENAI_API_KEY', raising=False)
-    source = '# KIA-LG 경기 브리핑\nKIA가 LG에 6-4로 승리했다. 김도영이 9회 시즌 42호 역전 3점 홈런을 기록했다.'
+    source = '# KIA-LG 경기 브리핑\nKIA가 LG에 6-4로 승리했다. 김도영이 9회 시즌 42호 역전 3점 홈런을 기록했다. 정해영이 세이브를 기록했다.'
     with TestClient(create_app(make_project(tmp_path))) as client:
         response = client.post('/api/local/jobs', json={
             'edition_date': '2026-10-06', 'category': 'KBO', 'markdown_text': source})
@@ -248,17 +249,20 @@ def test_local_failure_keeps_progress_and_server_reason(tmp_path, monkeypatch):
         assert 'runner test failure' in job['error']
 
 
-def test_grounding_hold_exposes_diagnostic_without_completed_package(tmp_path, monkeypatch):
+@pytest.mark.parametrize('extraction', [False, True])
+def test_grounding_hold_exposes_diagnostic_without_completed_package(tmp_path, monkeypatch, extraction):
     from sports_card_news.grounded_editorial import GroundingReviewRequired
+    from sports_card_news.staged_editorial import ExtractionReviewRequired
     class Ready:
         def health(self): return {'model_installed': True}
     def hold(request, *, output_root, progress, **kwargs):
         folder = output_root / 'studio' / 'local-test-001'
         folder.mkdir(parents=True)
-        report = folder / 'grounding-card-02.json'
+        report = folder / ('extraction-diagnostic-001.json' if extraction else 'grounding-card-02.json')
         report.write_text('{"status":"needs_review"}')
         progress('editorial', 42, '카드 검수')
-        raise GroundingReviewRequired('2페이지 근거 검토 필요', report)
+        error_type = ExtractionReviewRequired if extraction else GroundingReviewRequired
+        raise error_type('원문 근거 검토 필요', report)
     monkeypatch.setattr('sports_card_news.webapp.OllamaClient', Ready)
     monkeypatch.setattr('sports_card_news.webapp.run_local_studio', hold)
     with TestClient(create_app(make_project(tmp_path))) as client:

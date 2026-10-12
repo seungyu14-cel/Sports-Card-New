@@ -192,6 +192,8 @@ Drive에는 원본 MD·이미지·완성본을, Notion에는 세션 ID·검수 �
         # Grounding provenance travels with the deliverable, not just the UI.
         for path in sorted(destination.glob('grounding-*.json')):
             bundle.write(path, path.name)
+        for path in sorted(destination.glob('extraction-diagnostic-*.json')):
+            bundle.write(path, path.name)
         index = destination / 'evidence-index.json'
         if index.exists():
             bundle.write(index, index.name)

@@ -25,6 +25,7 @@ from .pipeline import load_package, run_daily
 from .feedback_memory import FeedbackMemory
 from .grounded_editorial import GroundingReviewRequired
 from .local_studio import LocalStudioRequest, OllamaClient, local_category_info, run_local_studio
+from .staged_editorial import ExtractionReviewRequired
 from .studio import (
     StudioPackage,
     StudioRequest,
@@ -400,7 +401,7 @@ async def _run_local_studio_job(
             record.stage = "complete"
             record.percent = 100
             record.message = f"MD 기반 {payload.page_count}페이지 카드뉴스와 Work 전달 파일 생성 완료"
-        except GroundingReviewRequired as error:
+        except (GroundingReviewRequired, ExtractionReviewRequired) as error:
             record.status = "needs_review"
             record.stage = "needs_review"
             record.message = "근거 검증을 통과하지 못했습니다. 오류 기록과 원문을 확인해 주세요."

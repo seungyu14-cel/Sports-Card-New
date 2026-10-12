@@ -175,7 +175,7 @@ def test_end_to_end_one_card_repair_has_provenance_in_download(tmp_path, monkeyp
     assert all(counts['card', i] == 1 for i in range(1,11))
     assert counts['repair_card', 2] == 1
     assert counts['repair_social', None] == 1
-    assert package.cards[1].body == '김투수가 8탈삼진을 기록했다'
+    assert package.cards[1].body == '김투수가 8탈삼진을 기록했다.'
     summary = json.loads((folder/'grounding-summary.json').read_text())
     assert len(summary['items']) == 11
     assert all(item['status'] == 'passed' for item in summary['items'])
