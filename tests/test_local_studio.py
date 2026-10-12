@@ -7,6 +7,14 @@ from sports_card_news.employee_training import EMPLOYEE_TRAINING, training_profi
 from sports_card_news.local_studio import LocalStudioRequest, local_category_info, run_local_studio
 
 
+def passing_relation_review(payload):
+    """Protocol stub only: this does not emulate a model's factual judgment."""
+    from sports_card_news.fact_verification import RELATIONS
+    return {'reviews': [{'claim_id': claim['id'], 'evidence_ids': list(payload['evidence'])[:1],
+                         'checks': {key: True for key in RELATIONS}, 'reason': ''}
+                        for claim in payload['claims']]}
+
+
 class FakeOllama:
     def __init__(self) -> None:
         self.calls = 0
@@ -18,7 +26,7 @@ class FakeOllama:
             stage = payload['stage']
             self.calls += 1
             if stage == 'grounding_review':
-                return {'supported': True, 'issues': []}
+                return passing_relation_review(payload)
             if stage == 'extract':
                 return {'facts':[{'source_id':key, 'importance':90-i}
                                  for i,key in enumerate(list(payload['source_units'])[:4])]}

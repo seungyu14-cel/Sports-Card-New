@@ -286,7 +286,8 @@ def build_editorial(request, client, agents, rules, notify, destination):
         reports.append(json.loads((destination/'grounding-social.json').read_text(encoding='utf-8')))
         write_json(destination/'grounding-summary.json', {
             'schema_version': 1, 'status': 'passed', 'scope': 'uploaded_source_only',
-            'notice': '업로드 원문과의 일치 검수입니다. 공식 기록 검증이나 사실 정확도 보증이 아닙니다.',
+            'verification_method': 'fact_relationships',
+            'notice': '업로드 원문과의 사실 관계 검수입니다. 공식 기록 검증이나 사실 정확도 보증이 아닙니다.',
             'items': [{'item': r['item'], 'status': r['status'], 'repairs': r['repairs'],
                        'evidence_ids': r['evidence_ids'], 'report': f'grounding-{r["item"]}.json'} for r in reports],
         })

@@ -13,7 +13,7 @@ from sports_card_news.grounded_editorial import (
 from sports_card_news.local_studio import LocalStudioRequest, run_local_studio
 from sports_card_news.staged_editorial import normalize_quote
 from sports_card_news.studio import CardCopy
-from test_local_studio import FakeOllama
+from test_local_studio import FakeOllama, passing_relation_review
 
 
 def document(text, evidence_id='e1', source='source-a', league='KBO'):
@@ -23,13 +23,9 @@ def document(text, evidence_id='e1', source='source-a', league='KBO'):
 
 @pytest.mark.parametrize('copy', [
     '김투수가 9탈삼진을 기록했다.',  # Invented number
-    '박투수가 8탈삼진을 기록했다.',  # Existing number, wrong player
-    '김투수가 8볼넷을 기록했다.',  # Existing number, wrong unit
-    'KIA가 LG에 4-6으로 승리했다.',  # Reversed score
     '김투수의 평균자책점은 2.15다.',  # Decimal alteration
-    '김투수가 8탈삼진을 기록하지 않았다.',  # Negation
 ])
-def test_number_entity_unit_and_score_changes_are_blocked(copy):
+def test_invented_values_are_blocked_before_relation_review(copy):
     docs = [document('김투수가 8탈삼진을 기록했다. KIA가 LG에 6-4로 승리했다. 김투수의 평균자책점은 1.25다.')]
     assert numeric_issues({'body': copy}, docs)
 
@@ -77,8 +73,11 @@ class RepairClient:
         OllamaClient().check_budget(system, payload)
         self.calls.append(payload['stage'])
         if payload['stage'] == 'grounding_review':
-            return {'supported': not self.semantic_failure,
-                    'issues': ['원문에 역전승 근거가 없습니다.'] if self.semantic_failure else []}
+            verdict = passing_relation_review(payload)
+            if self.semantic_failure:
+                verdict['reviews'][0]['checks']['outcome'] = False
+                verdict['reviews'][0]['reason'] = '원문에 역전승 근거가 없습니다.'
+            return verdict
         if self.crash and payload['stage'] == 'repair_card':
             raise RuntimeError('model unavailable')
         wrong = payload['stage'] == 'card' or self.never_fix
@@ -102,7 +101,7 @@ def test_graph_repairs_and_revalidates_only_bad_card(tmp_path):
     report = json.loads((tmp_path/'grounding-card-02.json').read_text())
     assert report['status'] == 'passed'
     assert report['repairs'] == 1
-    assert report['attempts'][0]['issues'][0]['code'] == 'numeric_claim_not_in_evidence'
+    assert report['attempts'][0]['issues'][0]['code'] == 'numeric_value_not_in_evidence'
     assert report['attempts'][1]['issues'] == []
 
 
@@ -123,7 +122,7 @@ def test_semantic_rejection_cannot_be_overridden_by_numeric_pass(tmp_path):
         generate(client, tmp_path)
     assert client.calls.count('repair_card') == 2
     report = json.loads((tmp_path/'grounding-card-02.json').read_text())
-    assert report['attempts'][-1]['issues'][0]['code'] == 'semantic_support_missing'
+    assert report['attempts'][-1]['issues'][0]['code'] == 'fact_relationship_mismatch'
 
 
 def test_model_failure_keeps_previous_rejected_copy(tmp_path):
