@@ -100,9 +100,10 @@ def _render_card(package: "StudioPackage", card, path: Path) -> None:
         font=ImageFont.truetype(bold, 19),
         fill=theme.accent,
     )
-    key_font, key_lines = _fit_text(
-        draw, card.key_stat or package.master_headline, bold, 780, 2, 48, 32
-    )
+    # KBO cards have separate evidence scopes; never inject the cover's facts
+    # into another game's card when its key-stat field is intentionally empty.
+    fallback = card.headline if package.league == 'KBO' else package.master_headline
+    key_font, key_lines = _fit_text(draw, card.key_stat or fallback, bold, 780, 2, 48, 32)
     draw.multiline_text(
         (110, block_top + 102),
         "\n".join(key_lines),

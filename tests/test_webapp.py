@@ -246,3 +246,45 @@ def test_local_failure_keeps_progress_and_server_reason(tmp_path, monkeypatch):
         assert job['status']=='failed'
         assert job['percent']==49
         assert 'runner test failure' in job['error']
+
+
+def test_grounding_hold_exposes_diagnostic_without_completed_package(tmp_path, monkeypatch):
+    from sports_card_news.grounded_editorial import GroundingReviewRequired
+    class Ready:
+        def health(self): return {'model_installed': True}
+    def hold(request, *, output_root, progress, **kwargs):
+        folder = output_root / 'studio' / 'local-test-001'
+        folder.mkdir(parents=True)
+        report = folder / 'grounding-card-02.json'
+        report.write_text('{"status":"needs_review"}')
+        progress('editorial', 42, '카드 검수')
+        raise GroundingReviewRequired('2페이지 근거 검토 필요', report)
+    monkeypatch.setattr('sports_card_news.webapp.OllamaClient', Ready)
+    monkeypatch.setattr('sports_card_news.webapp.run_local_studio', hold)
+    with TestClient(create_app(make_project(tmp_path))) as client:
+        created = client.post('/api/local/jobs', json={
+            'edition_date': '2026-10-12', 'category': 'KBO',
+            'markdown_text': '테스트 전용 원문이며 실제 스포츠 경기 결과가 아닙니다.'})
+        assert created.status_code == 202
+        for _ in range(100):
+            job = client.get('/api/studio/jobs/' + created.json()['id']).json()
+            if job['status'] != 'running' and job['status'] != 'queued': break
+            time.sleep(.01)
+        assert job['status'] == 'needs_review'
+        assert job['percent'] == 42
+        assert job['result'] is None
+        assert client.get(job['diagnostic_url']).json()['status'] == 'needs_review'
+        assert client.get('/api/studio/sessions').json()['items'] == []
+
+
+def test_ollama_environment_settings_are_loaded(tmp_path, monkeypatch):
+    from sports_card_news.webapp import _load_local_env
+    env_file = tmp_path / '.env'
+    env_file.write_text('OLLAMA_MODEL=test-model\nOLLAMA_NUM_CTX=12288\n', encoding='utf-8')
+    monkeypatch.setenv('OLLAMA_MODEL', 'old-model')
+    monkeypatch.setenv('OLLAMA_NUM_CTX', '8192')
+    _load_local_env(env_file)
+    from sports_card_news.ollama_client import OllamaClient
+    client = OllamaClient()
+    assert client.model == 'test-model'
+    assert client.num_ctx == 12288

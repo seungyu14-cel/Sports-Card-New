@@ -23,6 +23,7 @@ from pydantic import BaseModel, Field, SecretStr
 from .config import Settings, load_settings
 from .pipeline import load_package, run_daily
 from .feedback_memory import FeedbackMemory
+from .grounded_editorial import GroundingReviewRequired
 from .local_studio import LocalStudioRequest, OllamaClient, local_category_info, run_local_studio
 from .studio import (
     StudioPackage,
@@ -92,7 +93,7 @@ class StudioJobRecord:
     id: str
     edition_date: str
     mode: Literal["live", "demo", "local"]
-    status: Literal["queued", "running", "completed", "failed"] = "queued"
+    status: Literal["queued", "running", "completed", "failed", "needs_review"] = "queued"
     stage: str = "queued"
     percent: int = 0
     message: str = "편집국 작업 대기 중"
@@ -100,6 +101,7 @@ class StudioJobRecord:
     finished_at: str | None = None
     result: dict[str, object] | None = None
     error: str | None = None
+    diagnostic_url: str | None = None
 
 
 def create_app(project_root: str | Path | None = None) -> FastAPI:
@@ -398,6 +400,13 @@ async def _run_local_studio_job(
             record.stage = "complete"
             record.percent = 100
             record.message = f"MD 기반 {payload.page_count}페이지 카드뉴스와 Work 전달 파일 생성 완료"
+        except GroundingReviewRequired as error:
+            record.status = "needs_review"
+            record.stage = "needs_review"
+            record.message = "근거 검증을 통과하지 못했습니다. 오류 기록과 원문을 확인해 주세요."
+            record.error = _safe_error(error)
+            relative = error.report_path.relative_to(app.state.output_root)
+            record.diagnostic_url = "/output/" + relative.as_posix()
         except Exception as error:
             record.status = "failed"
             record.stage = "failed"
@@ -536,6 +545,8 @@ def _studio_package_payload(package: StudioPackage, destination: Path) -> dict[s
             for card in package.cards
         ],
         "caption_file": f"/output/studio/{package.session_id}/caption-instagram.md",
+        "grounding_url": (f"/output/studio/{package.session_id}/grounding-summary.json"
+                          if (destination / 'grounding-summary.json').exists() else None),
     }
 
 
@@ -625,6 +636,8 @@ def _load_local_env(path: Path) -> None:
         "SUPABASE_SERVICE_ROLE_KEY",
         "CARD_NEWS_FONT",
         "CARD_NEWS_BOLD_FONT",
+        "OLLAMA_BASE_URL", "OLLAMA_MODEL", "OLLAMA_NUM_CTX",
+        "OLLAMA_NUM_PREDICT", "OLLAMA_TIMEOUT_SECONDS",
     }
     for raw_line in path.read_text(encoding="utf-8").splitlines():
         line = raw_line.strip()

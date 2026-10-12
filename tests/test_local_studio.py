@@ -17,6 +17,8 @@ class FakeOllama:
             OllamaClient().check_budget(system, payload)
             stage = payload['stage']
             self.calls += 1
+            if stage == 'grounding_review':
+                return {'supported': True, 'issues': []}
             if stage == 'extract':
                 text = payload['source_chunk']
                 pieces = [x.strip() for x in text.replace('\n', '.').split('.') if len(x.strip()) >= 5]
