@@ -68,7 +68,7 @@ class RepairClient:
         self.semantic_failure = semantic_failure
         self.crash = crash
 
-    def json_chat(self, system, payload):
+    def json_chat(self, system, payload, *, response_schema=None):
         from sports_card_news.ollama_client import OllamaClient
         OllamaClient().check_budget(system, payload)
         self.calls.append(payload['stage'])
@@ -144,15 +144,15 @@ class FullRunClient(FakeOllama):
         self.fail = fail
         self.corrupt_social = corrupt_social
 
-    def json_chat(self, system, payload):
+    def json_chat(self, system, payload, *, response_schema=None):
         from sports_card_news.ollama_client import OllamaClient
         OllamaClient().check_budget(system, payload)
         self.stages.append((payload['stage'], payload.get('slide')))
         if payload['stage'] == 'repair_card':
             return {**payload['previous_copy'], 'body': '김투수가 9탈삼진을 기록했다.' if self.fail else payload['evidence'][0]}
         if payload['stage'] == 'repair_social':
-            return super().json_chat(system, {**payload, 'stage': 'social'})
-        result = super().json_chat(system, payload)
+            return super().json_chat(system, {**payload, 'stage': 'social'}, response_schema=response_schema)
+        result = super().json_chat(system, payload, response_schema=response_schema)
         if payload['stage'] == 'card' and payload['slide'] == 2:
             result['body'] = '김투수가 9탈삼진을 기록했다.'
         if payload['stage'] == 'social' and self.corrupt_social:

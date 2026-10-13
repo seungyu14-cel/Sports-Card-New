@@ -27,7 +27,7 @@ class RelationClient:
         self.failed_relation = failed_relation
         self.requests = []
 
-    def json_chat(self, system, payload):
+    def json_chat(self, system, payload, *, response_schema=None):
         from sports_card_news.ollama_client import OllamaClient
         OllamaClient().check_budget(system, payload)
         self.requests.append(payload)
@@ -149,10 +149,10 @@ def test_long_caption_and_twelve_tags_are_all_reviewed_in_bounded_batches():
 def test_partial_review_is_preserved_when_later_model_call_fails(tmp_path):
     copy = {**CITY_COPY, 'kicker': '오늘의 주요 이슈'}  # Four fields force multiple batches.
     class Crash(RelationClient):
-        def json_chat(self, system, payload):
+        def json_chat(self, system, payload, *, response_schema=None):
             if payload['stage'] == 'grounding_review' and any(p['stage'] == 'grounding_review' for p in self.requests):
                 raise RuntimeError('review unavailable')
-            return super().json_chat(system, payload)
+            return super().json_chat(system, payload, response_schema=response_schema)
     with pytest.raises(RuntimeError, match='review unavailable'):
         graph(Crash(copy), tmp_path, [document(CITY)])
     report = json.loads((tmp_path/'grounding-card-01.json').read_text())

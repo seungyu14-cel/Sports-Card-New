@@ -12,6 +12,13 @@ class OllamaError(RuntimeError):
     pass
 
 
+class OllamaFormatError(OllamaError):
+    """A completed response with invalid JSON; safe to retry once, unlike HTTP errors."""
+    def __init__(self, message: str, response_text: str) -> None:
+        super().__init__(message)
+        self.response_text = response_text
+
+
 class OllamaClient:
     def __init__(self, base_url: str | None = None, model: str | None = None) -> None:
         self.base_url = (base_url or os.getenv('OLLAMA_BASE_URL') or 'http://127.0.0.1:11434').rstrip('/')
@@ -36,14 +43,16 @@ class OllamaClient:
         models = [str(item.get('name', '')) for item in response.json().get('models', []) if isinstance(item, dict)]
         return {'reachable': True, 'model': self.model, 'model_installed': self.model in models, 'models': models}
 
-    def json_chat(self, system: str, payload: dict[str, Any]) -> dict[str, Any]:
+    def json_chat(self, system: str, payload: dict[str, Any], *,
+                  response_schema: dict[str, Any] | None = None) -> dict[str, Any]:
         self.check_budget(system, payload)
         try:
             response = httpx.post(
                 f'{self.base_url}/api/chat',
                 json={
-                    'model': self.model, 'stream': False, 'format': 'json', 'think': False,
-                    'options': {'temperature': 0.15, 'top_p': 0.9,
+                    'model': self.model, 'stream': False,
+                    'format': response_schema if response_schema is not None else 'json', 'think': False,
+                    'options': {'temperature': 0 if response_schema is not None else 0.15, 'top_p': 0.9,
                                 'num_ctx': self.num_ctx, 'num_predict': self.num_predict},
                     'messages': [{'role': 'system', 'content': system},
                                  {'role': 'user', 'content': json.dumps(payload, ensure_ascii=False)}],
@@ -78,7 +87,10 @@ def extract_json(text: str) -> dict[str, Any]:
         pass
     start, end = cleaned.find('{'), cleaned.rfind('}')
     if start >= 0 and end > start:
-        value = json.loads(cleaned[start:end + 1])
-        if isinstance(value, dict):
-            return value
-    raise OllamaError('Ollama 응답에서 JSON 객체를 찾지 못했습니다.')
+        try:
+            value = json.loads(cleaned[start:end + 1])
+            if isinstance(value, dict):
+                return value
+        except json.JSONDecodeError:
+            pass
+    raise OllamaFormatError('Ollama 응답이 유효한 JSON 객체가 아닙니다.', text)

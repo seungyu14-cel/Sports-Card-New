@@ -13,11 +13,13 @@ class Responses:
     def __init__(self, responses):
         self.responses = iter(responses)
         self.requests = []
+        self.schemas = []
 
-    def json_chat(self, system, payload):
+    def json_chat(self, system, payload, *, response_schema=None):
         from sports_card_news.ollama_client import OllamaClient
         OllamaClient().check_budget(system, payload)
         self.requests.append(payload)
+        self.schemas.append(response_schema)
         response = next(self.responses)
         if isinstance(response, Exception):
             raise response
@@ -65,8 +67,9 @@ def test_reported_korean_latin_name_corruption_cannot_enter_evidence(tmp_path):
     {'facts': [{'source_id': 'C999-S001', 'importance': 90}]},
     {'facts': [{'source_id': 'C002-S999', 'importance': 90}]},
     {'facts': [{'source_id': 'C002-S001', 'importance': 90, 'quote': '두산은 8-5로 승리했다.'}]},
-    {'facts': [{'source_id': 'C002-S001', 'importance': 90}]*2},
     {'facts': [{'source_id': 'C002-S001', 'importance': True}]},
+    {'facts': [{'source_id': 'C002-S001'}]},
+    {'facts': [{'source_id': 'C002-S001', 'importance': 101}]},
 ])
 def test_invalid_selection_stops_after_one_retry_with_diagnostics(tmp_path, response):
     source = '두산은 **7-5**로 승리했다.'
@@ -81,6 +84,34 @@ def test_invalid_selection_stops_after_one_retry_with_diagnostics(tmp_path, resp
     assert len(report['attempts']) == 2
     assert all(attempt['issues'] for attempt in report['attempts'])
     assert 'selected_quotes' not in report
+    assert report['attempts'][-1]['issues'][0] in str(error.value)
+    assert report['response_format'] == 'json_schema'
+
+
+def test_valid_duplicate_ids_merge_without_retry_or_inventing_facts(tmp_path):
+    client = Responses([{'facts': [
+        {'source_id': 'C001-S001', 'importance': 80},
+        {'source_id': 'C001-S001', 'importance': 95},
+        {'source_id': 'C001-S002', 'importance': 90},
+    ]}])
+    result = extract_chunk(client, 'KBO', '김투수가 8탈삼진을 기록했다. 박타자가 결승 홈런을 기록했다.',
+                           1, tmp_path, lambda: pytest.fail('중복 번호는 안전하게 합칠 수 있음'))
+    assert [(f.quote, f.importance) for f in result.facts] == [
+        ('김투수가 8탈삼진을 기록했다.', 95), ('박타자가 결승 홈런을 기록했다.', 90)]
+    report = json.loads((tmp_path/'extraction-diagnostic-001.json').read_text())
+    assert report['status'] == 'recovered'
+    assert report['attempts'][0]['normalizations']
+    assert report['attempts'][0]['issues'] == []
+
+
+def test_invalid_json_retries_once_and_keeps_raw_response(tmp_path):
+    from sports_card_news.ollama_client import OllamaFormatError
+    client = Responses([OllamaFormatError('유효한 JSON 객체가 아닙니다.', '{"facts":broken}'), choose_first])
+    result = extract_chunk(client, 'KBO', '김투수가 8탈삼진을 기록했다.', 1, tmp_path, lambda: None)
+    assert result.facts[0].quote == '김투수가 8탈삼진을 기록했다.'
+    report = json.loads((tmp_path/'extraction-diagnostic-001.json').read_text())
+    assert report['status'] == 'recovered'
+    assert report['attempts'][0]['model_response'] == '{"facts":broken}'
 
 
 def test_only_failed_chunk_retried_and_recovery_logged(tmp_path):
@@ -119,6 +150,13 @@ def test_dense_short_sentences_are_batched_without_dropping_units(tmp_path):
     assert ' '.join(sent) == source
     assert len(client.requests) > 1
     assert len(result.facts) <= 4
+    for payload, schema in zip(client.requests, client.schemas):
+        choice = schema['$defs']['SourceChoice']
+        assert choice['properties']['source_id']['enum'] == list(payload['source_units'])
+        assert set(choice['required']) == {'source_id', 'importance'}
+        assert choice['additionalProperties'] is False
+        assert choice['properties']['importance']['type'] == 'integer'
+        assert schema['properties']['facts']['maxItems'] == 4
 
 
 def test_http_failure_after_rejected_selection_preserves_diagnostic(tmp_path):

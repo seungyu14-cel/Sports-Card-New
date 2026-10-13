@@ -19,7 +19,7 @@ class FakeOllama:
     def __init__(self) -> None:
         self.calls = 0
 
-    def json_chat(self, system: str, payload: dict) -> dict:
+    def json_chat(self, system: str, payload: dict, *, response_schema=None) -> dict:
         if payload.get('stage'):
             from sports_card_news.ollama_client import OllamaClient
             OllamaClient().check_budget(system, payload)
@@ -138,8 +138,8 @@ def test_local_rejects_wrong_requested_count(tmp_path: Path) -> None:
     request = LocalStudioRequest(edition_date=date(2026,10,6), category='KBO', topic='페이지 수 불일치', page_count=7,
         markdown_text='KIA가 LG에 6-4로 승리했다. 김도영이 역전 홈런을 기록했다. 정해영이 세이브를 기록했다.')
     class WrongNumber(FakeOllama):
-        def json_chat(self, system, payload):
-            result = super().json_chat(system,payload)
+        def json_chat(self, system, payload, *, response_schema=None):
+            result = super().json_chat(system,payload, response_schema=response_schema)
             if payload.get('stage') == 'card': result['slide'] = 10
             return result
     with pytest.raises(ValueError, match='페이지 번호'):
@@ -160,10 +160,10 @@ def test_long_md_all_chunks_reach_model_and_memory_reused(tmp_path):
     class Recording(FakeOllama):
         def __init__(self):
             super().__init__(); self.sources=[]; self.memories=[]
-        def json_chat(self,system,payload):
+        def json_chat(self,system,payload, *, response_schema=None):
             if payload['stage']=='extract': self.sources.extend(payload['source_units'].values())
             if payload['stage']=='review': self.memories.extend(payload['previous_learning_rules'])
-            return super().json_chat(system,payload)
+            return super().json_chat(system,payload, response_schema=response_schema)
     text = ('KIA가 LG에 6-4로 승리했다. 김도영이 역전 홈런을 기록했다. 정해영이 세이브를 기록했다.\n'*100)
     client=Recording()
     request=LocalStudioRequest(edition_date=date(2026,10,6),category='KBO',markdown_text=text)
@@ -179,7 +179,7 @@ def test_long_md_all_chunks_reach_model_and_memory_reused(tmp_path):
 def test_extracted_quote_must_exist_in_source(tmp_path):
     import pytest
     class Invented(FakeOllama):
-        def json_chat(self,system,payload):
+        def json_chat(self,system,payload, *, response_schema=None):
             return {'facts':[{'source_id':'C999-S999','importance':100}]}
     request=LocalStudioRequest(edition_date=date(2026,10,6),category='KBO',markdown_text='KIA가 LG에 6-4로 승리했다. 김도영이 역전 홈런을 기록했다.')
     with pytest.raises(ValueError,match='원문 번호 선택'):
